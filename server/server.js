@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import colors from 'colors';
+import connectDB from './config/db';
 import path from 'path';
 const config = dotenv.config();
 import mongoSanitize from 'express-mongo-sanitize';
@@ -17,8 +18,12 @@ app.use(mongoSanitize());
 
 app.use(cookieParser());
 
-app.listen(PORT, () => {
-	console.log(`Server is running on port ${PORT}`);
+connectDB(() => {
+	if (process.env.NODE_ENV !== 'test') {
+		app.listen(PORT, () => {
+			console.log(`Server is running on port ${PORT}`);
+		});
+	}
 });
 
 // app.use('/api/name', name); use the route
