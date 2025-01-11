@@ -10,20 +10,22 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import HapticButton from '@/components/ui/HapticButton';
-import { ThemedText } from '@/components/ThemedText';
+import { ThemedText } from '@/components/defaults/ThemedText';
 import { Colors } from '@/constants/Colors';
+import { useRouter } from 'expo-router';
 
 const LoginScreen = () => {
 	const [email, setEmail] = useState('Louis04real@gmail.com');
 	const [password, setPassword] = useState('password');
 	const [showPassword, setShowPassword] = useState(false);
+	const router = useRouter();
 
 	const handleLogin = () => {
 		console.log('Login');
 	};
 
 	const handleRegister = () => {
-		console.log('Register');
+		router.push('/register');
 	};
 
 	return (
