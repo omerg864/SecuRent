@@ -3,16 +3,19 @@ import {
 	View,
 	Text,
 	TextInput,
+	StyleSheet,
 	TouchableOpacity,
 	SafeAreaView,
-	StyleSheet,
 	Pressable,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import HapticButton from '@/components/ui/HapticButton';
-import { ThemedText } from '@/components/defaults/ThemedText';
+import { ThemedText } from '@/components/ui/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useRouter } from 'expo-router';
+import { ThemedTextInput } from '@/components/ui/ThemedTextInput';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
+import Entypo from '@expo/vector-icons/Entypo';
 
 const LoginScreen = () => {
 	const [email, setEmail] = useState('Louis04real@gmail.com');
@@ -29,188 +32,112 @@ const LoginScreen = () => {
 	};
 
 	return (
-		<SafeAreaView style={styles.container}>
-			<View style={styles.header}>
-				<ThemedText type="title">Login</ThemedText>
+		<ParallaxScrollView
+			headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+			headerImage={
+				<Entypo
+					name="login"
+					size={250}
+					color="#808080"
+					style={styles.headerImage}
+				/>
+			}
+		>
+			<View className="w-full p-6 flex-row text-center">
+				<ThemedText
+					type="title"
+					className="text-xl font-bold w-full text-center"
+				>
+					Login
+				</ThemedText>
 			</View>
 
-			<View style={styles.content}>
-				<Text style={styles.title}>Welcome back</Text>
-				<Text style={styles.subtitle}>
+			<View className="flex-1 px-6">
+				<ThemedText className="text-2xl font-bold mb-2">
+					Welcome back
+				</ThemedText>
+				<ThemedText className="text-sm mb-8">
 					Hey you're back, fill in your details to get back in
-				</Text>
+				</ThemedText>
 
-				<View style={styles.form}>
-					<View style={styles.inputContainer}>
-						<Text style={styles.label}>Email</Text>
-						<TextInput
-							style={styles.input}
-							value={email}
-							onChangeText={setEmail}
-							keyboardType="email-address"
-							autoCapitalize="none"
-						/>
-					</View>
+				<View className="space-y-6">
+					<ThemedTextInput
+						className="w-full h-12 px-4 border border-gray-300 rounded-md"
+						value={email}
+						onChangeText={setEmail}
+						keyboardType="email-address"
+						autoCapitalize="none"
+						label="Email"
+					/>
 
-					<View style={styles.inputContainer}>
-						<Text style={styles.label}>Password</Text>
-						<View style={styles.passwordContainer}>
-							<TextInput
-								style={styles.passwordInput}
-								value={password}
-								onChangeText={setPassword}
-								secureTextEntry={!showPassword}
-							/>
-							<TouchableOpacity
-								onPress={() => setShowPassword(!showPassword)}
-								style={styles.eyeIcon}
-							>
+					<ThemedTextInput
+						className="w-full h-12 px-4 border border-gray-300 rounded-md pr-12"
+						value={password}
+						onChangeText={setPassword}
+						secureTextEntry={!showPassword}
+						label="Password"
+						containerClassName="mt-4 mb-4"
+						Icon={
+							showPassword ? (
 								<Ionicons
-									name={showPassword ? 'eye-off' : 'eye'}
+									name="eye-off"
+									className="absolute right-0 top-3 bottom-0 justify-center px-3"
 									size={24}
 									color={Colors.light.tint}
 								/>
-							</TouchableOpacity>
-						</View>
-					</View>
+							) : (
+								<Ionicons
+									name="eye"
+									className="absolute right-0 top-3 bottom-0 justify-center px-3"
+									size={24}
+									color={Colors.light.tint}
+								/>
+							)
+						}
+						onIconPress={() => setShowPassword(!showPassword)}
+					/>
 
-					<TouchableOpacity style={styles.forgotPassword}>
-						<Text style={styles.forgotPasswordText}>
+					<TouchableOpacity className="self-end">
+						<ThemedText className={`text-sm`} type="custom">
 							Forgot Password?
-						</Text>
+						</ThemedText>
 					</TouchableOpacity>
 				</View>
 
-				<View style={styles.buttonContainer}>
+				<View className="flex-row justify-between mt-auto mb-14">
 					<HapticButton
-						style={styles.registerButton}
+						className="w-24 h-12 bg-gray-100 rounded-full justify-center items-center"
 						onPress={handleRegister}
 					>
-						<Text style={styles.registerButtonText}>Register</Text>
+						<ThemedText className="font-semibold" type="custom">
+							Register
+						</ThemedText>
 					</HapticButton>
 					<HapticButton
-						style={styles.loginButton}
+						style={{ backgroundColor: Colors.light.tintBlue }}
+						className={`w-24 h-12 rounded-full justify-center items-center`}
 						onPress={handleLogin}
 					>
-						<Text style={styles.loginButtonText}>Login</Text>
+						<ThemedText
+							className="text-white font-semibold"
+							lightColor="#fff"
+						>
+							Login
+						</ThemedText>
 					</HapticButton>
 				</View>
 			</View>
-		</SafeAreaView>
+		</ParallaxScrollView>
 	);
 };
 
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: '#fff',
-	},
-	header: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		paddingHorizontal: 16,
-		paddingTop: 8,
-		paddingBottom: 16,
-	},
-	backButton: {
-		padding: 8,
-	},
-	headerTitle: {
-		fontSize: 16,
-		fontWeight: '500',
-		marginLeft: 8,
-	},
-	content: {
-		flex: 1,
-		paddingHorizontal: 24,
-	},
-	title: {
-		fontSize: 24,
-		fontWeight: '700',
-		color: '#1A1A1A',
-		marginBottom: 8,
-	},
-	subtitle: {
-		fontSize: 14,
-		color: '#666',
-		marginBottom: 32,
-	},
-	form: {
-		gap: 20,
-	},
-	inputContainer: {
-		gap: 8,
-	},
-	label: {
-		fontSize: 14,
-		color: '#666',
-	},
-	input: {
-		height: 48,
-		borderWidth: 1,
-		borderColor: '#E5E5E5',
-		borderRadius: 8,
-		paddingHorizontal: 16,
-		fontSize: 16,
-	},
-	passwordContainer: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		borderWidth: 1,
-		borderColor: '#E5E5E5',
-		borderRadius: 8,
-	},
-	passwordInput: {
-		flex: 1,
-		height: 48,
-		paddingHorizontal: 16,
-		fontSize: 16,
-	},
-	eyeIcon: {
-		padding: 12,
-	},
-	forgotPassword: {
-		alignSelf: 'flex-end',
-	},
-	forgotPasswordText: {
-		color: Colors.light.tint,
-		fontSize: 14,
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		marginTop: 'auto',
-		marginBottom: 55,
-		width: '100%',
-	},
-	registerButton: {
-		height: 48,
-		paddingVertical: 8,
-		width: 100,
-		borderRadius: 24,
-		backgroundColor: '#F3F0FF',
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-	registerButtonText: {
-		color: Colors.light.tint,
-		fontSize: 16,
-		fontWeight: '600',
-	},
-	loginButton: {
-		height: 48,
-		paddingVertical: 8,
-		width: 100,
-		borderRadius: 24,
-		backgroundColor: Colors.light.tint,
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-	loginButtonText: {
-		color: '#fff',
-		fontSize: 16,
-		fontWeight: '600',
+	headerImage: {
+		color: '#808080',
+		bottom: -90,
+		left: -35,
+		position: 'absolute',
 	},
 });

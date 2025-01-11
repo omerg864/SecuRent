@@ -1,4 +1,4 @@
-import { ThemedText } from '@/components/defaults/ThemedText';
+import { ThemedText } from '@/components/ui/ThemedText';
 import React from 'react';
 import { View } from 'react-native';
 const CustomerHome = () => {

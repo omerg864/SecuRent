@@ -4,18 +4,23 @@ import * as Haptics from 'expo-haptics';
 
 interface ButtonProps {
 	onPress: () => void;
-	style: StyleProp<any>;
+	style?: StyleProp<any>;
 	children: React.ReactNode;
+	className?: string;
 }
 
-const Button = ({ onPress, style, children }: ButtonProps) => {
+const Button = ({ onPress, style, children, className = '' }: ButtonProps) => {
 	const handlePress = () => {
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 		onPress();
 	};
 
 	return (
-		<TouchableOpacity style={{ ...style }} onPress={handlePress}>
+		<TouchableOpacity
+			className={className}
+			style={{ ...style }}
+			onPress={handlePress}
+		>
 			{children}
 		</TouchableOpacity>
 	);
