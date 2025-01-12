@@ -8,21 +8,26 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { ThemedView } from '@/components/ui/ThemedView';
-import { useBottomTabOverflow } from '@/components/defaults/TabBarBackground';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import HapticButton from '@/components/ui/HapticButton';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const HEADER_HEIGHT = 200;
 
 type Props = PropsWithChildren<{
 	headerImage: ReactElement;
 	headerBackgroundColor: { dark: string; light: string };
+	onBack?: () => void;
 }>;
 
 export default function ParallaxScrollView({
 	children,
 	headerImage,
 	headerBackgroundColor,
+	onBack,
 }: Props) {
+	const insets = useSafeAreaInsets();
 	const colorScheme = useColorScheme() ?? 'light';
 	const scrollRef = useAnimatedRef<Animated.ScrollView>();
 	const scrollOffset = useScrollViewOffset(scrollRef);
@@ -63,6 +68,19 @@ export default function ParallaxScrollView({
 					]}
 				>
 					{headerImage}
+					{onBack && (
+						<HapticButton
+							onPress={onBack}
+							className="absolute w-12 h-12 rounded-full bg-gray-100 justify-center items-center "
+							style={{ top: insets.top - 10, left: 10 }}
+						>
+							<Ionicons
+								name="arrow-back"
+								size={24}
+								color="black"
+							/>
+						</HapticButton>
+					)}
 				</Animated.View>
 				<ThemedView className="flex-1">{children}</ThemedView>
 			</Animated.ScrollView>
@@ -74,5 +92,6 @@ const styles = StyleSheet.create({
 	header: {
 		height: HEADER_HEIGHT,
 		overflow: 'hidden',
+		position: 'relative',
 	},
 });

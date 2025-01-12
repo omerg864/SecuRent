@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import {
-	View,
-	Text,
-	TextInput,
-	StyleSheet,
-	TouchableOpacity,
-	SafeAreaView,
-	Pressable,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import HapticButton from '@/components/ui/HapticButton';
 import { ThemedText } from '@/components/ui/ThemedText';
 import { Colors } from '@/constants/Colors';
@@ -16,6 +8,7 @@ import { ThemedTextInput } from '@/components/ui/ThemedTextInput';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import Entypo from '@expo/vector-icons/Entypo';
+import Header from '@/components/ui/Header';
 
 const LoginScreen = () => {
 	const [email, setEmail] = useState('Louis04real@gmail.com');
@@ -31,6 +24,10 @@ const LoginScreen = () => {
 		router.push('/register');
 	};
 
+	const handleForgotPassword = () => {
+		console.log('Forgot Password');
+	};
+
 	return (
 		<ParallaxScrollView
 			headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -43,14 +40,7 @@ const LoginScreen = () => {
 				/>
 			}
 		>
-			<View className="w-full p-6 flex-row text-center">
-				<ThemedText
-					type="title"
-					className="text-xl font-bold w-full text-center"
-				>
-					Login
-				</ThemedText>
-			</View>
+			<Header title="Login" />
 
 			<View className="flex-1 px-6">
 				<ThemedText className="text-2xl font-bold mb-2">
@@ -97,14 +87,17 @@ const LoginScreen = () => {
 						onIconPress={() => setShowPassword(!showPassword)}
 					/>
 
-					<TouchableOpacity className="self-end">
+					<TouchableOpacity
+						onPress={handleForgotPassword}
+						className="self-end"
+					>
 						<ThemedText className={`text-sm`} type="custom">
 							Forgot Password?
 						</ThemedText>
 					</TouchableOpacity>
 				</View>
 
-				<View className="flex-row justify-between mt-auto mb-14">
+				<View className="flex-row justify-between mt-auto mb-14 items-baseline">
 					<HapticButton
 						className="w-24 h-12 bg-gray-100 rounded-full justify-center items-center"
 						onPress={handleRegister}
@@ -115,7 +108,7 @@ const LoginScreen = () => {
 					</HapticButton>
 					<HapticButton
 						style={{ backgroundColor: Colors.light.tintBlue }}
-						className={`w-24 h-12 rounded-full justify-center items-center`}
+						className={`w-40 h-16 rounded-full justify-center items-center`}
 						onPress={handleLogin}
 					>
 						<ThemedText
