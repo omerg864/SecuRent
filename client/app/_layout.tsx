@@ -59,6 +59,7 @@ export default function RootLayout() {
 					<Stack.Screen name="customer" />
 					<Stack.Screen name="business" />
 					<Stack.Screen name="login" />
+					<Stack.Screen name="get-started" />
 					<Stack.Screen name="register" />
 					<Stack.Screen name="+not-found" />
 				</Stack>

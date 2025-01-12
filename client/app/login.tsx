@@ -21,7 +21,7 @@ const LoginScreen = () => {
 	};
 
 	const handleRegister = () => {
-		router.push('/register');
+		router.push('/get-started');
 	};
 
 	const handleForgotPassword = () => {

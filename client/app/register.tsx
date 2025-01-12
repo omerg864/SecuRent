@@ -9,8 +9,9 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Header from '@/components/ui/Header';
+import { useLocalSearchParams } from 'expo-router';
 
-const LoginScreen = () => {
+const RegisterScreen = () => {
 	const [name, setName] = useState('Louis04real');
 	const [email, setEmail] = useState('Louis04real@gmail.com');
 	const [password, setPassword] = useState('password');
@@ -18,8 +19,9 @@ const LoginScreen = () => {
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const router = useRouter();
+	const { accountType } = useLocalSearchParams();
 
-	const goToLogin = () => {
+	const goBack = () => {
 		router.back();
 	};
 
@@ -30,7 +32,7 @@ const LoginScreen = () => {
 	return (
 		<ParallaxScrollView
 			headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-			onBack={goToLogin}
+			onBack={goBack}
 			headerImage={
 				<FontAwesome5
 					name="user-plus"
@@ -44,10 +46,10 @@ const LoginScreen = () => {
 
 			<View className="flex-1 px-6">
 				<ThemedText className="text-2xl font-bold mb-2">
-					Welcome
+					Welcome, create your {accountType} Account
 				</ThemedText>
 				<ThemedText className="text-sm mb-8">
-					Hey there! Let's get you started.
+					Hey there! Let's get you started
 				</ThemedText>
 
 				<View className="space-y-6">
@@ -145,7 +147,7 @@ const LoginScreen = () => {
 	);
 };
 
-export default LoginScreen;
+export default RegisterScreen;
 
 const styles = StyleSheet.create({
 	headerImage: {
