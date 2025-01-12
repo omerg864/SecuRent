@@ -1,7 +1,7 @@
 {
 	"expo": {
-		"name": "client",
-		"slug": "client",
+		"name": "SecuRent",
+		"slug": "SecuRent",
 		"version": "1.0.0",
 		"orientation": "portrait",
 		"icon": "./assets/images/icon.png",
@@ -13,21 +13,26 @@
 		},
 		"android": {
 			"adaptiveIcon": {
-				"foregroundImage": "./assets/images/adaptive-icon.png",
+				"foregroundImage": "./assets/images/icon.png",
 				"backgroundColor": "#2c14dd"
 			}
 		},
 		"web": {
 			"bundler": "metro",
 			"output": "static",
-			"favicon": "./assets/images/favicon.png"
+			"favicon": "./assets/images/icon.png"
+		},
+		"splash": {
+			"backgroundColor": "#2c14dd",
+			"image": "./assets/images/icon.png",
+			"resizeMode": "contain"
 		},
 		"plugins": [
 			"expo-router",
 			[
 				"expo-splash-screen",
 				{
-					"image": "./assets/images/splash-icon.png",
+					"image": "./assets/images/icon.png",
 					"imageWidth": 200,
 					"resizeMode": "contain",
 					"backgroundColor": "#2c14dd"
