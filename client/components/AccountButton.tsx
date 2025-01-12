@@ -2,7 +2,6 @@ import HapticButton from '@/components/ui/HapticButton';
 import { ThemedText } from '@/components/ui/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { View } from 'react-native';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { ReactElement } from 'react';
 
 interface AccountProps {
@@ -11,7 +10,12 @@ interface AccountProps {
 	subTitle: string;
 	Icon: ReactElement;
 }
-const AccountButton = ({ handlePress, title, subTitle, Icon }: AccountProps) => {
+const AccountButton = ({
+	handlePress,
+	title,
+	subTitle,
+	Icon,
+}: AccountProps) => {
 	return (
 		<HapticButton
 			onPress={handlePress}
