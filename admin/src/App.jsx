@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 import UserRestrictedRoute from './components/routes/UserRestrictedRoute';
+import Businesses from './pages/Businesses';
 
 function App() {
 	return (
@@ -24,6 +25,14 @@ function App() {
 						<UserRestrictedRoute>
 							<Login />
 						</UserRestrictedRoute>
+					}
+				/>
+				<Route
+					path="/businesses"
+					element={
+						<ProtectedRoute>
+							<Businesses />
+						</ProtectedRoute>
 					}
 				/>
 				<Route
