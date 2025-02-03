@@ -44,7 +44,7 @@ const BusinessesTable = ({ businesses }) => {
 							to={`/business/${business._id}`}
 							className="flex items-center gap-3 p-2.5 xl:p-5 hover:bg-gray-2 dark:hover:bg-meta-4"
 						>
-							<div className="flex-shrink-0">
+							<div className="flex-shrink-0 hidden sm:block">
 								<img
 									className="h-8 w-8 rounded-full"
 									src={
@@ -55,7 +55,7 @@ const BusinessesTable = ({ businesses }) => {
 									alt="Brand"
 								/>
 							</div>
-							<p className="hidden text-black dark:text-white sm:block">
+							<p className="text-black dark:text-white">
 								{business.name}
 							</p>
 						</Link>
