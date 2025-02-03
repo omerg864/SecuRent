@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import Header from '../components/Header/index';
 import Sidebar from '../components/Sidebar/index';
+import { useAuth } from '../context/AuthContext';
 
 const DefaultLayout = ({ children }) => {
 	const [sidebarOpen, setSidebarOpen] = useState(false);
+	const { isAuthenticated } = useAuth();
+
+	if (!isAuthenticated) {
+		return <>{children}</>;
+	}
 
 	return (
 		<div className="dark:bg-boxdark-2 dark:text-bodydark">
