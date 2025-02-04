@@ -6,6 +6,7 @@ import path from 'path';
 const config = dotenv.config();
 import mongoSanitize from 'express-mongo-sanitize';
 import cookieParser from 'cookie-parser';
+import adminRoutes from './routes/adminRoutes';
 
 const PORT = process.env.PORT || 3000;
 
@@ -27,5 +28,7 @@ connectDB(() => {
 });
 
 // app.use('/api/name', name); use the route
+
+app.use('admin', adminRoutes);
 
 //app.use(errorHandler);
