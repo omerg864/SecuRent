@@ -45,10 +45,10 @@ const Register = () => {
 		return <Loader />;
 	}
 	return (
-		<main className="w-full py-8 shadow-default flex items-center justify-center dark:bg-boxdark-2">
+		<main className="w-full p-8 shadow-default flex items-center justify-center dark:bg-boxdark-2">
 			<div className="max-w-2xl flex-1 w-full rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
 				<div className="flex flex-wrap items-center">
-					<div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
+					<div className="w-full border-stroke dark:border-strokedark xl:border-l-2">
 						<div className="w-full p-4 sm:p-12.5 xl:p-17.5">
 							<span className="mb-1.5 block font-medium">
 								SecuRent

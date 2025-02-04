@@ -43,13 +43,13 @@ export default function Pagination({
 			<div className="flex-1 flex justify-between sm:hidden">
 				<span
 					onClick={decrementPage}
-					className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+					className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:text-white dark:border-strokedark dark:hover:bg-meta-4 dark:bg-boxdark dark:hover:bg-meta-4"
 				>
 					Previous
 				</span>
 				<span
 					onClick={incrementPage}
-					className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+					className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:text-white dark:border-strokedark dark:hover:bg-meta-4 dark:bg-boxdark dark:hover:bg-meta-4"
 				>
 					Next
 				</span>
