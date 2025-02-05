@@ -8,6 +8,7 @@ import mongoSanitize from 'express-mongo-sanitize';
 import cookieParser from 'cookie-parser';
 import { errorHandler } from './middleware/errorMiddleware.js';
 import rateLimiterMiddleware from './middleware/rateLimiterMiddleware.js';
+import adminRoutes from './routes/adminRoutes';
 
 const PORT = process.env.PORT || 3000;
 
@@ -29,4 +30,9 @@ connectDB(() => {
 	}
 });
 
+// app.use('/api/name', name); use the route
+
+app.use('admin', adminRoutes);
+
+//app.use(errorHandler);
 app.use(errorHandler);
