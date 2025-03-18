@@ -6,7 +6,7 @@ import {
 	deleteAdmin,
 	updateAdmin,
 	verifyAdmin,
-} from '../controllers/adminController';
+} from '../controllers/adminController.js';
 
 const router = express.Router();
 

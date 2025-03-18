@@ -8,7 +8,7 @@ import mongoSanitize from 'express-mongo-sanitize';
 import cookieParser from 'cookie-parser';
 import { errorHandler } from './middleware/errorMiddleware.js';
 import rateLimiterMiddleware from './middleware/rateLimiterMiddleware.js';
-import adminRoutes from './routes/adminRoutes';
+import adminRoutes from './routes/adminRoutes.js';
 
 const PORT = process.env.PORT || 3000;
 
