@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import asyncHandler from 'express-async-handler';
+import Admin from '../models/adminModel.js';
 // TODO: import the Costumer model
 // TODO: import the Business model
 
@@ -59,4 +60,32 @@ const authBusiness = asyncHandler(async (req, res, next) => {
 	next();
 });
 
-export { authCostumer, authBusiness };
+const authAdmin = asyncHandler(async (req, res, next) => {
+	const authHeader = req.headers['authorization'];
+	const token = authHeader && authHeader.split(' ')[1];
+
+	if (!token) {
+		res.status(401);
+		throw new Error('Not authorized, no token');
+	}
+	let decoded;
+	try {
+		decoded = jwt.verify(token, process.env.JWT_SECRET_ADMIN_ACCESS);
+	} catch (error) {
+		res.status(401);
+		throw new Error('Not authorized, token failed');
+	}
+
+	const admin = await Admin.findById(decoded.id);
+
+	if (!admin) {
+		res.status(404);
+		throw new Error('Admin not found');
+	}
+
+	req.admin = admin;
+
+	next();
+});
+
+export { authCostumer, authBusiness, authAdmin };
