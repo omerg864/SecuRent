@@ -20,20 +20,20 @@ const transactionScheme = mongoose.Schema(
         business: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Business',
+            required: true,
         },
         costumer: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Costumer',
         },
-        opened_at: {
-            type: Date,
-            required: true,
-        },
         closed_at: {
             type: Date,
         },
-        returned_at: {
+        return_date: {
             type: Date,
+        },
+        charged: {
+            type: Number,
         },
         charged_description: {
             type: String,
