@@ -111,6 +111,37 @@ const chargeDeposit = asyncHandler(async (req, res) => {
     });
 });
 
+const getTransactionAdmin = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const transaction = await Transaction.findById(id).populate('business', 'name image rating category').populate('costumer', 'name image phone');
+    if (!transaction) {
+        res.status(404);
+        throw new Error('Transaction not found');
+    }
+    res.status(200).json({
+        success: true,
+        transaction,
+    });
+});
+
+const getCostumerTransactionsAdmin = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const transactions = await Transaction.find({ costumer: id }).populate('business', 'name image rating category');
+    res.status(200).json({
+        success: true,
+        transactions,
+    });
+});
+
+const getBusinessTransactionsAdmin = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const transactions = await Transaction.find({ business: id }).populate('costumer', 'name image phone');
+    res.status(200).json({
+        success: true,
+        transactions,
+    });
+});
 
 
-export { getBusinessTransactions, getCostumerTransactions, getTransactionByCostumer, getTransactionByBusiness, createTransaction, releaseDeposit, chargeDeposit };
+
+export { getBusinessTransactions, getCostumerTransactions, getTransactionByCostumer, getTransactionByBusiness, createTransaction, releaseDeposit, chargeDeposit, getTransactionAdmin, getCostumerTransactionsAdmin, getBusinessTransactionsAdmin };
