@@ -26,7 +26,9 @@ const RegisterScreen = () => {
 	};
 
 	const handleRegister = () => {
-		console.log('Register');
+		if (accountType==='business') {
+			router.push('/business/buisness-setup');
+		}
 	};
 
 	return (
@@ -58,7 +60,7 @@ const RegisterScreen = () => {
 						value={name}
 						onChangeText={setName}
 						autoCapitalize="words"
-						label="Name"
+						label={accountType === "business" ? "Business name" : "Name"}
 					/>
 
 					<ThemedTextInput
