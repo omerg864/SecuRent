@@ -9,6 +9,8 @@ import {
 	ScrollView,
 	ActivityIndicator,
 	Alert,
+	Modal,
+	Button,
 } from 'react-native';
 import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import BusinessCard from '../../components/BusinessCard';
@@ -18,8 +20,10 @@ import HapticButton from '@/components/ui/HapticButton';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { getDistance } from '@/utils/functions';
+import { Picker } from '@react-native-picker/picker';
+import Slider from '@react-native-community/slider';
 
-const businesses: Business[] = [
+const businesses_obj: Business[] = [
 	{
 		id: '1',
 		name: 'Bike Shop',
@@ -64,6 +68,8 @@ const businesses: Business[] = [
 
 const CustomerHome: React.FC = () => {
 	const [searchText, setSearchText] = useState<string>('');
+	const [businesses, setBusinesses] = useState<Business[]>(businesses_obj);
+
 	const [updatedBusinesses, setUpdatedBusinesses] =
 		useState<Business[]>(businesses);
 	const [userLocation, setUserLocation] = useState<{
@@ -75,18 +81,40 @@ const CustomerHome: React.FC = () => {
 	});
 
 	const router = useRouter();
+	const [loading, setLoading] = useState(true);
+	const [selectedCategory, setSelectedCategory] = useState('All');
+	const [categories, setCategories] = useState([
+		{ label: 'All', value: 'All' },
+		{ label: 'Bike Rental', value: 'Bike Rental' },
+		{ label: 'Bowling', value: 'Bowling' },
+		{ label: 'Scuba Diving', value: 'Scuba diving' },
+		{ label: 'Car Rental', value: 'Car Rental' },
+	]);
+
+	// Modal State
+	const [modalVisible, setModalVisible] = useState(false);
+	const [maxDistance, setMaxDistance] = useState(10);
+	const [minRating, setMinRating] = useState(0);
 
 	const onBarcodeClick = () => {
-		console.log('Barcode Clicked');
 		router.push('/customer/QRScanner');
 	};
 
 	const onMapClick = () => {
-		console.log('Map Clicked');
 		router.push('/customer/BusinessesMap');
 	};
 
-	const [loading, setLoading] = useState(true);
+	const onSearch = (text: string) => {
+		setSearchText(text);
+		if (!text) {
+			applyFilters();
+			return;
+		}
+		const filteredBusinesses = updatedBusinesses.filter((business) =>
+			business.name.toLowerCase().includes(text.toLowerCase())
+		);
+		setUpdatedBusinesses(filteredBusinesses);
+	};
 
 	useEffect(() => {
 		(async () => {
@@ -102,7 +130,6 @@ const CustomerHome: React.FC = () => {
 			}
 
 			const location = await Location.getCurrentPositionAsync({});
-
 			setUserLocation({
 				latitude: location.coords.latitude,
 				longitude: location.coords.longitude,
@@ -110,21 +137,44 @@ const CustomerHome: React.FC = () => {
 
 			const updatedList = businesses.map((business) => ({
 				...business,
-				distance: parseFloat(getDistance(
-					location.coords.latitude,
-					location.coords.longitude,
-					business.latitude,
-					business.longitude
-				).toFixed(2)), // Distance in Km
+				distance: parseFloat(
+					getDistance(
+						location.coords.latitude,
+						location.coords.longitude,
+						business.latitude,
+						business.longitude
+					).toFixed(2)
+				), // Distance in Km
 			}));
-
-			console.log(updatedList);
-
+			setBusinesses(updatedList);
 			setUpdatedBusinesses(updatedList);
-
 			setLoading(false);
 		})();
 	}, []);
+
+	// Function to apply filters
+	const applyFilters = () => {
+		if (!searchText) {
+			const filteredBusinesses = businesses.filter(
+				(business) =>
+					business.distance <= maxDistance &&
+					(selectedCategory === 'All' ||
+						business.category === selectedCategory) &&
+					business.rating >= minRating
+			);
+			setUpdatedBusinesses(filteredBusinesses);
+			return;
+		}
+		const filteredBusinesses = updatedBusinesses.filter(
+			(business) =>
+				business.distance <= maxDistance &&
+				(selectedCategory === 'All' ||
+					business.category === selectedCategory) &&
+				business.rating >= minRating
+		);
+		setUpdatedBusinesses(filteredBusinesses);
+		setModalVisible(false);
+	};
 
 	if (loading) {
 		return (
@@ -160,7 +210,7 @@ const CustomerHome: React.FC = () => {
 							placeholder="Search..."
 							placeholderTextColor="#CCCCCC"
 							value={searchText}
-							onChangeText={setSearchText}
+							onChangeText={onSearch}
 						/>
 						{searchText ? (
 							<HapticButton onPress={() => setSearchText('')}>
@@ -174,13 +224,12 @@ const CustomerHome: React.FC = () => {
 					</View>
 					<HapticButton
 						className="bg-white rounded-full w-12 h-12 items-center justify-center shadow-md"
-						onPress={() => {}}
+						onPress={() => setModalVisible(true)}
 					>
 						<Feather name="filter" size={20} color="#666" />
 					</HapticButton>
 				</View>
 
-				{/* Tab Buttons */}
 				<View className="flex-row justify-between mb-4">
 					<HapticButton
 						className="flex-row items-center bg-gray-200 rounded-full px-6 py-3"
@@ -218,6 +267,85 @@ const CustomerHome: React.FC = () => {
 					<View className="h-4" />
 				</ScrollView>
 			</View>
+
+			{/* Filter Modal */}
+			<Modal
+				animationType="slide"
+				transparent={true}
+				visible={modalVisible}
+				onRequestClose={() => setModalVisible(false)}
+			>
+				<View
+					className="flex-1 justify-center items-center"
+					style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+				>
+					<View className="bg-white w-4/5 p-6 rounded-lg">
+						<Text className="text-lg font-semibold mb-4">
+							Filter Options
+						</Text>
+
+						{/* Max Distance Slider */}
+						<Text className="text-gray-700">
+							Max Distance: {maxDistance} km
+						</Text>
+						<Slider
+							minimumValue={1}
+							maximumValue={50}
+							step={1}
+							value={maxDistance}
+							onValueChange={setMaxDistance}
+						/>
+
+						{/* Category Picker */}
+						<Text className="text-gray-700 mt-4">Category</Text>
+						<Picker
+							selectedValue={selectedCategory}
+							onValueChange={(itemValue) =>
+								setSelectedCategory(itemValue)
+							}
+							mode="dropdown" // Ensures dropdown mode for Android
+							style={{
+								width: '100%',
+								color: 'black',
+							}}
+						>
+							{categories.map((category) => (
+								<Picker.Item
+									key={category.value}
+									color="black"
+									label={category.label}
+									value={category.value}
+								/>
+							))}
+						</Picker>
+						{/* Rating Slider */}
+						<Text className="text-gray-700 mt-4">
+							Minimum Rating: {minRating} Stars
+						</Text>
+						<Slider
+							minimumValue={0}
+							maximumValue={5}
+							step={1}
+							value={minRating}
+							onValueChange={setMinRating}
+						/>
+
+						{/* Buttons */}
+						<View className="flex-row justify-between mt-6">
+							<Button
+								title="Cancel"
+								color="red"
+								onPress={() => setModalVisible(false)}
+							/>
+							<Button
+								title="Apply"
+								color="blue"
+								onPress={applyFilters}
+							/>
+						</View>
+					</View>
+				</View>
+			</Modal>
 		</ThemedView>
 	);
 };
