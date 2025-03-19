@@ -9,12 +9,12 @@ const BusinessHomePage = () => {
 
   const handleNewTransaction = () => {
     // Navigate to new transaction page
-    router.push("/business/bank-details")
+    router.push("/bank-details")
   }
 
   const handleTransactionPress = (id: string) => {
     // Navigate to transaction details
-    router.push(`/business/bank-details`)
+    router.push(`/bank-details`)
   }
 
   const transactions = [

@@ -14,7 +14,7 @@ export default function VerifyBusinessNumberScreen() {
   const handleVerify = () => {
     // Add verification logic (e.g., API call) here
     if (/^\d{9}$/.test(businessNumber.trim())) {
-      router.push("/business/buisness-setup"); // Redirect after verification
+      router.back(); // Redirect after verification
     } else {
       alert("Please enter a valid 9-digit business number.");
     }
@@ -23,7 +23,6 @@ export default function VerifyBusinessNumberScreen() {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-      onBack={() => router.back()}
       headerImage={
         <MaterialCommunityIcons
           name="check-outline"
@@ -53,7 +52,7 @@ export default function VerifyBusinessNumberScreen() {
 
           <HapticButton
             onPress={handleVerify}
-            className="bg-indigo-500 py-3 mt-2 rounded-xl"
+            className="bg-indigo-600/30 py-3 mt-2 rounded-xl"
           >
             <ThemedText className="text-white text-center text-lg font-semibold">
               Verify Business Number

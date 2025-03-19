@@ -1,53 +1,70 @@
 import { View, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Route, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import { ThemedText } from '@/components/ui/ThemedText';
 import AccountButton from '@/components/AccountButton';
 import { MaterialCommunityIcons, MaterialIcons, Entypo } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
-const BusinessSetupSteps: {
-	id: string;
-	title: string;
-	subTitle: string;
-	icon: JSX.Element;
-	route: "/business/verify-email" | "/business/bank-details" | "/business/verification" | "/business/buisness-home";
-}[] = [
+const BusinessSetupSteps = [
 	{
 		id: "email",
 		title: "Verify your email address",
 		subTitle: "Confirm your email to secure your account",
 		icon: <MaterialCommunityIcons name="email-check" size={42} color="white" />,
-		route: "/business/verify-email",
+		route: "/verify-email",
 	},
 	{
 		id: "bank",
 		title: "Add Bank Details",
 		subTitle: "Link your bank account for transactions",
 		icon: <MaterialIcons name="account-balance" size={42} color="white" />,
-		route: "/business/bank-details",
+		route: "/bank-details",
 	},
 	{
 		id: "verification",
 		title: "Business Verification",
 		subTitle: "Complete verification to activate your business account",
 		icon: <Entypo name="briefcase" size={42} color="white" />,
-		route: "/business/verification",
-	},
-	{
-		id: "home",
-		title: "Business Home",
-		subTitle: "Go to your business home page",
-		icon: <Entypo name="home" size={42} color="white" />,
-		route: "/business/buisness-home",
+		route: "/verification",
 	},
 ];
 
 export default function BusinessSetupScreen() {
 	const router = useRouter();
+	const [completedSteps, setCompletedSteps] = useState<string[]>([]);
 
-	const handleStepPress = (route: "/business/verify-email" | "/business/bank-details" | "/business/verification" | "/business/buisness-home") => {
-		router.push(route); // ✅ Now TypeScript correctly recognizes `route` as a valid option.
+	
+	useEffect(() => {
+		const loadCompletedSteps = async () => {
+			const savedSteps = await AsyncStorage.getItem('completedSteps');
+			if (savedSteps) {
+				setCompletedSteps(JSON.parse(savedSteps));
+			}
+		};
+		loadCompletedSteps();
+	}, []);
+
+	// Handle step completion
+	const handleStepPress = async (route: string, id: string) => {
+		router.push(route as Route);
+		const updatedSteps = [...completedSteps, id];
+		await AsyncStorage.setItem('completedSteps', JSON.stringify(updatedSteps));
+		setCompletedSteps(updatedSteps);
 	};
+
+	const remainingSteps = BusinessSetupSteps.filter(step => !completedSteps.includes(step.id));
+
+	useFocusEffect(
+		useCallback(() => {
+			if (remainingSteps.length === 0) {
+				router.replace('/business/buisness-home');
+			}
+		}, [remainingSteps.length])
+	);
 
 	return (
 		<ParallaxScrollView
@@ -70,10 +87,10 @@ export default function BusinessSetupScreen() {
 				</ThemedText>
 
 				<View className="space-y-4 mt-8 flex-col gap-4">
-					{BusinessSetupSteps.map((step) => (
+					{remainingSteps.map((step) => (
 						<AccountButton
 							key={step.id}
-							handlePress={() => handleStepPress(step.route)}
+							handlePress={() => handleStepPress(step.route, step.id)}
 							title={step.title}
 							subTitle={step.subTitle}
 							Icon={step.icon}
@@ -84,7 +101,6 @@ export default function BusinessSetupScreen() {
 		</ParallaxScrollView>
 	);
 }
-
 
 const styles = StyleSheet.create({
 	headerImage: {

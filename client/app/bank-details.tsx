@@ -40,8 +40,7 @@ const BankDetailsScreen = () => {
   ];
 
   const handleSaveDetails = () => {
-    // Add logic to save the bank details (API call, etc.)
-    router.push("/business/buisness-setup"); // Redirect after saving details
+    router.back(); 
   };
 
   const renderBankItem = ({
@@ -69,7 +68,6 @@ const BankDetailsScreen = () => {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-      onBack={() => router.back()}
       headerImage={
         <Ionicons
           name="cash-outline"
@@ -138,7 +136,7 @@ const BankDetailsScreen = () => {
           <View className="flex-row justify-center mt-4">
             <HapticButton
               onPress={handleSaveDetails}
-              className="bg-indigo-500 py-3 px-8 rounded-xl w-full"
+              className="bg-indigo-600/30 py-3 px-8 rounded-xl w-full"
             >
               <ThemedText className="text-white text-center text-lg font-semibold">
                 Save Details

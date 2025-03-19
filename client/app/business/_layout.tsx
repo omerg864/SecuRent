@@ -10,11 +10,7 @@ export default function Layout() {
           headerShown: false, // Hide headers globally
         }}
       >
-		<Stack.Screen name="verify-email" />
-        <Stack.Screen name="business-setup" />
-		<Stack.Screen name="bank-details" />
-		<Stack.Screen name="verification" />
-		<Stack.Screen name="buisness-home" />
+        <Stack.Screen name="buisness-home" />
       </Stack>
     </GestureHandlerRootView>
   );

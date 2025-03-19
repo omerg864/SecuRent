@@ -14,7 +14,7 @@ export default function VerifyEmailScreen() {
   const handleVerify = () => {
     // Add verification logic (e.g., API call) here
     if (code.trim().length === 6) {
-      router.push("/business/buisness-setup"); // Redirect after verification
+      router.back(); // Redirect after verification
     } else {
       alert("Please enter a valid 6-digit code.");
     }
@@ -23,7 +23,6 @@ export default function VerifyEmailScreen() {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-      onBack={() => router.back()}
       headerImage={
         <MaterialCommunityIcons
           name="email-check-outline"
@@ -53,7 +52,7 @@ export default function VerifyEmailScreen() {
 
           <HapticButton
             onPress={handleVerify}
-            className="bg-indigo-500 py-3 mt-2 rounded-xl"
+            className="bg-indigo-600/30 py-3 mt-2 rounded-xl"
           >
             <ThemedText className="text-white text-center text-lg font-semibold">
               Verify Email
