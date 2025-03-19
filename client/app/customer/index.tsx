@@ -5,7 +5,6 @@ import { useState } from 'react';
 import {
 	View,
 	Text,
-	SafeAreaView,
 	TextInput,
 	ScrollView,
 } from 'react-native';
@@ -18,6 +17,7 @@ import BusinessCard from '../../components/BusinessCard';
 import { ThemedView } from '@/components/ui/ThemedView';
 import type { Business } from '../../types/business';
 import HapticButton from '@/components/ui/HapticButton';
+import { useRouter } from 'expo-router';
 
 
 const businesses: Business[] = [
@@ -58,6 +58,13 @@ const businesses: Business[] = [
 const CustomerHome: React.FC = () => {
 	const [searchText, setSearchText] = useState<string>('');
 
+	const router = useRouter();
+
+	const onBarcodeClick = () => {
+		console.log('Barcode Clicked');
+		router.push('/customer/QRScanner');
+	};
+
 	return (
 		<ThemedView className="flex-1 bg-white">
 			{/* Header */}
@@ -95,7 +102,7 @@ const CustomerHome: React.FC = () => {
 
 				{/* Tab Buttons */}
 				<View className="flex-row justify-between mb-4">
-					<HapticButton className="flex-row items-center bg-gray-200 rounded-full px-6 py-3" onPress={() => {}}>
+					<HapticButton className="flex-row items-center bg-gray-200 rounded-full px-6 py-3" onPress={onBarcodeClick}>
 						<MaterialIcons name="qr-code-scanner" size={20} color="#3B82F6" />
 						<Text className="text-blue-500 font-medium ml-2">Barcode</Text>
 					</HapticButton>
