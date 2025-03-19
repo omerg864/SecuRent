@@ -1,30 +1,27 @@
 import mongoose from 'mongoose';
 
-const ItemSchema = mongoose.Schema(
+const ReviewSchema = mongoose.Schema(
     {
         business:{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Business',
             required: true,
         },
-        description:{
-            type: String,
+        customer:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Costumer',
             required: true,
         },
-        amount:{
+        rating:{
             type: Number,
             required: true,
         },
-        price:{
-            type: Number,
-            required: true,
-        },
-        currency:{
+        content:{
             type: String,
-            required: true,
         }
+        
     },
     { timestamps: true }
 );
 
-export default mongoose.model('Item', ItemSchema);
+export default mongoose.model('Review', ReviewSchema);
