@@ -23,7 +23,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business }) => {
 							{business.name}
 						</Text>
 						<Text className="text-white text-sm">
-							{business.distance}
+							{business.distance} km away
 						</Text>
 					</View>
 					<Text className="text-white text-sm">
