@@ -84,11 +84,11 @@ const deleteReview = asyncHandler(async (req, res) => {
         throw new Error('Review not found');
     }
 
-    await review.remove();
+    await review.deleteOne();
     res.status(200).json({
         success: true,
+
         message: 'Review deleted successfully',
     });
 });
-
 export { createReview, getReviews, getReviewById, updateReview, deleteReview };

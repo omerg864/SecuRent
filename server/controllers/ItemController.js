@@ -82,7 +82,7 @@ const deleteItem = asyncHandler(async (req, res) => {
         throw new Error('Item not found');
     }
 
-    await item.remove();
+    await item.deleteOne();
     res.status(200).json({
         success: true,
         message: 'Item deleted successfully',
