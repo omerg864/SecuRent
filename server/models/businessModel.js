@@ -55,4 +55,4 @@ const businessScheme = mongoose.Schema(
     },
 }
 );
-mongoose.model("Business", businessScheme);
+export default mongoose.model("Business", businessScheme);

@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import asyncHandler from 'express-async-handler';
 import Admin from '../models/adminModel.js';
-// TODO: import the Costumer model
-// TODO: import the Business model
+import Costumer from '../models/costumerModel.js';
+import Business from '../models/businessModel.js';
 
 const authCostumer = asyncHandler(async (req, res, next) => {
 	const authHeader = req.headers['authorization'];
