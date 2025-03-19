@@ -41,11 +41,15 @@ const businessScheme = mongoose.Schema(
         type: Number,
         required: true,
     },
+    bank:{
+        type: Object,
+        required: true,
+    },
     address:{
         type: String,
         required: true,
     },
-    Image:{
+    image:{
         type: String,
         required: true,
     },

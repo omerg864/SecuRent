@@ -11,6 +11,7 @@ import rateLimiterMiddleware from './middleware/rateLimiterMiddleware.js';
 import adminRoutes from './routes/adminRoutes.js';
 import transactionRoutes from './routes/transactionRoutes.js';
 import costumerRoutes from './routes/costumerRoutes.js';
+import businessRoutes from './routes/businessRoutes.js';
 const PORT = process.env.PORT || 3000;
 
 const app = express();
@@ -36,6 +37,7 @@ connectDB(() => {
 app.use('admin', adminRoutes);
 app.use('transaction', transactionRoutes);
 app.use('/api/costumer', costumerRoutes);
+app.use('/api/business', businessRoutes);
 
 //app.use(errorHandler);
 app.use(errorHandler);

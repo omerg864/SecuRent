@@ -27,3 +27,16 @@ export const generateCustomerRefreshToken = (id) => {
         expiresIn: '7d',
     });
 };
+export const generateBusinessAccessToken = (id) => {
+    const unique = uuid();
+    return jwt.sign({ id, unique }, process.env.JWT_SECRET_ACCESS_BUSINESS, {
+        expiresIn: '1d',
+    });
+};
+
+export const generateBusinessRefreshToken = (id) => {
+    const unique = uuid();
+    return jwt.sign({ id, unique }, process.env.JWT_SECRET_REFRESH_BUSINESS, {
+        expiresIn: '7d',
+    });
+};
