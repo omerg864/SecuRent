@@ -8,9 +8,13 @@ import {
 import bcrypt from 'bcrypt';
 import { OAuth2Client } from 'google-auth-library';
 
-const successFullLogin = (res, admin) => {
+const successFullLogin = async (res, admin) => {
 	const accessToken = generateAdminAccessToken(admin._id);
-	const refreshToken = generateAdminRefreshToken(admin._id);
+	const { refreshToken, unique } = generateAdminRefreshToken(admin._id);
+	
+	admin.refreshTokens.push({ token: refreshToken, unique });
+	await admin.save();
+
 	res.status(200).json({
 		success: true,
 		accessToken,
