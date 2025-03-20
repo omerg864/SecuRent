@@ -40,7 +40,10 @@ const BankDetailsScreen = () => {
   ];
 
   const handleSaveDetails = () => {
-    router.back(); 
+    router.replace({
+      pathname: "/business-setup",
+      params: { addedBank: "true" }, 
+    });
   };
 
   const renderBankItem = ({

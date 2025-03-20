@@ -14,7 +14,10 @@ export default function VerifyEmailScreen() {
   const handleVerify = () => {
     // Add verification logic (e.g., API call) here
     if (code.trim().length === 6) {
-      router.back(); // Redirect after verification
+      router.replace({
+        pathname: "/business-setup",
+        params: { verifiedEmail: "true" }, // Passing verification success
+      });
     } else {
       alert("Please enter a valid 6-digit code.");
     }

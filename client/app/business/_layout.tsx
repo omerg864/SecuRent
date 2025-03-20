@@ -10,7 +10,7 @@ export default function Layout() {
           headerShown: false, // Hide headers globally
         }}
       >
-        <Stack.Screen name="buisness-home" />
+        <Stack.Screen name="business-home" />
       </Stack>
     </GestureHandlerRootView>
   );

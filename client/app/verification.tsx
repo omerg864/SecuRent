@@ -14,7 +14,11 @@ export default function VerifyBusinessNumberScreen() {
   const handleVerify = () => {
     // Add verification logic (e.g., API call) here
     if (/^\d{9}$/.test(businessNumber.trim())) {
-      router.back(); // Redirect after verification
+        router.replace({
+          pathname: "/business-setup",
+          params: { verifiedBusiness: "true" },
+        });
+      
     } else {
       alert("Please enter a valid 9-digit business number.");
     }
@@ -47,7 +51,12 @@ export default function VerifyBusinessNumberScreen() {
             value={businessNumber}
             onChangeText={setBusinessNumber}
             containerClassName="border border-white p-3 rounded-xl"
-            style={{ color: "white", fontSize: 18, textAlign: "center", textAlignVertical: "center" }} // Centers text and cursor
+            style={{
+              color: "white",
+              fontSize: 18,
+              textAlign: "center",
+              textAlignVertical: "center",
+            }} // Centers text and cursor
           />
 
           <HapticButton

@@ -63,7 +63,7 @@ export default function RootLayout() {
 					<Stack.Screen name="register" />
 					<Stack.Screen name="+not-found" />
 					<Stack.Screen name="bank-details" />
-					<Stack.Screen name="buisness-setup" />
+					<Stack.Screen name="business-setup" />
 					<Stack.Screen name="verification" />
 					<Stack.Screen name="verify-email" />
 				</Stack>
