@@ -31,10 +31,9 @@ export default function RootLayout() {
 					if (parsedUser.role === 'customer') {
 						router.replace('/customer');
 					} else {
-						router.replace('/business');
+						router.replace('/business/business-home');
 					}
 				} else {
-					//router.replace('/customer');
 					router.replace('/login');
 				}
 			});
@@ -62,6 +61,10 @@ export default function RootLayout() {
 					<Stack.Screen name="get-started" />
 					<Stack.Screen name="register" />
 					<Stack.Screen name="+not-found" />
+					<Stack.Screen name="bank-details" />
+					<Stack.Screen name="business-setup" />
+					<Stack.Screen name="verification" />
+					<Stack.Screen name="verify-email" />
 				</Stack>
 				<StatusBar style={colorScheme === 'dark' ? 'dark' : 'light'} />
 			</ThemeProvider>
