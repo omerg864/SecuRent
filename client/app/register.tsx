@@ -27,6 +27,7 @@ const RegisterScreen = () => {
 
 	const handleRegister = () => {
 		if (accountType==='business') {
+			router.dismissAll();
 			router.replace('/business-setup');
 		}
 	};

@@ -31,10 +31,9 @@ export default function RootLayout() {
 					if (parsedUser.role === 'customer') {
 						router.replace('/customer');
 					} else {
-						router.replace('/business');
+						router.replace('/business/business-home');
 					}
 				} else {
-					//router.replace('/customer');
 					router.replace('/login');
 				}
 			});

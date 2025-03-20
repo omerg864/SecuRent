@@ -46,20 +46,12 @@ const BusinessHomePage = () => {
 
   return (
     <View className="flex-1 bg-gray-100">
-      {/* Header */}
-      <View className="flex-row items-center justify-between pt-16 pb-3 px-5" style={{ backgroundColor: "#5D3FD3" }}>
-        <TouchableOpacity className="p-2">
-          <Ionicons name="menu" size={24} color="white" />
-        </TouchableOpacity>
-        <ThemedText className="text-white text-2xl font-bold">Home</ThemedText>
-        <View className="w-6" />
-      </View>
 
       <ScrollView className="flex-1 px-4">
         {/* New Transaction Button */}
         <TouchableOpacity
           className="bg-white rounded-full py-4 items-center mb-5 shadow-lg mt-5"
-          style={{ backgroundColor: "#5D3FD3" }}
+          style={{ backgroundColor: "#4338CA" }}
           onPress={handleNewTransaction}
         >
           <ThemedText className="text-white font-semibold text-lg">New Transaction</ThemedText>
