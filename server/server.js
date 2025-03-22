@@ -10,10 +10,16 @@ import { errorHandler } from './middleware/errorMiddleware.js';
 import rateLimiterMiddleware from './middleware/rateLimiterMiddleware.js';
 import adminRoutes from './routes/adminRoutes.js';
 import transactionRoutes from './routes/transactionRoutes.js';
+import { WebSocketServer } from 'ws';
+import http from 'http';
 
 const PORT = process.env.PORT || 3000;
 
 const app = express();
+
+const server = http.createServer(app);
+
+const wss = new WebSocketServer({ server });
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -25,7 +31,7 @@ app.use(rateLimiterMiddleware);
 
 connectDB(() => {
 	if (process.env.NODE_ENV !== 'test') {
-		app.listen(PORT, () => {
+		server.listen(PORT, () => {
 			console.log(`Server is running on port ${PORT}`);
 		});
 	}
@@ -38,3 +44,5 @@ app.use('transaction', transactionRoutes);
 
 //app.use(errorHandler);
 app.use(errorHandler);
+
+export { wss };
