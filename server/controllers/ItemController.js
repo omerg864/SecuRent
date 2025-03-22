@@ -26,7 +26,7 @@ const createItem = asyncHandler(async (req, res) => {
 
 
 const getItems = asyncHandler(async (req, res) => {
-    const items = await Item.find().populate('business');
+    const items = await Item.find().populate('business', 'name image rating');
     res.status(200).json({
         success: true,
         items,
