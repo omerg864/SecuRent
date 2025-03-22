@@ -16,7 +16,7 @@ const createReview = asyncHandler(async (req, res) => {
 
     const review = await Review.create({
         business,
-        customer,
+        customer: req.customer.id,
         rating,
         content,
     });
@@ -28,7 +28,7 @@ const createReview = asyncHandler(async (req, res) => {
 });
 
 const getReviews = asyncHandler(async (req, res) => {
-    const reviews = await Review.find().populate('customer', 'rating content');
+    const reviews = await Review.find().populate('customer', 'name image');
     res.status(200).json({
         success: true,
         reviews,
@@ -38,8 +38,8 @@ const getReviews = asyncHandler(async (req, res) => {
 const getReviewById = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const review = await Review.findById(id)
-        .populate('business', 'rating content') 
-        .populate('customer', 'name email');
+        .populate('business', 'name image rating') 
+        .populate('customer', 'name image');
 
     if (!review) {
         res.status(404);
@@ -62,7 +62,7 @@ const updateReview = asyncHandler(async (req, res) => {
         throw new Error('Review not found');
     }
 
-    if (review.customer.toString() !== req.customer.id) {
+    if (review.customer.toString() !== req.customer._id.toString()) {
         res.status(403);
         throw new Error('Not authorized to update this review');
     }
@@ -91,7 +91,7 @@ const deleteReview = asyncHandler(async (req, res) => {
         throw new Error('Review not found');
     }
 
-    if (review.user.toString() !== req.user.id) {
+    if (review.content._id.toString() !== req.customer._id.toString()) {
         res.status(403);
         throw new Error('Not authorized to delete this review');
     }

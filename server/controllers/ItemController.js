@@ -11,7 +11,7 @@ const createItem = asyncHandler(async (req, res) => {
     }
 
     const item = await Item.create({
-        business,
+        business:req.business._id,
         description,
         amount,
         price,
@@ -25,18 +25,18 @@ const createItem = asyncHandler(async (req, res) => {
 });
 
 
-// const getItems = asyncHandler(async (req, res) => {
-//     const items = await Item.find().populate('business');
-//     res.status(200).json({
-//         success: true,
-//         items,
-//     });
-// });
+const getItems = asyncHandler(async (req, res) => {
+    const items = await Item.find().populate('business');
+    res.status(200).json({
+        success: true,
+        items,
+    });
+});
 
 
 const getItemById = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const item = await Item.findById(id).populate('business', 'description amount price currency');
+    const item = await Item.findById(id).populate('business', 'name image rating');
 
     if (!item) {
         res.status(404);
@@ -60,7 +60,7 @@ const updateItem = asyncHandler(async (req, res) => {
         throw new Error('Item not found');
     }
 
-    if (item.business.toString() !== req.business.toString()) {
+    if (item.business._id.toString() !== req.business._id.toString()) {
         res.status(403);
         throw new Error('Not authorized to update this item');
     }
