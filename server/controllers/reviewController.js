@@ -91,7 +91,7 @@ const deleteReview = asyncHandler(async (req, res) => {
         throw new Error('Review not found');
     }
 
-    if (review.content._id.toString() !== req.customer._id.toString()) {
+    if (review.customer._id.toString() !== req.customer._id.toString()) {
         res.status(403);
         throw new Error('Not authorized to delete this review');
     }

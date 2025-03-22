@@ -87,7 +87,7 @@ const deleteItem = asyncHandler(async (req, res) => {
         throw new Error('Item not found');
     }
 
-    if (item.business.toString() !== req.business.toString()) {
+    if (item.business._id.toString() !== req.business._id.toString()) {
         res.status(403);
         throw new Error('Not authorized to delete this item');
     }
