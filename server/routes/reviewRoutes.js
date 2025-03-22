@@ -11,7 +11,7 @@ import { authCostumer } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 
-router.post('/', createReview); 
+router.post('/',authCostumer, createReview); 
 router.get('/', getReviews); 
 router.get('/:id', getReviewById); 
 
