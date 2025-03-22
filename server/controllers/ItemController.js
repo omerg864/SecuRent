@@ -5,7 +5,7 @@ import Item from '../models/itemModel.js';
 const createItem = asyncHandler(async (req, res) => {
     const { description, amount, price, currency } = req.body;
 
-    if ( || !description || !amount || !price || !currency) {
+    if ( !description || !amount || !price || !currency) {
         res.status(400);
         throw new Error('Please provide all required fields');
     }
