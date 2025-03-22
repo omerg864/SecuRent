@@ -2,9 +2,9 @@ import asyncHandler from 'express-async-handler';
 import Review from '../models/reviewModel.js';
 
 const createReview = asyncHandler(async (req, res) => {
-    const { business, customer, rating, content } = req.body;
+    const { business, rating, content } = req.body;
 
-    if (!business || !customer || !rating) {
+    if (!business || !rating || !content) {
         res.status(400);
         throw new Error('Please provide business, customer, and rating');
     }
@@ -28,7 +28,7 @@ const createReview = asyncHandler(async (req, res) => {
 });
 
 const getReviews = asyncHandler(async (req, res) => {
-    const reviews = await Review.find().populate('business', 'rating content');
+    const reviews = await Review.find().populate('customer', 'rating content');
     res.status(200).json({
         success: true,
         reviews,
@@ -37,7 +37,9 @@ const getReviews = asyncHandler(async (req, res) => {
 
 const getReviewById = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const review = await Review.findById(id).populate('business', 'rating content');
+    const review = await Review.findById(id)
+        .populate('business', 'rating content') 
+        .populate('customer', 'name email');
 
     if (!review) {
         res.status(404);
@@ -60,7 +62,7 @@ const updateReview = asyncHandler(async (req, res) => {
         throw new Error('Review not found');
     }
 
-    if (review.user.toString() !== req.user.id) {
+    if (review.customer.toString() !== req.customer.id) {
         res.status(403);
         throw new Error('Not authorized to update this review');
     }

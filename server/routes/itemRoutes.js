@@ -6,13 +6,14 @@ import {
     updateItem,
     deleteItem,
 } from '../controllers/ItemController.js';
+import { authBusiness } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', createItem);
+router.post('/',authBusiness , createItem);
 router.get('/', getItems);
-router.get('/:id', getItemById);
-router.put('/:id', updateItem);
-router.delete('/:id', deleteItem);
+router.get('/:id',authBusiness ,getItemById);
+router.put('/:id',authBusiness , updateItem);
+router.delete('/:id',authBusiness , deleteItem);
 
 export default router;
