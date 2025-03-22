@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+"use client";
+
+import { useState } from "react";
 import {
   View,
   ScrollView,
@@ -6,16 +8,19 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { ThemedTextInput } from "@/components/ui/ThemedTextInput";
 import { ThemedText } from "@/components/ui/ThemedText";
 import HapticButton from "@/components/ui/HapticButton";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "@/constants/Colors";
 import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BankDetailsScreen = () => {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  // Get account type from params, default to "business" for this screen
+  const accountType = (params.accountType as string) || "business";
 
   const [accountHolderName, setAccountHolderName] = useState("");
   const [bankName, setBankName] = useState("");
@@ -39,11 +44,51 @@ const BankDetailsScreen = () => {
     { label: "Bank Massad", value: "bank_massad" },
   ];
 
-  const handleSaveDetails = () => {
-    router.replace({
-      pathname: "/business-setup",
-      params: { addedBank: "true" }, 
-    });
+  const handleSaveDetails = async () => {
+    try {
+      // Validate form fields
+      if (!accountHolderName || !bankName || !branchNumber || !accountNumber) {
+        alert("Please fill in all fields");
+        return;
+      }
+
+      // Mark this step as completed for the specific account type
+      const storageKey = `completedSteps_${accountType}`;
+
+      // Get existing completed steps
+      const savedSteps = await AsyncStorage.getItem(storageKey);
+      const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
+
+      // Check if this step is already completed
+      if (!completedSteps.includes("bank")) {
+        // Add this step to the completed steps
+        completedSteps.push("bank");
+
+        // Save the updated completed steps
+        await AsyncStorage.setItem(storageKey, JSON.stringify(completedSteps));
+
+        // For debugging
+        console.log(
+          `Bank details saved. Completed steps for ${accountType}:`,
+          completedSteps
+        );
+      }
+
+      // Save the current account type for persistence
+      await AsyncStorage.setItem("current_account_type", accountType);
+
+      // Navigate back to setup screen with both account type and completion status
+      router.replace({
+        pathname: "/setup-screen",
+        params: {
+          accountType: accountType,
+          addedBank: "true",
+        },
+      });
+    } catch (error) {
+      console.error("Error saving bank details:", error);
+      alert("There was an error saving your bank details. Please try again.");
+    }
   };
 
   const renderBankItem = ({
