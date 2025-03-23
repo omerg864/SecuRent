@@ -13,6 +13,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { AuthProvider } from "@/context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import "../global.css";
+import { WebSocketProvider } from "@/context/WebSocketContext";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -47,26 +48,30 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack
-          screenOptions={{
-            headerShown: false, // Hide headers globally
-          }}
+      <WebSocketProvider>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
-          <Stack.Screen name="customer" />
-          <Stack.Screen name="business" />
-          <Stack.Screen name="login" />
-          <Stack.Screen name="get-started" />
-          <Stack.Screen name="register" />
-          <Stack.Screen name="+not-found" />
-          <Stack.Screen name="bank-details" />
-          <Stack.Screen name="setup-screen" />
-          <Stack.Screen name="verification" />
-          <Stack.Screen name="verify-email" />
-          <Stack.Screen name="add-payment" />
-        </Stack>
-        <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
-      </ThemeProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false, // Hide headers globally
+            }}
+          >
+            <Stack.Screen name="customer" />
+            <Stack.Screen name="business" />
+            <Stack.Screen name="login" />
+            <Stack.Screen name="get-started" />
+            <Stack.Screen name="register" />
+            <Stack.Screen name="+not-found" />
+            <Stack.Screen name="bank-details" />
+            <Stack.Screen name="setup-screen" />
+            <Stack.Screen name="verification" />
+            <Stack.Screen name="verify-email" />
+            <Stack.Screen name="add-payment" />
+          </Stack>
+          <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
+        </ThemeProvider>
+      </WebSocketProvider>
     </AuthProvider>
   );
 }
