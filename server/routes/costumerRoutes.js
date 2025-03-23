@@ -5,6 +5,7 @@ import {
     googleLoginCustomer,
     updateCustomer,
     deleteCustomer,
+    updateCustomerPassword,
 } from '../controllers/costumerController.js';
 import { authCostumer } from '../middleware/authMiddleware.js';
 
@@ -16,6 +17,7 @@ router.post('/login', loginCustomer);        // Customer Login
 router.post('/google-login', googleLoginCustomer); // Google OAuth Login
 
 // Protected Routes (Requires Authentication)
+router.put('/update/password', authCostumer, updateCustomerPassword);  // Update Customer Password
 router.put('/update', authCostumer, updateCustomer);  // Update Customer Profile
 router.delete('/delete', authCostumer, deleteCustomer);  // Delete Customer Account
 
