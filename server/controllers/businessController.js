@@ -10,24 +10,28 @@ export const password_regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$
 
 // Register a new business
 const registerBusiness = asyncHandler(async (req, res) => {
-    const { name, email, password, phone, category, bank, address, image, currency, rating } = req.body;
+    const { name, email, password } = req.body;
 
-    if (!name || !email || !password || !phone || !category || !bank || !address || !image || !currency || rating === undefined) {
-        return res.status(400).json({ message: 'Please provide all required fields' });
+    if (!name || !email || !password ) {
+        res.status(400);
+        throw new Error('Please fill in all fields');
     }
 
     if (!email_regex.test(email)) {
-        return res.status(400).json({ message: 'Invalid email format' });
+        res.status(401);
+        throw new Error('Invalid email format');
     }
 
     if (!password_regex.test(password)) {
-        return res.status(400).json({ message: 'Password is not strong enough' });
+        res.status(402);
+        throw new Error('Password is not strong enough');
     }
 
     const businessExists = await Business.findOne({ email: new RegExp(`^${email}$`, 'i') });
 
     if (businessExists) {
-        return res.status(400).json({ message: 'Business already exists' });
+        res.status(403);
+        throw new Error('Business already exists');
     }
 
     // Hash password
@@ -38,13 +42,6 @@ const registerBusiness = asyncHandler(async (req, res) => {
         name,
         email,
         password: hashedPassword,
-        phone,
-        category,
-        bank,
-        address,
-        image,
-        currency,
-        rating,
     });
 
     return res.status(201).json({
@@ -58,19 +55,22 @@ const loginBusiness = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(400).json({ message: 'Please provide both email and password' });
+        res.status(400);
+        throw new Error('Please fill in all fields');
     }
 
     const business = await Business.findOne({ email: new RegExp(`^${email}$`, 'i') });
 
     if (!business) {
-        return res.status(404).json({ message: 'Invalid email or password' });
+        res.status(404);
+        throw new Error('Invalid email or password');
     }
 
     const isMatch = await bcrypt.compare(password, business.password);
 
     if (!isMatch) {
-        return res.status(401).json({ message: 'Invalid email or password' });
+        res.status(405);
+        throw new Error('Invalid email or password');
     }
 
     const accessToken = generateBusinessAccessToken(business._id);
@@ -99,7 +99,8 @@ const googleLoginBusiness = asyncHandler(async (req, res) => {
     const { code } = req.body;
 
     if (!code) {
-        return res.status(400).json({ message: 'No code provided' });
+        res.status(400);
+        throw new Error('Invalid code');
     }
 
     const response = await client.getToken(code);
@@ -112,7 +113,8 @@ const googleLoginBusiness = asyncHandler(async (req, res) => {
     const email = payload?.email;
 
     if (!email) {
-        return res.status(400).json({ message: 'Invalid email' });
+        res.status(401);
+        throw new Error('Invalid email');
     }
 
     let business = await Business.findOne({ email: new RegExp(`^${email}$`, 'i') });
@@ -148,8 +150,8 @@ const updateBusiness = asyncHandler(async (req, res) => {
     const business = await Business.findById(req.business._id);
 
     if (!business) {
-        return res.status(404).json({ message: 'Business not found' });
-    }
+        res.status(404);
+        throw new Error('Business not found');}
 
     if (name) business.name = name;
     if (email && email_regex.test(email)) business.email = email;
