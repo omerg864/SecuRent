@@ -10,8 +10,6 @@ import { errorHandler } from './middleware/errorMiddleware.js';
 import rateLimiterMiddleware from './middleware/rateLimiterMiddleware.js';
 import adminRoutes from './routes/adminRoutes.js';
 import transactionRoutes from './routes/transactionRoutes.js';
-import itemRoutes from './routes/itemRoutes.js';
-import reviewRoutes from './routes/reviewRoutes.js';
 
 const PORT = process.env.PORT || 3000;
 
@@ -37,6 +35,8 @@ connectDB(() => {
 
 app.use('admin', adminRoutes);
 app.use('transaction', transactionRoutes);
+app.use('/api/costumer', costumerRoutes);
+app.use('/api/business', businessRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/review', reviewRoutes);
 
