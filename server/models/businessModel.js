@@ -17,9 +17,14 @@ const businessScheme = mongoose.Schema(
     },
     phone:{
         type: String,
+        required: true,
     },
     category:[String],
-
+    role: {
+        type: String,
+        required: true,
+        default: 'Business',
+    },
     tokens:[
         {
             token:{
@@ -38,18 +43,19 @@ const businessScheme = mongoose.Schema(
     ],
     rating:{
         type: Number,
-    },
-    bank:{
-        type: Object,
+        required: true,
     },
     address:{
         type: String,
+        required: true,
     },
-    image:{
+    Image:{
         type: String,
+        required: true,
     },
     currency:{
         type: String,
+        required: true,
     },
 }
 );

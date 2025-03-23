@@ -26,10 +26,12 @@ export const generateCustomerAccessToken = (id) => {
 
 export const generateCustomerRefreshToken = (id) => {
     const unique = uuid();
-    return jwt.sign({ id, unique }, process.env.JWT_SECRET_REFRESH_COSTUMER, {
+    const refreshToken = jwt.sign({ id, unique }, process.env.JWT_SECRET_REFRESH_COSTUMER, {
         expiresIn: '7d',
     });
+    return { refreshToken, unique };
 };
+
 export const generateBusinessAccessToken = (id) => {
     const unique = uuid();
     return jwt.sign({ id, unique }, process.env.JWT_SECRET_ACCESS_BUSINESS, {
