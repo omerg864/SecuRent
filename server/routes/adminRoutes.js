@@ -7,15 +7,17 @@ import {
 	updateAdmin,
 	verifyAdmin,
 } from '../controllers/adminController.js';
+import { authAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.get('/login', login);
 router.get('/register', register);
 router.get('/google', googleLogin);
-// TODO: add middleware to protect routes
-router.put('/update', updateAdmin);
-router.delete('/:id', deleteAdmin);
-router.put('/verify/:id', verifyAdmin);
+
+//! protected routes
+router.put('/update', authAdmin, updateAdmin);
+router.delete('/:id', authAdmin, deleteAdmin);
+router.put('/verify/:id', authAdmin, verifyAdmin);
 
 export default router;

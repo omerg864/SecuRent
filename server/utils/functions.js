@@ -10,9 +10,12 @@ export const generateAdminAccessToken = (id) => {
 
 export const generateAdminRefreshToken = (id) => {
 	const unique = uuid();
-	return jwt.sign({ id, unique }, process.env.JWT_SECRET_ADMIN_REFRESH, {
-		expiresIn: '7d',
-	});
+	return {
+		refreshToken: jwt.sign({ id, unique }, process.env.JWT_SECRET_ADMIN_REFRESH, {
+			expiresIn: '7d',
+		}),
+		unique,
+	};
 };
 export const generateCustomerAccessToken = (id) => {
     const unique = uuid();

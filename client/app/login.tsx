@@ -18,6 +18,7 @@ const LoginScreen = () => {
 
 	const handleLogin = () => {
 		console.log('Login');
+		router.replace('/customer');
 	};
 
 	const handleRegister = () => {
