@@ -40,8 +40,10 @@ export const generateBusinessAccessToken = (id) => {
 };
 
 export const generateBusinessRefreshToken = (id) => {
-    const unique = uuid();
-    return jwt.sign({ id, unique }, process.env.JWT_SECRET_REFRESH_BUSINESS, {
-        expiresIn: '7d',
-    });
+	const unique = uuid();
+	const refreshToken = jwt.sign({ id, unique }, process.env.JWT_SECRET_REFRESH_BUSINESS, {
+		expiresIn: '7d',
+	});
+	return { refreshToken, unique };
 };
+

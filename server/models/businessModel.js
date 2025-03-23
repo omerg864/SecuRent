@@ -17,7 +17,6 @@ const businessScheme = mongoose.Schema(
     },
     phone:{
         type: String,
-        required: true,
     },
     category:[String],
     role: {
@@ -25,37 +24,28 @@ const businessScheme = mongoose.Schema(
         required: true,
         default: 'Business',
     },
-    tokens:[
+    refreshTokens: [
         {
-            token:{
+            token: {
                 type: String,
                 required: true,
             },
-            device_id:{
+            unique: {
                 type: String,
-                required: true,
             },
-            name:{
-                type: String,
-                required: true,
-            }
         },
     ],
     rating:{
         type: Number,
-        required: true,
     },
     address:{
         type: String,
-        required: true,
     },
     Image:{
         type: String,
-        required: true,
     },
     currency:{
         type: String,
-        required: true,
     },
 }
 );
