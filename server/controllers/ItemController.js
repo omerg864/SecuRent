@@ -60,7 +60,7 @@ const updateItem = asyncHandler(async (req, res) => {
         throw new Error('Item not found');
     }
 
-    if (item.business._id.toString() !== req.business._id.toString()) {
+    if (item.business.toString() !== req.business.toString()) {
         res.status(403);
         throw new Error('Not authorized to update this item');
     }
@@ -87,7 +87,7 @@ const deleteItem = asyncHandler(async (req, res) => {
         throw new Error('Item not found');
     }
 
-    if (item.business._id.toString() !== req.business._id.toString()) {
+    if (item.business.toString() !== req.business.toString()) {
         res.status(403);
         throw new Error('Not authorized to delete this item');
     }
