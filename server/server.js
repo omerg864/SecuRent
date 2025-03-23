@@ -10,6 +10,10 @@ import { errorHandler } from './middleware/errorMiddleware.js';
 import rateLimiterMiddleware from './middleware/rateLimiterMiddleware.js';
 import adminRoutes from './routes/adminRoutes.js';
 import transactionRoutes from './routes/transactionRoutes.js';
+import costumerRoutes from './routes/costumerRoutes.js';
+import businessRoutes from './routes/businessRoutes.js';
+import itemRoutes from './routes/itemRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
 
 const PORT = process.env.PORT || 3000;
 
