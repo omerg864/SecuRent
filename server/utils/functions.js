@@ -17,3 +17,29 @@ export const generateAdminRefreshToken = (id) => {
 		unique,
 	};
 };
+export const generateCustomerAccessToken = (id) => {
+    const unique = uuid();
+    return jwt.sign({ id, unique }, process.env.JWT_SECRET_ACCESS_COSTUMER, {
+        expiresIn: '1d',
+    });
+};
+
+export const generateCustomerRefreshToken = (id) => {
+    const unique = uuid();
+    return jwt.sign({ id, unique }, process.env.JWT_SECRET_REFRESH_COSTUMER, {
+        expiresIn: '7d',
+    });
+};
+export const generateBusinessAccessToken = (id) => {
+    const unique = uuid();
+    return jwt.sign({ id, unique }, process.env.JWT_SECRET_ACCESS_BUSINESS, {
+        expiresIn: '1d',
+    });
+};
+
+export const generateBusinessRefreshToken = (id) => {
+    const unique = uuid();
+    return jwt.sign({ id, unique }, process.env.JWT_SECRET_REFRESH_BUSINESS, {
+        expiresIn: '7d',
+    });
+};
