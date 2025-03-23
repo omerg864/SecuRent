@@ -9,23 +9,27 @@ export const password_regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$
 
 // Register a new customer
 const registerCustomer = asyncHandler(async (req, res) => {
-    const { name, email, password, phone, address, image, creditCard, rating } = req.body;
+    const { name, email, password } = req.body;
 
-    if (!name || !email || !password || !phone || !address || !creditCard || rating === undefined) {
-        return res.status(400).json({ message: 'Please provide all required fields' });
+    if (!name || !email || !password) {
+        res.status(400);
+        throw new Error('Please provide name, email, and password');
     }
 
     if (!email_regex.test(email)) {
-        return res.status(400).json({ message: 'Invalid email format' });
+        res.status(401);
+        throw new Error('Invalid email');
     }
 
     if (!password_regex.test(password)) {
-        return res.status(400).json({ message: 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.' });
-    }''
+        res.status(402);
+        throw new Error('Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.');
+    }
     const customerExists = await Costumer.findOne({ email: new RegExp(`^${email}$`, 'i') });
 
     if (customerExists) {
-        return res.status(400).json({ message: 'Customer already exists' });
+        res.status(403);
+        throw new Error('Customer already exists');
     }
 
     // Hash password
@@ -36,11 +40,7 @@ const registerCustomer = asyncHandler(async (req, res) => {
         name,
         email,
         password: hashedPassword,
-        phone,
-        address,
-        image,
-        creditCard,
-        rating,
+
     });
 
     return res.status(201).json({
@@ -54,19 +54,22 @@ const loginCustomer = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(400).json({ message: 'Please provide both email and password' });
+        res.status(400);
+        throw new Error('Please provide email and password');
     }
 
     const customer = await Costumer.findOne({ email: new RegExp(`^${email}$`, 'i') });
 
     if (!customer) {
-        return res.status(404).json({ message: 'Invalid email or password' });
+        res.status(404);
+        throw new Error('Customer not found');
     }
 
     const isMatch = await bcrypt.compare(password, customer.password);
 
     if (!isMatch) {
-        return res.status(401).json({ message: 'Invalid email or password' });
+        res.status(401);
+        throw new Error('Invalid password');
     }
 
     const accessToken = generateCustomerAccessToken(customer._id);
@@ -93,7 +96,8 @@ const googleLoginCustomer = asyncHandler(async (req, res) => {
     const { code } = req.body;
 
     if (!code) {
-        return res.status(400).json({ message: 'No code provided' });
+        res.status(400);
+        throw new Error('Invalid code');
     }
 
     const response = await client.getToken(code);
@@ -106,7 +110,8 @@ const googleLoginCustomer = asyncHandler(async (req, res) => {
     const email = payload?.email;
 
     if (!email) {
-        return res.status(400).json({ message: 'Invalid email' });
+        res.status(400);
+        throw new Error('Invalid email');
     }
 
     let customer = await Costumer.findOne({ email: new RegExp(`^${email}$`, 'i') });
@@ -147,7 +152,8 @@ const updateCustomer = asyncHandler(async (req, res) => {
     const customer = await Costumer.findById(req.costumer._id);
 
     if (!customer) {
-        return res.status(404).json({ message: 'Customer not found' });
+        res.status(404);
+        throw new Error('Customer not found');
     }
 
     if (name) customer.name = name;
@@ -178,7 +184,8 @@ const deleteCustomer = asyncHandler(async (req, res) => {
     const customer = await Costumer.findById(req.costumer._id);
 
     if (!customer) {
-        return res.status(404).json({ message: 'Customer not found' });
+        res.status(404);
+        throw new Error('Customer not found');
     }
 
     await customer.deleteOne();

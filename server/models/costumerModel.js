@@ -17,23 +17,18 @@ const costumerScheme = mongoose.Schema(
         },
         phone: {
             type: String,
-            required: true,
         },
         address: {
             type: String,
-            required: true,
         },
         image: {
             type: String,
-            required: true,
         },
         creditCard: {
             type: Object,
-            required: true,
         },
         rating: {
             type: Number,
-            required: true,
         },
         tokens: [
             {
