@@ -30,22 +30,22 @@ const costumerScheme = mongoose.Schema(
         rating: {
             type: Number,
         },
-        tokens: [
-            {
-                token: {
-                    type: String,
-                    required: true,
-                },
-                device_id:{
-                    type: String,
-                    required: true,
-                },
-                name:{
-                    type: String,
-                    required: true,
-                }
-            },
-        ],
+        role: {
+            type: String,
+            required: true,
+            default: 'Customer',
+        },
+        refreshTokens: [
+			{
+				token: {
+					type: String,
+					required: true,
+				},
+				unique: {
+					type: String,
+				},
+			},
+		],
     },
     { timestamps: true }
 );

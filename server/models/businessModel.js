@@ -19,33 +19,29 @@ const businessScheme = mongoose.Schema(
         type: String,
     },
     category:[String],
-
-    tokens:[
+    role: {
+        type: String,
+        required: true,
+        default: 'Business',
+    },
+    refreshTokens: [
         {
-            token:{
+            token: {
                 type: String,
                 required: true,
             },
-            device_id:{
+            unique: {
                 type: String,
-                required: true,
             },
-            name:{
-                type: String,
-                required: true,
-            }
         },
     ],
     rating:{
         type: Number,
     },
-    bank:{
-        type: Object,
-    },
     address:{
         type: String,
     },
-    image:{
+    Image:{
         type: String,
     },
     currency:{
