@@ -9,16 +9,55 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import Entypo from '@expo/vector-icons/Entypo';
 import Header from '@/components/ui/Header';
+import { loginBusiness } from '@/services/businessService';
+import { loginCustomer } from '@/services/customerService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BusinessLoginResponse, CustomerLoginResponse } from '@/services/interfaceService';
 
 const LoginScreen = () => {
-	const [email, setEmail] = useState('Louis04real@gmail.com');
-	const [password, setPassword] = useState('password');
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
 	const router = useRouter();
 
-	const handleLogin = () => {
-		console.log('Login');
-		router.replace('/customer');
+	const handleLogin = async () => {
+		if (!email || !password) {
+			alert('Please fill in all fields');
+			return;
+		}
+		try {
+			const response : BusinessLoginResponse = await loginBusiness({ email, password });
+			if (!response) {
+				return;
+			}
+			AsyncStorage.setItem("Access_Token", response.accessToken);
+			AsyncStorage.setItem("Refresh_Token", response.refreshToken);
+			AsyncStorage.setItem("Business_Data", JSON.stringify(response.business));
+			const expiration = new Date();
+			expiration.setHours(expiration.getHours() + 23);
+			AsyncStorage.setItem("Auth_Expiration", expiration.toISOString());
+			router.replace('/business/business-home');
+		}
+		catch (error) {	
+			console.log(error);
+		}
+		try {
+			const response : CustomerLoginResponse = await loginCustomer({ email, password });
+			if (!response) {
+				return;
+			}
+			AsyncStorage.setItem("Access_Token", response.accessToken);
+			AsyncStorage.setItem("Refresh_Token", response.refreshToken);
+			AsyncStorage.setItem("Customer_Data", JSON.stringify(response.customer));
+			const expiration = new Date();
+			expiration.setHours(expiration.getHours() + 23);
+			AsyncStorage.setItem("Auth_Expiration", expiration.toISOString());
+			router.replace('/customer');
+		}
+		catch (error) {
+			console.log(error);
+		}
+
 	};
 
 	const handleRegister = () => {

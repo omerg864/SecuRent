@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import Costumer from '../models/costumerModel.js';
+import Business from '../models/businessModel.js';
 import bcrypt from 'bcrypt';
 import { email_regex } from '../utils/regex.js';
 import {
@@ -27,14 +28,7 @@ const successFullLogin = async (res, customer) => {
 		success: true,
 		accessToken,
 		refreshToken,
-		customer: {
-			name: customer.name,
-			email: customer.email,
-			phone: customer.phone,
-			address: customer.address,
-			image: customer.image,
-			rating: customer.rating,
-		},
+        customer,
 	});
 };
 
@@ -61,10 +55,11 @@ const registerCustomer = asyncHandler(async (req, res) => {
 	}
 
 	const customerExists = await Costumer.findOne({ email: new RegExp(`^${email}$`, 'i') });
+	const businessExists = await Business.findOne({ email: new RegExp(`^${email}$`, 'i') });
 
-	if (customerExists) {
+	if (customerExists || businessExists) {
 		res.status(409);
-		throw new Error('Customer already exists');
+		throw new Error('Email already in use');
 	}
 
 	const salt = await bcrypt.genSalt(10);
@@ -97,6 +92,7 @@ const loginCustomer = asyncHandler(async (req, res) => {
 	}
 
 	const customer = await Costumer.findOne({ email: new RegExp(`^${email}$`, 'i') });
+
 
 	if (!customer) {
 		res.status(404);

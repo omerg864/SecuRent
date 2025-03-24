@@ -10,12 +10,16 @@ import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Header from "@/components/ui/Header";
 import { useLocalSearchParams } from "expo-router";
+import { registerBusiness, loginBusiness } from "@/services/businessService";
+import { registerCustomer, loginCustomer } from "@/services/customerService";
+import { AuthData } from "@/services/interfaceService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const RegisterScreen = () => {
-  const [name, setName] = useState("Louis04real");
-  const [email, setEmail] = useState("Louis04real@gmail.com");
-  const [password, setPassword] = useState("password");
-  const [confirmPassword, setConfirmPassword] = useState("confirm password");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
@@ -25,12 +29,76 @@ const RegisterScreen = () => {
     router.back();
   };
 
-  const handleRegister = () => {
-    router.dismissAll();
-    router.replace({
-      pathname: "./setup-screen",
-      params: { accountType },
-    });
+  const handleRegister = async () => {
+    if (!name || !email || !password || !confirmPassword) {
+      alert("Please fill in all fields.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+    //Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.
+    const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+      alert(
+        "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character."
+      );
+      return;
+    }
+    try {
+      const Data: AuthData = {
+        name,
+        email,
+        password,
+      };
+      if (accountType === "business") {
+        const response = await registerBusiness(Data);
+        if (!response) {
+          return;
+        }
+        const loginResponse = await loginBusiness({ email, password });
+        if (!loginResponse.success) {
+          return;
+        }
+        console.log("Business login response:", loginResponse);
+        AsyncStorage.setItem("Access_Token", loginResponse.accessToken);
+        AsyncStorage.setItem("Refresh_Token", loginResponse.refreshToken);
+        AsyncStorage.setItem("Business_Data", JSON.stringify(loginResponse.business));
+
+      } else {
+        const response = await registerCustomer(Data);
+        if (!response) {
+          return;
+        }
+        const loginResponse = await loginCustomer({ email, password });
+        if (!loginResponse.success) {
+          return;
+        }
+        console.log("Customer login response:", loginResponse);
+        AsyncStorage.setItem("Access_Token", loginResponse.accessToken);
+        AsyncStorage.setItem("Refresh_Token", loginResponse.refreshToken);
+        AsyncStorage.setItem("Customer_Data", JSON.stringify(loginResponse.customer));
+      }
+      const expiration = new Date();
+      expiration.setHours(expiration.getHours() + 23);
+      AsyncStorage.setItem("Auth_Expiration", expiration.toISOString());
+      router.replace({
+        pathname: "./setup-screen",
+        params: { accountType },
+      });
+    } catch (error: any) {
+      if (error.response?.status === 409 || error.response?.status === 403) {
+        alert("An account with that email already exists.");
+        return;
+      }
+      alert(error || "Registration failed.");
+    }
   };
 
   return (
