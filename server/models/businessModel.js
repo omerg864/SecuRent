@@ -47,6 +47,13 @@ const businessScheme = mongoose.Schema(
     currency:{
         type: String,
     },
+    companyNumber:{
+        type: String,
+    },
+    isCompanyNumberVerified:{
+        type: Boolean,
+        default: false,
+    },
 }
 );
 export default mongoose.model("Business", businessScheme);
