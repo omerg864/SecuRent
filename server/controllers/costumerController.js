@@ -9,6 +9,7 @@ import {
 } from '../utils/functions.js';
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
+import valid from 'card-validator';
 
 
 export const password_regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -305,6 +306,53 @@ const refreshTokens = asyncHandler(async (req, res) => {
 	});
 });
 
+// Update credit card info with validation
+// Update credit card info with validation
+const updateCustomerCreditCard = asyncHandler(async (req, res) => {
+	const { number, expiry, cvv, cardHolderName } = req.body;
+
+	// בדיקה שכל השדות קיימים
+	if (!number || !expiry || !cvv || !cardHolderName) {
+		res.status(400);
+		throw new Error('Missing credit card details');
+	}
+
+	// ולידציה
+	const numberValidation = valid.number(number);
+	const expiryValidation = valid.expirationDate(expiry);
+	const cvvValidation = valid.cvv(cvv);
+
+	if (!numberValidation.isValid || !expiryValidation.isValid || !cvvValidation.isValid) {
+		res.status(401);
+		throw new Error('Invalid credit card information');
+	}
+
+	// תיקון טעות קטנה: req.customer ולא req.costumer
+	const customer = await Costumer.findById(req.costumer._id);
+	if (!customer) {
+		res.status(402);
+		throw new Error('Customer not found');
+	}
+
+	// עדכון הכרטיס
+	customer.creditCard = {
+		number: `**** **** **** ${number.slice(-4)}`, // שמירה חלקית
+		expiry,
+		cardHolderName,
+		cardType: numberValidation.card?.niceType || 'Unknown'
+	};
+
+	await customer.save();
+
+	res.status(200).json({
+		success: true,
+		message: 'Credit card updated successfully',
+		card: customer.creditCard
+	});
+});
+
+
+
 
 export {
 	registerCustomer,
@@ -315,4 +363,5 @@ export {
 	updateCustomerPassword,
 	getCustomerById,
     refreshTokens,
+	updateCustomerCreditCard,
 };

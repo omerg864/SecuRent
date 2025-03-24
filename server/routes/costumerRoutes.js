@@ -7,7 +7,8 @@ import {
     deleteCustomer,
     updateCustomerPassword,
     getCustomerById,
-    refreshTokens
+    refreshTokens,
+    updateCustomerCreditCard,
 } from '../controllers/costumerController.js';
 import { authCostumer } from '../middleware/authMiddleware.js';
 
@@ -23,7 +24,9 @@ router.post('/refresh-token', refreshTokens);  // Refresh Customer Tokens
 router.put('/update/password', authCostumer, updateCustomerPassword);  // Update Customer Password
 router.put('/update', authCostumer, updateCustomer);  // Update Customer Profile
 router.delete('/delete', authCostumer, deleteCustomer);  // Delete Customer Account
-router.get('/:id', authCostumer, getCustomerById);  // Get Customer by ID
+router.get('/:id', authCostumer, getCustomerById);  // Get Customer by ID3
+router.put('/update/credit-card', authCostumer, updateCustomerCreditCard);  // Update Customer Credit Card
+
 
 
 export default router;

@@ -241,7 +241,7 @@ const verifyAndUpdateCompanyNumber = asyncHandler(async (req, res) => {
     }
     const isBusiness = await Business.findOne({ companyNumber });
     if (isBusiness) {
-      res.status(404);
+      res.status(401);
       throw new Error('Business already exists');
     }
 
@@ -249,13 +249,13 @@ const verifyAndUpdateCompanyNumber = asyncHandler(async (req, res) => {
     const verification = await verifyCompanyNumber(companyNumber);
   
     if (!verification) {
-      res.status(404);
+      res.status(402);
       throw new Error('Company number not found in official registry');
     }
   
     const business = await Business.findById(req.business._id);
     if (!business) {
-      res.status(404);
+      res.status(403);
       throw new Error('Business not found');
     }
   
