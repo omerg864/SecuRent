@@ -65,17 +65,19 @@ export default function SetupScreen() {
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [accountType, setAccountType] = useState<string>("business");
 
-  useEffect(() => {
-    console.log("Current account type:", accountType);
-    console.log("Completed steps:", completedSteps);
-    console.log("Params:", params);
-  }, [accountType, completedSteps, params]);
-
   useFocusEffect(
     useCallback(() => {
       const loadData = async () => {
         try {
           let currentAccountType = params.accountType as string;
+          const accessToken = await AsyncStorage.getItem("Access_Token");
+          const refreshToken = await AsyncStorage.getItem("Refresh_Token");
+          if(currentAccountType === "business") {
+            const businessData = await AsyncStorage.getItem("Business_Data");
+          }
+          else {
+            const customerData = await AsyncStorage.getItem("Customer_Data");
+          }
 
           if (!currentAccountType) {
             // await AsyncStorage.removeItem(ACCOUNT_TYPE_KEY)
@@ -95,10 +97,8 @@ export default function SetupScreen() {
 
           if (savedSteps) {
             const parsedSteps = JSON.parse(savedSteps);
-            console.log(`Loaded steps for ${currentAccountType}:`, parsedSteps);
             setCompletedSteps(parsedSteps);
           } else {
-            console.log(`No saved steps found for ${currentAccountType}`);
             setCompletedSteps([]);
           }
         } catch (error) {

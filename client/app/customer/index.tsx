@@ -22,6 +22,7 @@ import * as Location from 'expo-location';
 import { getDistance } from '@/utils/functions';
 import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const businesses_obj: Business[] = [
 	{
@@ -95,6 +96,23 @@ const CustomerHome: React.FC = () => {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [maxDistance, setMaxDistance] = useState(10);
 	const [minRating, setMinRating] = useState(0);
+
+	AsyncStorage.getItem('Customer_Data').then((data) => {
+		console.log('Customer Data:', data);
+	});
+	AsyncStorage.getItem('Access_Token').then((data) => {
+		console.log('Access Token:', data);
+	});
+	AsyncStorage.getItem('Refresh_Token').then((data) => {
+		console.log('Refresh Token:', data);
+	});
+	AsyncStorage.getItem('Auth_Expiration').then((data) => {
+		console.log('Auth Expiration:', data);
+	});
+	// AsyncStorage.removeItem('Customer_Data');
+	// AsyncStorage.removeItem('Access_Token');
+	// AsyncStorage.removeItem('Refresh_Token');
+	// AsyncStorage.removeItem('Auth_Expiration');
 
 	const onBarcodeClick = () => {
 		router.push('/customer/QRScanner');

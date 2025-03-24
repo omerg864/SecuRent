@@ -25,19 +25,31 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
-      AsyncStorage.getItem("user").then((user) => {
-        if (user) {
-          const parsedUser = JSON.parse(user);
-          if (parsedUser.role === "customer") {
-            router.replace("/customer");
-          } else {
+      const checkStorage = async () => {
+        try {
+          const businessData = await AsyncStorage.getItem("Business_Data");
+          const customerData = await AsyncStorage.getItem("Customer_Data");
+  
+          if (businessData) {
             router.replace("/business/business-home");
+            return; // Stop execution to prevent further navigation
           }
-        } else {
+  
+          if (customerData) {
+            router.replace("/customer");
+            return; // Stop execution to prevent further navigation
+          }
+  
+          // If no stored data, navigate to login
           router.replace("/login");
+        } catch (error) {
+          console.error("Error reading AsyncStorage:", error);
+        } finally {
+          SplashScreen.hideAsync();
         }
-      });
-      SplashScreen.hideAsync();
+      };
+  
+      checkStorage();
     }
   }, [loaded]);
 

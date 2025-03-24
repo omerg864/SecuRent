@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import Business from '../models/businessModel.js';
+import Customer from '../models/costumerModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { email_regex } from '../utils/regex.js';
@@ -24,16 +25,7 @@ const successFullLogin = async (res, business) => {
 		success: true,
 		accessToken,
 		refreshToken,
-		business: {
-			name: business.name,
-			email: business.email,
-			phone: business.phone,
-			address: business.address,
-			image: business.Image,
-			category: business.category,
-			currency: business.currency,
-			rating: business.rating,
-		},
+        business,
 	});
 };
 
@@ -58,10 +50,11 @@ const registerBusiness = asyncHandler(async (req, res) => {
 	}
 
 	const businessExists = await Business.findOne({ email: new RegExp(`^${email}$`, 'i') });
+	const customerExists = await Customer.findOne({ email: new RegExp(`^${email}$`, 'i') });
 
-	if (businessExists) {
+	if (businessExists || customerExists) {
 		res.status(403);
-		throw new Error('Business already exists');
+		throw new Error('Email already in use');
 	}
 
 	const salt = await bcrypt.genSalt(10);

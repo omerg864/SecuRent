@@ -79,7 +79,7 @@ const BankDetailsScreen = () => {
 
       // Navigate back to setup screen with both account type and completion status
       router.replace({
-        pathname: "/setup-screen",
+        pathname: "./setup-screen",
         params: {
           accountType: accountType,
           addedBank: "true",
