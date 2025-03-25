@@ -7,6 +7,7 @@ import {
     deleteBusiness,
     refreshTokens,
     getBusinessById,
+    verifyAndUpdateCompanyNumber,
 } from '../controllers/businessController.js';
 import { authBusiness } from '../middleware/authMiddleware.js';
 
@@ -17,6 +18,7 @@ router.post('/register', registerBusiness);
 router.post('/login', loginBusiness);
 router.post('/google-login', googleLoginBusiness);
 router.post('/refresh-token', refreshTokens);
+router.post('/verify-company-number', authBusiness,  verifyAndUpdateCompanyNumber);
 
 
 // Protected Routes (Requires Authentication)

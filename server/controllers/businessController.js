@@ -9,6 +9,7 @@ import {
 	generateBusinessRefreshToken,
 } from '../utils/functions.js';
 import { OAuth2Client } from 'google-auth-library';
+import { verifyCompanyNumber } from '../utils/externalFunctions.js';
 
 export const password_regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -231,6 +232,45 @@ const getBusinessById = asyncHandler(async (req, res) => {
     res.status(200).json({ success: true, business });
 }); 
 
+const verifyAndUpdateCompanyNumber = asyncHandler(async (req, res) => {
+    const { companyNumber } = req.body;
+  
+    if (!companyNumber) {
+      res.status(400);
+      throw new Error('Company number is required');
+    }
+    const isBusiness = await Business.findOne({ companyNumber });
+    if (isBusiness) {
+      res.status(401);
+      throw new Error('Business already exists');
+    }
+
+  
+    const verification = await verifyCompanyNumber(companyNumber);
+  
+    if (!verification) {
+      res.status(402);
+      throw new Error('Company number not found in official registry');
+    }
+  
+    const business = await Business.findById(req.business._id);
+    if (!business) {
+      res.status(403);
+      throw new Error('Business not found');
+    }
+  
+    business.companyNumber = companyNumber;
+    business.isCompanyNumberVerified = true;
+    await business.save();
+  
+    res.status(200).json({
+      success: true,
+      message: 'Company verified and updated successfully',
+      company: verification
+    });
+  });
+  
+
 export {
 	registerBusiness,
 	loginBusiness,
@@ -239,4 +279,5 @@ export {
 	updateBusiness,
 	deleteBusiness,
     getBusinessById,
+    verifyAndUpdateCompanyNumber,
 };
