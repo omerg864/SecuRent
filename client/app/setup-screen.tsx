@@ -70,17 +70,8 @@ export default function SetupScreen() {
       const loadData = async () => {
         try {
           let currentAccountType = params.accountType as string;
-          const accessToken = await AsyncStorage.getItem("Access_Token");
-          const refreshToken = await AsyncStorage.getItem("Refresh_Token");
-          if(currentAccountType === "business") {
-            const businessData = await AsyncStorage.getItem("Business_Data");
-          }
-          else {
-            const customerData = await AsyncStorage.getItem("Customer_Data");
-          }
 
           if (!currentAccountType) {
-            // await AsyncStorage.removeItem(ACCOUNT_TYPE_KEY)
             const savedAccountType = await AsyncStorage.getItem(
               ACCOUNT_TYPE_KEY
             );
@@ -92,7 +83,6 @@ export default function SetupScreen() {
           setAccountType(currentAccountType);
 
           const storageKey = `completedSteps_${currentAccountType}`;
-          // await AsyncStorage.removeItem(storageKey)
           const savedSteps = await AsyncStorage.getItem(storageKey);
 
           if (savedSteps) {
@@ -121,8 +111,12 @@ export default function SetupScreen() {
   useFocusEffect(
     useCallback(() => {
       if (remainingSteps.length === 0 && completedSteps.length > 0) {
+        AsyncStorage.removeItem(`completedSteps_${accountType}`);
+        AsyncStorage.removeItem(accountType);
+        AsyncStorage.removeItem("Account_setup");
         const homeRoute =
           accountType === "personal" ? "/customer" : "/business/business-home";
+        router.dismissAll();
         router.replace(homeRoute);
       }
     }, [remainingSteps.length, completedSteps.length, accountType])

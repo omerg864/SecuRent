@@ -9,22 +9,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const BusinessHomePage = () => {
   const router = useRouter();
 
-  AsyncStorage.getItem('Business_Data').then((data) => {
-		console.log('Business Data:', data);
-	});
-	AsyncStorage.getItem('Access_Token').then((data) => {
-		console.log('Access Token:', data);
-	});
-	AsyncStorage.getItem('Refresh_Token').then((data) => {
-		console.log('Refresh Token:', data);
-	});
-	AsyncStorage.getItem('Auth_Expiration').then((data) => {
-		console.log('Auth Expiration:', data);
-	});
-  // AsyncStorage.removeItem('Business_Data');
-  // AsyncStorage.removeItem('Access_Token');
-  // AsyncStorage.removeItem('Refresh_Token');
-  // AsyncStorage.removeItem('Auth_Expiration');
+  
+  AsyncStorage.removeItem("Business_Data");
+  AsyncStorage.removeItem("Access_Token");
+  AsyncStorage.removeItem("Refresh_Token");
+  AsyncStorage.removeItem("Auth_Expiration");
 
   const handleNewTransaction = () => {
     // Navigate to new transaction page

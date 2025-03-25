@@ -1,5 +1,6 @@
-import client from "./httpClient";
-import { AuthData, AuthResponse, LoginCredentials, CustomerLoginResponse } from "./interfaceService";
+import {client} from "./httpClient";
+import { AuthData, AuthResponse, LoginCredentials, CustomerLoginResponse, CreditCardData } from "./interfaceService";
+import { checkToken } from "./httpClient";
 
 const registerCustomer = async (businessData : AuthData) => {
   try {
@@ -19,4 +20,21 @@ const loginCustomer = async (loginCredentials: LoginCredentials) => {
   }
 }
 
-export { registerCustomer, loginCustomer };
+const updateCreditCard = async (creditCardData: CreditCardData) => {
+  try {
+    console.log(creditCardData);
+    const accessToken = await checkToken();
+    const response = await client.put<AuthResponse>(
+      "costumer/update/credit-card",
+      creditCardData,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` }, 
+      }
+    );
+    return response;
+  } catch (error) {
+    throw error || "Credit card update failed.";
+  }
+}
+
+export { registerCustomer, loginCustomer , updateCreditCard};

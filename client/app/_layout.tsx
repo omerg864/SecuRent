@@ -27,20 +27,49 @@ export default function RootLayout() {
     if (loaded) {
       const checkStorage = async () => {
         try {
+          // await AsyncStorage.multiRemove([ 
+          //   "Business_Data",
+          //   "Customer_Data",
+          //   "Account_setup",
+          //   "current_account_type",
+          //   "completedSteps_business",
+          //   "completedSteps_personal",
+          //   "Access_Token",
+          //   "Refresh_Token",
+          //   "Auth_Expiration",
+          // ]);
           const businessData = await AsyncStorage.getItem("Business_Data");
           const customerData = await AsyncStorage.getItem("Customer_Data");
   
           if (businessData) {
+            const setup_mode = await AsyncStorage.getItem("Account_setup");
+            const Account_Type = "Business";
+            if (setup_mode === "true") {
+              router.replace({
+                pathname: "./setup-screen",
+                params: { Account_Type },
+              });
+              return; 
+            }
             router.replace("/business/business-home");
-            return; // Stop execution to prevent further navigation
+            return; 
           }
   
           if (customerData) {
+            const setup_mode = await AsyncStorage.getItem("Account_setup");
+            const Account_Type = "Personal";
+            if (setup_mode === "true") {
+              router.replace({
+                pathname: "./setup-screen",
+                params: { Account_Type },
+              });
+              return;
+            }
+
             router.replace("/customer");
-            return; // Stop execution to prevent further navigation
+            return; 
           }
   
-          // If no stored data, navigate to login
           router.replace("/login");
         } catch (error) {
           console.error("Error reading AsyncStorage:", error);
@@ -76,6 +105,8 @@ export default function RootLayout() {
           <Stack.Screen name="verification" />
           <Stack.Screen name="verify-email" />
           <Stack.Screen name="add-payment" />
+          <Stack.Screen name="reset-password" />
+          <Stack.Screen name="restore-account" />
         </Stack>
         <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
       </ThemeProvider>
