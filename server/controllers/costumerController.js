@@ -307,17 +307,15 @@ const refreshTokens = asyncHandler(async (req, res) => {
 });
 
 // Update credit card info with validation
-// Update credit card info with validation
 const updateCustomerCreditCard = asyncHandler(async (req, res) => {
 	const { number, expiry, cvv, cardHolderName } = req.body;
 
-	// בדיקה שכל השדות קיימים
 	if (!number || !expiry || !cvv || !cardHolderName) {
 		res.status(400);
 		throw new Error('Missing credit card details');
 	}
 
-	// ולידציה
+
 	const numberValidation = valid.number(number);
 	const expiryValidation = valid.expirationDate(expiry);
 	const cvvValidation = valid.cvv(cvv);
@@ -327,16 +325,15 @@ const updateCustomerCreditCard = asyncHandler(async (req, res) => {
 		throw new Error('Invalid credit card information');
 	}
 
-	// תיקון טעות קטנה: req.customer ולא req.costumer
+
 	const customer = await Costumer.findById(req.costumer._id);
 	if (!customer) {
 		res.status(402);
 		throw new Error('Customer not found');
 	}
 
-	// עדכון הכרטיס
 	customer.creditCard = {
-		number: `**** **** **** ${number.slice(-4)}`, // שמירה חלקית
+		number: `**** **** **** ${number.slice(-4)}`, 
 		expiry,
 		cardHolderName,
 		cardType: numberValidation.card?.niceType || 'Unknown'
