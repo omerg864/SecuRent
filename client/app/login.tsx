@@ -81,7 +81,7 @@ const LoginScreen = () => {
   };
 
   const handleForgotPassword = () => {
-    console.log("Forgot Password");
+    router.push("/restore-account");
   };
 
   return (

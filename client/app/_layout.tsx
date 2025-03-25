@@ -105,6 +105,8 @@ export default function RootLayout() {
           <Stack.Screen name="verification" />
           <Stack.Screen name="verify-email" />
           <Stack.Screen name="add-payment" />
+          <Stack.Screen name="reset-password" />
+          <Stack.Screen name="restore-account" />
         </Stack>
         <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
       </ThemeProvider>

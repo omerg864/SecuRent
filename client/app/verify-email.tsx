@@ -21,42 +21,29 @@ export default function VerifyEmailScreen() {
     // Add verification logic (e.g., API call) here
     if (code.trim().length === 6) {
       try {
-        // Mark this step as completed for the specific account type
-        const storageKey = `completedSteps_${accountType}`;
-
-        // Get existing completed steps
-        const savedSteps = await AsyncStorage.getItem(storageKey);
-        const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
-
-        // Check if this step is already completed
-        if (!completedSteps.includes("email")) {
-          // Add this step to the completed steps
-          completedSteps.push("email");
-
-          // Save the updated completed steps
-          await AsyncStorage.setItem(
-            storageKey,
-            JSON.stringify(completedSteps)
-          );
-
-          // For debugging
-          console.log(
-            `Email verification completed. Completed steps for ${accountType}:`,
-            completedSteps
-          );
+        const setup_mode = await AsyncStorage.getItem("Account_setup");
+        if (setup_mode === "true") {
+          const storageKey = `completedSteps_${accountType}`;
+          const savedSteps = await AsyncStorage.getItem(storageKey);
+          const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
+          if (!completedSteps.includes("email")) {
+            completedSteps.push("email");
+            await AsyncStorage.setItem(
+              storageKey,
+              JSON.stringify(completedSteps)
+            );
+          }
+          await AsyncStorage.setItem("current_account_type", accountType);
+          router.replace({
+            pathname: "./setup-screen",
+            params: {
+              accountType: accountType,
+              verifiedEmail: "true",
+            },
+          });
+        } else {
+          router.replace("/reset-password");
         }
-
-        // Save the current account type for persistence
-        await AsyncStorage.setItem("current_account_type", accountType);
-
-        // Navigate back to setup screen with both account type and completion status
-        router.replace({
-          pathname: "./setup-screen",
-          params: {
-            accountType: accountType,
-            verifiedEmail: "true",
-          },
-        });
       } catch (error) {
         console.error("Error verifying email:", error);
         alert("There was an error verifying your email. Please try again.");
