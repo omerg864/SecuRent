@@ -90,7 +90,6 @@ export default function VerifyBusinessNumberScreen() {
 
         <View className="space-y-4 mt-8 flex-col gap-4">
           <ThemedTextInput
-            placeholder="Enter business number"
             keyboardType="numeric"
             value={businessNumber}
             onChangeText={setBusinessNumber}
