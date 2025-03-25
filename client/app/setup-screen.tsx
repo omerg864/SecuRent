@@ -116,6 +116,7 @@ export default function SetupScreen() {
         AsyncStorage.removeItem("Account_setup");
         const homeRoute =
           accountType === "personal" ? "/customer" : "/business/business-home";
+        router.dismissAll();
         router.replace(homeRoute);
       }
     }, [remainingSteps.length, completedSteps.length, accountType])

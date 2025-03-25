@@ -7,10 +7,15 @@ import { ThemedTextInput } from "@/components/ui/ThemedTextInput";
 import HapticButton from "@/components/ui/HapticButton";
 import { router } from "expo-router";
 import { StyleSheet } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Colors } from "@/constants/Colors";
+
 
 const ResetPasswordScreen = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleResetPassword = () => {
     if (!newPassword || !confirmPassword) {
@@ -47,33 +52,58 @@ const ResetPasswordScreen = () => {
 
         <View className="space-y-4 mt-8 flex-col gap-4">
           <ThemedTextInput
-            placeholder="New Password"
-            secureTextEntry
+            className="w-full h-12 px-4 border border-gray-300 rounded-md pr-12"
             value={newPassword}
             onChangeText={setNewPassword}
-            containerClassName="border border-white p-3 rounded-xl"
-            style={{
-              color: "white",
-              fontSize: 18,
-              textAlign: "center",
-              textAlignVertical: "center",
-            }}
+            secureTextEntry={!showPassword}
+            label="New Password"
+            containerClassName="mt-4"
+            Icon={
+              showPassword ? (
+                <Ionicons
+                  name="eye-off"
+                  className="absolute right-0 top-3 bottom-0 justify-center px-3"
+                  size={24}
+                  color={Colors.light.tint}
+                />
+              ) : (
+                <Ionicons
+                  name="eye"
+                  className="absolute right-0 top-3 bottom-0 justify-center px-3"
+                  size={24}
+                  color={Colors.light.tint}
+                />
+              )
+            }
+            onIconPress={() => setShowPassword(!showPassword)}
           />
 
           <ThemedTextInput
-            placeholder="Confirm Password"
-            secureTextEntry
+            className="w-full h-12 px-4 border border-gray-300 rounded-md pr-12"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
-            containerClassName="border border-white p-3 rounded-xl"
-            style={{
-              color: "white",
-              fontSize: 18,
-              textAlign: "center",
-              textAlignVertical: "center",
-            }}
+            secureTextEntry={!showConfirmPassword}
+            label="Confirm Password"
+            containerClassName="mt-4 mb-4"
+            Icon={
+              showConfirmPassword ? (
+                <Ionicons
+                  name="eye-off"
+                  className="absolute right-0 top-3 bottom-0 justify-center px-3"
+                  size={24}
+                  color={Colors.light.tint}
+                />
+              ) : (
+                <Ionicons
+                  name="eye"
+                  className="absolute right-0 top-3 bottom-0 justify-center px-3"
+                  size={24}
+                  color={Colors.light.tint}
+                />
+              )
+            }
+            onIconPress={() => setShowConfirmPassword(!showConfirmPassword)}
           />
-
           <HapticButton
             onPress={handleResetPassword}
             className="bg-indigo-600/30 py-3 mt-2 rounded-xl"

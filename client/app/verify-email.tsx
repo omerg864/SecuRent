@@ -75,17 +75,11 @@ export default function VerifyEmailScreen() {
 
         <View className="space-y-4 mt-8 flex-col gap-4">
           <ThemedTextInput
-            placeholder="Enter verification code"
-            keyboardType="numeric"
+            className="w-full h-12 px-4 border border-gray-300 rounded-md"
             value={code}
             onChangeText={setCode}
-            containerClassName="border border-white p-3 rounded-xl"
-            style={{
-              color: "white",
-              fontSize: 18,
-              textAlign: "center",
-              textAlignVertical: "center",
-            }} // Centers text and cursor
+            keyboardType="numeric"
+            label="Verification Code"
           />
 
           <HapticButton

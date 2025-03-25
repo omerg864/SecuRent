@@ -25,7 +25,7 @@ export default function VerifyBusinessNumberScreen() {
       try {
         const response: any = await verifyCompanyNumber(businessNumber);
         console.log(response.data);
-        
+
         if (!response.data.success) {
           console.log("Verification failed");
           return;
@@ -37,7 +37,10 @@ export default function VerifyBusinessNumberScreen() {
 
         if (!completedSteps.includes("verification")) {
           completedSteps.push("verification");
-          await AsyncStorage.setItem(storageKey, JSON.stringify(completedSteps));
+          await AsyncStorage.setItem(
+            storageKey,
+            JSON.stringify(completedSteps)
+          );
         }
 
         await AsyncStorage.setItem("current_account_type", accountType);
@@ -91,13 +94,8 @@ export default function VerifyBusinessNumberScreen() {
             keyboardType="numeric"
             value={businessNumber}
             onChangeText={setBusinessNumber}
-            containerClassName="border border-white p-3 rounded-xl"
-            style={{
-              color: "white",
-              fontSize: 18,
-              textAlign: "center",
-              textAlignVertical: "center",
-            }}
+            className="w-full h-12 px-4 border border-gray-300 rounded-md"
+            label="Business Number"
             editable={!loading} // Disable input while loading
           />
 

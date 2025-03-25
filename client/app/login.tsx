@@ -181,7 +181,7 @@ const LoginScreen = () => {
 
         <View className="flex-row justify-between mt-auto mb-14 items-baseline">
           <HapticButton
-            className="w-24 h-12 bg-gray-100 rounded-full justify-center items-center"
+            className="w-24 h-12 bg-gray-100 rounded-full justify-center items-center border border-black"
             onPress={handleRegister}
           >
             <ThemedText className="font-semibold" type="custom">

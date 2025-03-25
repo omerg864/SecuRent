@@ -97,18 +97,6 @@ const CustomerHome: React.FC = () => {
 	const [maxDistance, setMaxDistance] = useState(10);
 	const [minRating, setMinRating] = useState(0);
 
-	AsyncStorage.getItem('Customer_Data').then((data) => {
-		console.log('Customer Data:', data);
-	});
-	AsyncStorage.getItem('Access_Token').then((data) => {
-		console.log('Access Token:', data);
-	});
-	AsyncStorage.getItem('Refresh_Token').then((data) => {
-		console.log('Refresh Token:', data);
-	});
-	AsyncStorage.getItem('Auth_Expiration').then((data) => {
-		console.log('Auth Expiration:', data);
-	});
 	AsyncStorage.removeItem('Customer_Data');
 	AsyncStorage.removeItem('Access_Token');
 	AsyncStorage.removeItem('Refresh_Token');

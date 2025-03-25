@@ -27,6 +27,7 @@ const RestoreAccountScreen = () => {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
+      onBack={() => router.back()}
       headerImage={
         <MaterialCommunityIcons
           name="email-outline"
@@ -46,17 +47,12 @@ const RestoreAccountScreen = () => {
 
         <View className="space-y-4 mt-8 flex-col gap-4">
           <ThemedTextInput
-            placeholder="Enter your email"
-            keyboardType="email-address"
+            className="w-full h-12 px-4 border border-gray-300 rounded-md"
             value={email}
             onChangeText={setEmail}
-            containerClassName="border border-white p-3 rounded-xl"
-            style={{
-              color: "white",
-              fontSize: 18,
-              textAlign: "center",
-              textAlignVertical: "center",
-            }}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            label="Email"
           />
 
           <HapticButton
@@ -64,7 +60,7 @@ const RestoreAccountScreen = () => {
             className="bg-indigo-600/30 py-3 mt-2 rounded-xl"
           >
             <ThemedText className="text-white text-center text-lg font-semibold">
-                Restore Account
+              Restore Account
             </ThemedText>
           </HapticButton>
         </View>
