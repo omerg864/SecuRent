@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { View, ScrollView } from "react-native";
+import { View, ScrollView, ActivityIndicator } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ThemedTextInput } from "@/components/ui/ThemedTextInput";
 import { ThemedText } from "@/components/ui/ThemedText";
@@ -9,6 +9,8 @@ import HapticButton from "@/components/ui/HapticButton";
 import { Ionicons } from "@expo/vector-icons";
 import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { updateCreditCard } from "@/services/customerService";
+import { CreditCardData } from "@/services/interfaceService";
 
 const AddPaymentScreen = () => {
   const router = useRouter();
@@ -16,13 +18,31 @@ const AddPaymentScreen = () => {
   const [cardNumber, setCardNumber] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
   const [cvv, setCvv] = useState("");
+  const [loading, setLoading] = useState(false); // New loading state
   const params = useLocalSearchParams();
-  // Get account type from params, default to "personal" for this screen
   const accountType = (params.accountType as string) || "personal";
 
   const handleSavePayment = async () => {
+    if (!cardholderName || !cardNumber || !expiryDate || !cvv) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    setLoading(true); // Show loader
     try {
-      // Mark this step as completed for the specific account type
+      const data: CreditCardData = {
+        cardHolderName: cardholderName,
+        number: cardNumber,
+        expiry: expiryDate,
+        cvv,
+      };
+
+      const response: any = await updateCreditCard(data);
+      console.log(response.data);
+      if (!response.data.success) {
+        return;
+      }
+
       const storageKey = `completedSteps_${accountType}`;
       const savedSteps = await AsyncStorage.getItem(storageKey);
       const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
@@ -31,11 +51,8 @@ const AddPaymentScreen = () => {
         completedSteps.push("payment");
         await AsyncStorage.setItem(storageKey, JSON.stringify(completedSteps));
       }
-
-      // Save the current account type for persistence
       await AsyncStorage.setItem("current_account_type", accountType);
 
-      // Navigate back to setup screen with both account type and completion status
       router.replace({
         pathname: "/setup-screen",
         params: {
@@ -43,9 +60,12 @@ const AddPaymentScreen = () => {
           addedPayment: "true",
         },
       });
-    } catch (error) {
-      console.error("Error saving payment method:", error);
-      alert("There was an error saving your payment method. Please try again.");
+    } catch (error: any) {
+      if (error.response?.status == 401) {
+        alert("Payment method is invalid");
+      }
+    } finally {
+      setLoading(false); // Hide loader
     }
   };
 
@@ -76,6 +96,7 @@ const AddPaymentScreen = () => {
               value={cardholderName}
               onChangeText={setCardholderName}
               label="Cardholder Name"
+              editable={!loading} // Disable input while loading
             />
 
             <ThemedTextInput
@@ -84,6 +105,7 @@ const AddPaymentScreen = () => {
               onChangeText={setCardNumber}
               label="Card Number"
               keyboardType="numeric"
+              editable={!loading} // Disable input while loading
             />
 
             <ThemedTextInput
@@ -101,6 +123,7 @@ const AddPaymentScreen = () => {
               }}
               label="Expiry Date (MM/YY)"
               keyboardType="numeric"
+              editable={!loading} // Disable input while loading
             />
 
             <ThemedTextInput
@@ -109,6 +132,7 @@ const AddPaymentScreen = () => {
               onChangeText={setCvv}
               label="CVV"
               keyboardType="numeric"
+              editable={!loading} // Disable input while loading
             />
           </View>
 
@@ -117,10 +141,15 @@ const AddPaymentScreen = () => {
             <HapticButton
               onPress={handleSavePayment}
               className="bg-indigo-600/30 py-3 px-8 rounded-xl w-full"
+              disabled={loading} // Disable button while loading
             >
-              <ThemedText className="text-white text-center text-lg font-semibold">
-                Save Payment Method
-              </ThemedText>
+              {loading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <ThemedText className="text-white text-center text-lg font-semibold">
+                  Save Payment Method
+                </ThemedText>
+              )}
             </HapticButton>
           </View>
         </View>

@@ -46,6 +46,13 @@ interface AuthData {
     };
   }
 
+  interface CreditCardData {
+    number: string;
+    expiry: string;
+    cvv: string;
+    cardHolderName: string;
+  }
 
 
-  export type { AuthData, LoginCredentials, AuthResponse, BusinessLoginResponse, CustomerLoginResponse };
+
+  export type { AuthData, LoginCredentials, AuthResponse, BusinessLoginResponse, CustomerLoginResponse , CreditCardData };

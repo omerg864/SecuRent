@@ -109,10 +109,11 @@ const CustomerHome: React.FC = () => {
 	AsyncStorage.getItem('Auth_Expiration').then((data) => {
 		console.log('Auth Expiration:', data);
 	});
-	// AsyncStorage.removeItem('Customer_Data');
-	// AsyncStorage.removeItem('Access_Token');
-	// AsyncStorage.removeItem('Refresh_Token');
-	// AsyncStorage.removeItem('Auth_Expiration');
+	AsyncStorage.removeItem('Customer_Data');
+	AsyncStorage.removeItem('Access_Token');
+	AsyncStorage.removeItem('Refresh_Token');
+	AsyncStorage.removeItem('Auth_Expiration');
+
 
 	const onBarcodeClick = () => {
 		router.push('/customer/QRScanner');

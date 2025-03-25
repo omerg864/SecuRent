@@ -8,6 +8,7 @@ import { ThemedTextInput } from "@/components/ui/ThemedTextInput";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import Header from "@/components/ui/Header";
 import { useLocalSearchParams } from "expo-router";
 import { registerBusiness, loginBusiness } from "@/services/businessService";
@@ -27,6 +28,10 @@ const RegisterScreen = () => {
 
   const goBack = () => {
     router.back();
+  };
+
+  const handleGoogleLogin = async () => {
+    alert("Google login not implemented yet.");
   };
 
   const handleRegister = async () => {
@@ -88,6 +93,8 @@ const RegisterScreen = () => {
       const expiration = new Date();
       expiration.setHours(expiration.getHours() + 23);
       AsyncStorage.setItem("Auth_Expiration", expiration.toISOString());
+      AsyncStorage.setItem("Account_setup", "true");
+      router.dismissAll();
       router.replace({
         pathname: "./setup-screen",
         params: { accountType },
@@ -196,6 +203,35 @@ const RegisterScreen = () => {
             }
             onIconPress={() => setShowConfirmPassword(!showConfirmPassword)}
           />
+        </View>
+
+         {/* Optional divider */}
+         <View className="flex-row items-center my-4">
+          <View className="flex-1 h-px bg-gray-300" />
+          <ThemedText className="mx-4 text-sm text-gray-500">or</ThemedText>
+          <View className="flex-1 h-px bg-gray-300" />
+        </View>
+
+        {/* Google Login Button */}
+        <View className="mt-2 mb-2">
+          <HapticButton
+            className="w-full h-12 border border-gray-300 rounded-full flex-row justify-center items-center bg-white"
+            onPress={handleGoogleLogin}
+          >
+            <AntDesign
+              name="google"
+              size={20}
+              color= "#000"
+              style={{ marginRight: 10 }}
+            />
+            <ThemedText
+              className="font-semibold"
+              darkColor="#000"
+              lightColor="#000"
+            >
+              Register with Google
+            </ThemedText>
+          </HapticButton>
         </View>
 
         <View className="flex-row justify-center mt-auto mb-14 items-baseline">
