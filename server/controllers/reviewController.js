@@ -3,16 +3,11 @@ import Review from '../models/reviewModel.js';
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 
 const createReview = asyncHandler(async (req, res) => {
-	const { business, rating, content } = req.body;
+	const { business, content } = req.body;
 
-	if (!business || !rating || !content) {
+	if (!business || !content) {
 		res.status(400);
 		throw new Error('Please provide business, customer, and rating');
-	}
-
-	if (rating < 1 || rating > 5) {
-		res.status(400);
-		throw new Error('Rating must be between 1 and 5');
 	}
 
 	const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -29,13 +24,12 @@ const createReview = asyncHandler(async (req, res) => {
 	const prompt = `Give me a rating between 1 and 5 for this business, according to my experience: ${content}. return only the rating number.`;
 	const result = await model.generateContent(prompt);
 
-	const ratingGenerated = parseInt(result.data[0].text);
+	const rating = parseInt(result.data[0].text);
 
 	const review = await Review.create({
 		business,
 		customer: req.customer.id,
 		rating,
-		ratingGenerated,
 		content,
 	});
 
@@ -72,7 +66,7 @@ const getReviewById = asyncHandler(async (req, res) => {
 
 const updateReview = asyncHandler(async (req, res) => {
 	const { id } = req.params;
-	const { rating, content } = req.body;
+	const { content } = req.body;
 
 	const review = await Review.findById(id);
 	if (!review) {
@@ -80,20 +74,40 @@ const updateReview = asyncHandler(async (req, res) => {
 		throw new Error('Review not found');
 	}
 
+	if (!content) {
+		res.status(400);
+		throw new Error('Please provide content');
+	}
+
 	if (review.customer.toString() !== req.customer._id.toString()) {
 		res.status(403);
 		throw new Error('Not authorized to update this review');
 	}
 
-	if (rating && (rating < 1 || rating > 5)) {
-		res.status(400);
-		throw new Error('Rating must be between 1 and 5');
+	if (review.content !== content) {
+		
+		review.content = content;
+
+		const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+		const model = genAI.getGenerativeModel({
+			model: 'gemini-2.0-flash',
+			generationConfig: {
+				responseMimeType: 'application/json',
+				responseSchema: {
+					type: SchemaType.STRING,
+				},
+			},
+		});
+		const prompt = `Give me a rating between 1 and 5 for this business, according to my experience: ${content}. return only the rating number.`;
+		const result = await model.generateContent(prompt);
+
+		const rating = parseInt(result.data[0].text);
+
+		review.rating = rating ?? review.rating;
+
+		await review.save();
 	}
-
-	review.rating = rating ?? review.rating;
-	review.content = content ?? review.content;
-
-	await review.save();
 	res.status(200).json({
 		success: true,
 		review,
@@ -117,7 +131,6 @@ const deleteReview = asyncHandler(async (req, res) => {
 	await review.deleteOne();
 	res.status(200).json({
 		success: true,
-
 		message: 'Review deleted successfully',
 	});
 });
