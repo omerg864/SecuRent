@@ -9,6 +9,7 @@ import {
 } from '../utils/functions.js';
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
+import { sendEmail } from '../utils/functions.js';
 
 export const password_regex =
 	/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
