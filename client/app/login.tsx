@@ -1,215 +1,287 @@
-import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
-import HapticButton from "@/components/ui/HapticButton";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { Colors } from "@/constants/Colors";
-import { useRouter } from "expo-router";
-import { ThemedTextInput } from "@/components/ui/ThemedTextInput";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
-import Entypo from "@expo/vector-icons/Entypo";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import Header from "@/components/ui/Header";
-import { loginBusiness } from "@/services/businessService";
-import { loginCustomer } from "@/services/customerService";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import HapticButton from '@/components/ui/HapticButton';
+import { ThemedText } from '@/components/ui/ThemedText';
+import { Colors } from '@/constants/Colors';
+import { useRouter } from 'expo-router';
+import { ThemedTextInput } from '@/components/ui/ThemedTextInput';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
+import Entypo from '@expo/vector-icons/Entypo';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Header from '@/components/ui/Header';
+import { loginBusiness } from '@/services/businessService';
+import { loginCustomer } from '@/services/customerService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  BusinessLoginResponse,
-  CustomerLoginResponse,
-} from "@/services/interfaceService";
+	BusinessLoginResponse,
+	CustomerLoginResponse,
+	GoogleLoginResponse,
+} from '@/services/interfaceService';
+import { googleLogin } from '@/services/adminService';
+import Toast from 'react-native-toast-message';
 
 const LoginScreen = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
+	const [showPassword, setShowPassword] = useState(false);
+	const [loading, setLoading] = useState(false);
+	const [token, setToken] = useState('');
+	const router = useRouter();
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      alert("Please fill in all fields");
-      return;
-    }
-    try {
-      const response: BusinessLoginResponse = await loginBusiness({
-        email,
-        password,
+	/*const GoogleLogin = async () => {
+		await GoogleSignin.hasPlayServices();
+		const userInfo = (await GoogleSignin.signIn()).data;
+		console.log('u', userInfo);
+		return userInfo;
+	};*/
+
+	const handleLogin = async () => {
+		if (!email || !password) {
+      Toast.show({
+        type: 'info',
+        text1: 'Please fill in all fields',
       });
-      if (!response) {
-        return;
-      }
-      AsyncStorage.setItem("Access_Token", response.accessToken);
-      AsyncStorage.setItem("Refresh_Token", response.refreshToken);
-      AsyncStorage.setItem("Business_Data", JSON.stringify(response.business));
-      const expiration = new Date();
-      expiration.setHours(expiration.getHours() + 23);
-      AsyncStorage.setItem("Auth_Expiration", expiration.toISOString());
-      router.replace("/business/business-home");
-	  return;
-    } catch (error) {
-      console.log(error);
-    }
-    try {
-      const response: CustomerLoginResponse = await loginCustomer({
-        email,
-        password,
-      });
-      if (!response) {
-        return;
-      }
-      AsyncStorage.setItem("Access_Token", response.accessToken);
-      AsyncStorage.setItem("Refresh_Token", response.refreshToken);
-      AsyncStorage.setItem("Customer_Data", JSON.stringify(response.customer));
-      const expiration = new Date();
-      expiration.setHours(expiration.getHours() + 23);
-      AsyncStorage.setItem("Auth_Expiration", expiration.toISOString());
-      router.replace("/customer");
-	  return;
-    } catch (error) {
-      console.log(error);
-    }
-	alert("Credentials are incorrect");
-	setEmail("");
-	setPassword("");
-  };
+			return;
+		}
+    setLoading(true);
+		try {
+			const response: BusinessLoginResponse = await loginBusiness({
+				email,
+				password,
+			});
+			if (!response) {
+        setLoading(false);
+				return;
+			}
+			AsyncStorage.setItem('Access_Token', response.accessToken);
+			AsyncStorage.setItem('Refresh_Token', response.refreshToken);
+			AsyncStorage.setItem(
+				'Business_Data',
+				JSON.stringify(response.business)
+			);
+			const expiration = new Date();
+			expiration.setHours(expiration.getHours() + 23);
+			AsyncStorage.setItem('Auth_Expiration', expiration.toISOString());
+			router.replace('/business/business-home');
+			return;
+		} catch (error) {
+			console.log(error);
+		}
+		try {
+			const response: CustomerLoginResponse = await loginCustomer({
+				email,
+				password,
+			});
+			if (!response) {
+        setLoading(false);
+				return;
+			}
+			AsyncStorage.setItem('Access_Token', response.accessToken);
+			AsyncStorage.setItem('Refresh_Token', response.refreshToken);
+			AsyncStorage.setItem(
+				'Customer_Data',
+				JSON.stringify(response.customer)
+			);
+			const expiration = new Date();
+			expiration.setHours(expiration.getHours() + 23);
+			AsyncStorage.setItem('Auth_Expiration', expiration.toISOString());
+			router.replace('/customer');
+			return;
+		} catch (error) {
+			console.log(error);
+		}
+    setLoading(false);
+		Toast.show({
+      type: 'error',
+      text1: 'Invalid email or password',
+    });
+	};
 
-  const handleGoogleLogin = () => {
-    console.log("Google Login");
-  };
+	const handleGoogleLogin = async () => {
+		console.log('Google Login');
+	};
 
-  const handleRegister = () => {
-    router.push("/get-started");
-  };
+	/*const handleGoogleLogin = async () => {
+		setLoading(true);
+		try {
+			const response = await GoogleLogin(); // Google sign-in
+			if (!response) {
+				setLoading(false);
 
-  const handleForgotPassword = () => {
-    router.push("/restore-account");
-  };
+				return;
+			}
+			const { idToken } = response; // Check if idToken is directly available
 
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-      headerImage={
-        <Entypo
-          name="login"
-          size={250}
-          color="#808080"
-          style={styles.headerImage}
-        />
-      }
-    >
-      <Header title="Login" />
+			console.log('idToken:', idToken); // Log idToken to check if it's retrieved
 
-      <View className="flex-1 px-6">
-        <ThemedText className="text-2xl font-bold mb-2">
-          Welcome back
-        </ThemedText>
-        <ThemedText className="text-sm mb-8">
-          Hey you're back, fill in your details to get back in
-        </ThemedText>
+			if (idToken) {
+				const response: GoogleLoginResponse = await googleLogin(
+					idToken
+				);
+				if (!response) {
+					setLoading(false);
+					return;
+				}
+				console.log('Backend Response:', response);
+			}
+		} catch (error) {
+			console.log('Login Error:', error);
+		} finally {
+			setLoading(false);
+		}
+	};*/
 
-        <View className="space-y-6">
-          <ThemedTextInput
-            className="w-full h-12 px-4 border border-gray-300 rounded-md"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            label="Email"
-          />
+	const handleRegister = () => {
+		router.push('/get-started');
+	};
 
-          <ThemedTextInput
-            className="w-full h-12 px-4 border border-gray-300 rounded-md pr-12"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            label="Password"
-            containerClassName="mt-4 mb-4"
-            Icon={
-              showPassword ? (
-                <Ionicons
-                  name="eye-off"
-                  className="absolute right-0 top-3 bottom-0 justify-center px-3"
-                  size={24}
-                  color={Colors.light.tint}
-                />
-              ) : (
-                <Ionicons
-                  name="eye"
-                  className="absolute right-0 top-3 bottom-0 justify-center px-3"
-                  size={24}
-                  color={Colors.light.tint}
-                />
-              )
-            }
-            onIconPress={() => setShowPassword(!showPassword)}
-          />
+	const handleForgotPassword = () => {
+		router.push('/restore-account');
+	};
 
-          <TouchableOpacity onPress={handleForgotPassword} className="self-end">
-            <ThemedText className={`text-sm`} type="custom">
-              Forgot Password?
-            </ThemedText>
-          </TouchableOpacity>
-        </View>
-
-        {/* Optional divider */}
-        <View className="flex-row items-center my-4">
-          <View className="flex-1 h-px bg-gray-300" />
-          <ThemedText className="mx-4 text-sm text-gray-500">or</ThemedText>
-          <View className="flex-1 h-px bg-gray-300" />
-        </View>
-
-        {/* Google Login Button */}
-        <View className="mt-4 mb-4">
-          <HapticButton
-            className="w-full h-12 border border-gray-300 rounded-full flex-row justify-center items-center bg-white"
-            onPress={handleGoogleLogin}
-          >
-            <AntDesign
-              name="google"
-              size={20}
-              color= "#000"
-              style={{ marginRight: 10 }}
-            />
-            <ThemedText
-              className="font-semibold"
-              darkColor="#000"
-              lightColor="#000"
-            >
-              Login with Google
-            </ThemedText>
-          </HapticButton>
-        </View>
-
-        <View className="flex-row justify-between mt-auto mb-14 items-baseline">
-          <HapticButton
-            className="w-24 h-12 bg-gray-100 rounded-full justify-center items-center border border-black"
-            onPress={handleRegister}
-          >
-            <ThemedText className="font-semibold" type="custom">
-              Register
-            </ThemedText>
-          </HapticButton>
-          <HapticButton
-            style={{ backgroundColor: Colors.light.tintBlue }}
-            className={`w-40 h-16 rounded-full justify-center items-center`}
-            onPress={handleLogin}
-          >
-            <ThemedText className="text-white font-semibold" lightColor="#fff">
-              Login
-            </ThemedText>
-          </HapticButton>
-        </View>
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color={Colors.light.tint} />
       </View>
-    </ParallaxScrollView>
-  );
+    );
+  }
+
+	return (
+		<ParallaxScrollView
+			headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+			headerImage={
+				<Entypo
+					name="login"
+					size={250}
+					color="#808080"
+					style={styles.headerImage}
+				/>
+			}
+		>
+			<Header title="Login" />
+
+			<View className="flex-1 px-6">
+				<ThemedText className="text-2xl font-bold mb-2">
+					Welcome back
+				</ThemedText>
+				<ThemedText className="text-sm mb-8">
+					Hey you're back, fill in your details to get back in
+				</ThemedText>
+
+				<View className="space-y-6">
+					<ThemedTextInput
+						className="w-full h-12 px-4 border border-gray-300 rounded-md"
+						value={email}
+						onChangeText={setEmail}
+						keyboardType="email-address"
+						autoCapitalize="none"
+						label="Email"
+					/>
+
+					<ThemedTextInput
+						className="w-full h-12 px-4 border border-gray-300 rounded-md pr-12"
+						value={password}
+						onChangeText={setPassword}
+						secureTextEntry={!showPassword}
+						label="Password"
+						containerClassName="mt-4 mb-4"
+						Icon={
+							showPassword ? (
+								<Ionicons
+									name="eye-off"
+									className="absolute right-0 top-3 bottom-0 justify-center px-3"
+									size={24}
+									color={Colors.light.tint}
+								/>
+							) : (
+								<Ionicons
+									name="eye"
+									className="absolute right-0 top-3 bottom-0 justify-center px-3"
+									size={24}
+									color={Colors.light.tint}
+								/>
+							)
+						}
+						onIconPress={() => setShowPassword(!showPassword)}
+					/>
+
+					<TouchableOpacity
+						onPress={handleForgotPassword}
+						className="self-end"
+					>
+						<ThemedText className={`text-sm`} type="custom">
+							Forgot Password?
+						</ThemedText>
+					</TouchableOpacity>
+				</View>
+
+				{/* Optional divider */}
+				<View className="flex-row items-center my-4">
+					<View className="flex-1 h-px bg-gray-300" />
+					<ThemedText className="mx-4 text-sm text-gray-500">
+						or
+					</ThemedText>
+					<View className="flex-1 h-px bg-gray-300" />
+				</View>
+
+				{/* Google Login Button */}
+				<View className="mt-4 mb-4">
+					<HapticButton
+						className="w-full h-12 border border-gray-300 rounded-full flex-row justify-center items-center bg-white"
+						onPress={handleGoogleLogin}
+					>
+						<AntDesign
+							name="google"
+							size={20}
+							color="#000"
+							style={{ marginRight: 10 }}
+						/>
+						<ThemedText
+							className="font-semibold"
+							darkColor="#000"
+							lightColor="#000"
+						>
+							Login with Google
+						</ThemedText>
+					</HapticButton>
+				</View>
+
+				<View className="flex-row justify-between mt-auto mb-14 items-baseline">
+					<HapticButton
+						className="w-24 h-12 bg-gray-100 rounded-full justify-center items-center border border-black"
+						onPress={handleRegister}
+					>
+						<ThemedText className="font-semibold" type="custom">
+							Register
+						</ThemedText>
+					</HapticButton>
+					<HapticButton
+						style={{ backgroundColor: Colors.light.tintBlue }}
+						className={`w-40 h-16 rounded-full justify-center items-center`}
+						onPress={handleLogin}
+					>
+						<ThemedText
+							className="text-white font-semibold"
+							lightColor="#fff"
+						>
+							Login
+						</ThemedText>
+					</HapticButton>
+				</View>
+			</View>
+		</ParallaxScrollView>
+	);
 };
 
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: "#808080",
-    bottom: -90,
-    left: -35,
-    position: "absolute",
-  },
+	headerImage: {
+		color: '#808080',
+		bottom: -90,
+		left: -35,
+		position: 'absolute',
+	},
 });

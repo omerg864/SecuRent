@@ -1,3 +1,4 @@
+
 interface AuthData {
     name?: string;
     email?: string;
@@ -46,6 +47,8 @@ interface AuthData {
     };
   }
 
+  type GoogleLoginResponse  = CustomerLoginResponse | BusinessLoginResponse;
+
   interface CreditCardData {
     number: string;
     expiry: string;
@@ -55,4 +58,4 @@ interface AuthData {
 
 
 
-  export type { AuthData, LoginCredentials, AuthResponse, BusinessLoginResponse, CustomerLoginResponse , CreditCardData };
+  export type { AuthData, LoginCredentials, AuthResponse, BusinessLoginResponse, CustomerLoginResponse , CreditCardData, GoogleLoginResponse };
