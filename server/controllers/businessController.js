@@ -101,7 +101,7 @@ const registerBusiness = asyncHandler(async (req, res) => {
 
 const verifyEmail = asyncHandler(async (req, res) => {
 	const { code } = req.body;
-	const business = await Business.findOne(req.business._id);
+	const business = await Business.findById(req.business._id);
 
 	if (!business) {
 		res.status(404);
@@ -113,7 +113,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
 		throw new Error('Invalid verification code');
 	}
 
-	business.isEmailVerified = true;
+	business.isEmailValid = true;
 	if (business.isCompanyNumberVerified && business.isBankValid === true) {
 		business.isValid = true;
 	}
