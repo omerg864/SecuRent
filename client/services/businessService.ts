@@ -1,5 +1,5 @@
 import {checkToken, client } from "./httpClient";
-import { AuthData, AuthResponse, LoginCredentials, BusinessLoginResponse } from "./interfaceService";
+import { AuthData, AuthResponse } from "./interfaceService";
 
 const registerBusiness = async (businessData : AuthData) => {
   try {
@@ -9,15 +9,6 @@ const registerBusiness = async (businessData : AuthData) => {
     throw error || "Registration failed.";
   }
 };
-
-const loginBusiness = async (loginCredentials: LoginCredentials) => {
-  try {
-    const response = await client.post<BusinessLoginResponse>("business/login", loginCredentials);
-    return response.data;
-  } catch (error) {
-    throw error || "Login failed.";
-  }
-}
 
 const verifyCompanyNumber = async (companyNumber: string) => {
   try {
@@ -44,4 +35,4 @@ const verifyCompanyNumber = async (companyNumber: string) => {
 };
 
 
-export { registerBusiness, loginBusiness, verifyCompanyNumber };
+export { registerBusiness, verifyCompanyNumber };

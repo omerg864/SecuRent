@@ -6,14 +6,16 @@ import {
 	deleteAdmin,
 	updateAdmin,
 	verifyAdmin,
+	loginClient
 } from '../controllers/adminController.js';
 import { authAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/login', login);
-router.get('/register', register);
-router.get('/google', googleLogin);
+router.post('/login', login);
+router.post('/register', register);
+router.post('/google', googleLogin);
+router.post('/login/client', loginClient);
 
 //! protected routes
 router.put('/update', authAdmin, updateAdmin);

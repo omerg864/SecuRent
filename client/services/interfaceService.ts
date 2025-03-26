@@ -1,3 +1,4 @@
+
 interface AuthData {
     name?: string;
     email?: string;
@@ -18,7 +19,7 @@ interface AuthData {
     success: boolean;
     accessToken: string;
     refreshToken: string;
-    business: {
+    user: {
       id: string;
       name: string;
       email: string;
@@ -28,6 +29,7 @@ interface AuthData {
       category: string;
       currency: string;
       rating: number;
+      role: string;
     };
   }
 
@@ -35,7 +37,7 @@ interface AuthData {
     success: boolean;
     accessToken: string;
     refreshToken: string;
-    customer: {
+    user: {
       id: string;
       name: string;
       email: string;
@@ -43,8 +45,11 @@ interface AuthData {
       address: string;
       image: string;
       rating: number;
+      role: string;
     };
   }
+
+  type LoginResponse  = CustomerLoginResponse | BusinessLoginResponse;
 
   interface CreditCardData {
     number: string;
@@ -55,4 +60,4 @@ interface AuthData {
 
 
 
-  export type { AuthData, LoginCredentials, AuthResponse, BusinessLoginResponse, CustomerLoginResponse , CreditCardData };
+  export type { AuthData, LoginCredentials, AuthResponse, BusinessLoginResponse, CustomerLoginResponse , CreditCardData, LoginResponse };
