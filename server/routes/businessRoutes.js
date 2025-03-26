@@ -8,6 +8,8 @@ import {
     refreshTokens,
     getBusinessById,
     verifyAndUpdateCompanyNumber,
+    verifyBank,
+    verifyEmail
 } from '../controllers/businessController.js';
 import { authBusiness } from '../middleware/authMiddleware.js';
 
@@ -19,6 +21,8 @@ router.post('/login', loginBusiness);
 router.post('/google-login', googleLoginBusiness);
 router.post('/refresh-token', refreshTokens);
 router.post('/verify-company-number', authBusiness,  verifyAndUpdateCompanyNumber);
+router.post('/verify-bank', authBusiness, verifyBank);
+router.post('/verify-email', authBusiness, verifyEmail);
 
 
 // Protected Routes (Requires Authentication)

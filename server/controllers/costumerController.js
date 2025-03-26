@@ -374,12 +374,48 @@ const updateCustomerCreditCard = asyncHandler(async (req, res) => {
 		cardType: numberValidation.card?.niceType || 'Unknown'
 	};
 
+	customer.isPaymentValid = true;
+
+	if (customer.isEmailValid) {
+		customer.isValid = true;
+	}
+
 	await customer.save();
 
 	res.status(200).json({
 		success: true,
+		valid: customer.isValid,
 		message: 'Credit card updated successfully',
 		card: customer.creditCard
+	});
+});
+
+const verifyEmail = asyncHandler(async (req, res) => {
+	const { code } = req.body;
+	const customer = await Costumer.findById(req.customer._id);
+
+	if (!customer) {
+		res.status(404);
+		throw new Error('Customer not found');
+	}
+
+	if (customer.verificationCode !== code) {
+		res.status(401);
+		throw new Error('Invalid verification code');
+	}
+
+	customer.isEmailValid = true;
+
+	if (customer.isPaymentValid) {
+		customer.isValid = true;
+	}
+
+	await customer.save();
+
+	res.status(200).json({
+		success: true,
+		valid: customer.isValid,
+		message: 'Email verified successfully',
 	});
 });
 
@@ -392,5 +428,6 @@ export {
 	updateCustomerPassword,
 	getCustomerById,
 	refreshTokens,
-	updateCustomerCreditCard
+	updateCustomerCreditCard,
+	verifyEmail
 };

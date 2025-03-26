@@ -99,6 +99,33 @@ const registerBusiness = asyncHandler(async (req, res) => {
 	});
 });
 
+const verifyEmail = asyncHandler(async (req, res) => {
+	const { code } = req.body;
+	const business = await Business.findOne(req.business._id);
+
+	if (!business) {
+		res.status(404);
+		throw new Error('Business not found');
+	}
+
+	if (code !== business.verificationCode) {
+		res.status(401);
+		throw new Error('Invalid verification code');
+	}
+
+	business.isEmailVerified = true;
+	if (business.isCompanyNumberVerified && business.isBankValid === true) {
+		business.isValid = true;
+	}
+	await business.save();
+
+	res.status(200).json({
+		success: true,
+		valid: business.isValid,
+		message: 'Email verified successfully',
+	});
+});
+
 //Login
 const loginBusiness = asyncHandler(async (req, res) => {
 	const { email, password } = req.body;
@@ -314,14 +341,54 @@ const verifyAndUpdateCompanyNumber = asyncHandler(async (req, res) => {
 
 	business.companyNumber = companyNumber;
 	business.isCompanyNumberVerified = true;
+	if (business.isEmailVerified && business.isBankValid === true) {
+		business.isValid = true;
+	}
 	await business.save();
 
 	res.status(200).json({
 		success: true,
+		valid: business.isValid,
 		message: 'Company verified and updated successfully',
 		company: verification,
 	});
 });
+
+
+const verifyBank = asyncHandler(async (req, res) => {
+	const { accountNumber, sortCode } = req.body;
+	const business = await Business.findById(req.business._id);
+	if (!business) {
+		res.status(404);
+		throw new Error('Business not found');
+	}
+
+	if (!accountNumber || !sortCode) {
+		res.status(400);
+		throw new Error('Account number and sort code are required');
+	}
+
+	const bank = {
+		accountNumber,
+		sortCode,
+	};
+
+	business.bank = bank;
+	business.isBankValid = true;
+	if (business.isEmailVerified && business.isCompanyNumberVerified) {
+		business.isValid = true;
+	}
+	await business.save();
+
+	res.status(200).json({
+		success: true,
+		valid: business.isValid,
+		message: 'Bank verified and updated successfully',
+		bank,
+	});
+});
+
+
 
 export {
 	registerBusiness,
@@ -331,5 +398,7 @@ export {
 	updateBusiness,
 	deleteBusiness,
 	getBusinessById,
-	verifyAndUpdateCompanyNumber
+	verifyAndUpdateCompanyNumber,
+	verifyEmail,
+	verifyBank
 };
