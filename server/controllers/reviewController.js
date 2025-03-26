@@ -85,7 +85,6 @@ const updateReview = asyncHandler(async (req, res) => {
 	}
 
 	if (review.content !== content) {
-		
 		review.content = content;
 
 		const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
