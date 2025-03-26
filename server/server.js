@@ -9,7 +9,7 @@ import { errorHandler } from './middleware/errorMiddleware.js';
 import rateLimiterMiddleware from './middleware/rateLimiterMiddleware.js';
 import adminRoutes from './routes/adminRoutes.js';
 import transactionRoutes from './routes/transactionRoutes.js';
-import costumerRoutes from './routes/costumerRoutes.js';
+import customerRoutes from './routes/customerRoutes.js';
 import businessRoutes from './routes/businessRoutes.js';
 import itemRoutes from './routes/itemRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
@@ -22,9 +22,9 @@ const app = express();
 
 // Enable CORS first
 const corsOptions = {
-  origin: '*', // or specify your frontend URL, e.g., 'http://localhost:19006'
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+	origin: '*', // or specify your frontend URL, e.g., 'http://localhost:19006'
+	methods: ['GET', 'POST', 'PUT', 'DELETE'],
+	allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 app.use(cors(corsOptions)); // Enable CORS with the specified options
@@ -38,17 +38,17 @@ app.use(rateLimiterMiddleware);
 
 // Database connection
 connectDB(() => {
-  if (process.env.NODE_ENV !== 'test') {
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`.green.bold);
-    });
-  }
+	if (process.env.NODE_ENV !== 'test') {
+		app.listen(PORT, () => {
+			console.log(`Server is running on port ${PORT}`.green.bold);
+		});
+	}
 });
 
 // Routes setup
-app.use('/admin', adminRoutes);
-app.use('/transaction', transactionRoutes);
-app.use('/api/costumer', costumerRoutes);
+app.use('api/admin', adminRoutes);
+app.use('api/transaction', transactionRoutes);
+app.use('/api/customer', customerRoutes);
 app.use('/api/business', businessRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/review', reviewRoutes);

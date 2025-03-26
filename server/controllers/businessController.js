@@ -1,6 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import Business from '../models/businessModel.js';
-import Customer from '../models/costumerModel.js';
+import Customer from '../models/customerModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { email_regex } from '../utils/regex.js';
@@ -101,7 +101,7 @@ const registerBusiness = asyncHandler(async (req, res) => {
 
 const verifyEmail = asyncHandler(async (req, res) => {
 	const { code } = req.body;
-	const business = await Business.findOne(req.business._id);
+	const business = await Business.findById(req.business._id);
 
 	if (!business) {
 		res.status(404);
@@ -113,7 +113,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
 		throw new Error('Invalid verification code');
 	}
 
-	business.isEmailVerified = true;
+	business.isEmailValid = true;
 	if (business.isCompanyNumberVerified && business.isBankValid === true) {
 		business.isValid = true;
 	}
@@ -354,7 +354,6 @@ const verifyAndUpdateCompanyNumber = asyncHandler(async (req, res) => {
 	});
 });
 
-
 const verifyBank = asyncHandler(async (req, res) => {
 	const { accountNumber, sortCode } = req.body;
 	const business = await Business.findById(req.business._id);
@@ -388,8 +387,6 @@ const verifyBank = asyncHandler(async (req, res) => {
 	});
 });
 
-
-
 export {
 	registerBusiness,
 	loginBusiness,
@@ -400,5 +397,5 @@ export {
 	getBusinessById,
 	verifyAndUpdateCompanyNumber,
 	verifyEmail,
-	verifyBank
+	verifyBank,
 };
