@@ -47,10 +47,22 @@ const businessScheme = mongoose.Schema(
     currency:{
         type: String,
     },
-    companyNumber:{
+    verificationCode:{
         type: String,
     },
-    isCompanyNumberVerified:{
+    isValid:{
+        type: Boolean,
+        default: false,
+    },
+    isEmailValid: {
+        type: Boolean,
+        default: false,
+    },
+    isBankValid:{
+        type: Boolean,
+        default: false,
+    },
+    isBusinessNUmberValid:{
         type: Boolean,
         default: false,
     },

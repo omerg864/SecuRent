@@ -9,9 +9,10 @@ import {
 	generateBusinessRefreshToken,
 } from '../utils/functions.js';
 import { OAuth2Client } from 'google-auth-library';
-import { verifyCompanyNumber } from '../utils/externalFunctions.js';
+import { sendEmail } from '../utils/functions.js';
 
-export const password_regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+export const password_regex =
+	/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 //Reusable login success function
 const successFullLogin = async (res, business) => {
@@ -26,10 +27,9 @@ const successFullLogin = async (res, business) => {
 		success: true,
 		accessToken,
 		refreshToken,
-        business,
+		business,
 	});
 };
-
 
 //Register
 const registerBusiness = asyncHandler(async (req, res) => {
@@ -50,8 +50,12 @@ const registerBusiness = asyncHandler(async (req, res) => {
 		throw new Error('Password is not strong enough');
 	}
 
-	const businessExists = await Business.findOne({ email: new RegExp(`^${email}$`, 'i') });
-	const customerExists = await Customer.findOne({ email: new RegExp(`^${email}$`, 'i') });
+	const businessExists = await Business.findOne({
+		email: new RegExp(`^${email}$`, 'i'),
+	});
+	const customerExists = await Customer.findOne({
+		email: new RegExp(`^${email}$`, 'i'),
+	});
 
 	if (businessExists || customerExists) {
 		res.status(403);
@@ -61,13 +65,37 @@ const registerBusiness = asyncHandler(async (req, res) => {
 	const salt = await bcrypt.genSalt(10);
 	const hashedPassword = await bcrypt.hash(password, salt);
 
-	await Business.create({
+	const business = await Business.create({
 		name,
 		email,
 		password: hashedPassword,
 	});
 
-	res.status(201).json({ success: true, message: 'Business registered successfully' });
+	const verificationCode = Math.floor(
+		100000 + Math.random() * 900000
+	).toString();
+	const subject = 'Verify Your Email Address';
+	const text = `Your verification code is: ${verificationCode}`;
+
+	const html = `
+		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+			<h2 style="color: #333;">Verify Your Email</h2>
+			<p>Thank you for signing up. Please use the code below to verify your email address:</p>
+			<div style="font-size: 24px; font-weight: bold; margin: 20px 0; color:rgb(76, 87, 175);">${verificationCode}</div>
+			<p>If you didn't request this, please ignore this email.</p>
+		</div>
+	`;
+
+	const sent = await sendEmail(email, subject, text, html);
+
+	business.verificationCode = verificationCode;
+	await business.save();
+
+	res.status(201).json({
+		success: true,
+		sent,
+		message: 'Business registered successfully',
+	});
 });
 
 //Login
@@ -79,7 +107,9 @@ const loginBusiness = asyncHandler(async (req, res) => {
 		throw new Error('Please fill in all fields');
 	}
 
-	const business = await Business.findOne({ email: new RegExp(`^${email}$`, 'i') });
+	const business = await Business.findOne({
+		email: new RegExp(`^${email}$`, 'i'),
+	});
 
 	if (!business) {
 		res.status(404);
@@ -105,7 +135,10 @@ const refreshTokens = asyncHandler(async (req, res) => {
 
 	let decoded;
 	try {
-		decoded = jwt.verify(refreshToken, process.env.JWT_SECRET_REFRESH_BUSINESS);
+		decoded = jwt.verify(
+			refreshToken,
+			process.env.JWT_SECRET_REFRESH_BUSINESS
+		);
 	} catch (err) {
 		throw new Error('Invalid or expired refresh token');
 	}
@@ -116,18 +149,23 @@ const refreshTokens = asyncHandler(async (req, res) => {
 		throw new Error('Business not found');
 	}
 
-	const storedToken = business.refreshTokens?.find(t => t.token === refreshToken);
+	const storedToken = business.refreshTokens?.find(
+		(t) => t.token === refreshToken
+	);
 	if (!storedToken) {
 		res.status(403);
 		throw new Error('Refresh token not recognized');
 	}
 
 	//Remove old token
-	business.refreshTokens = business.refreshTokens.filter(t => t.token !== refreshToken);
+	business.refreshTokens = business.refreshTokens.filter(
+		(t) => t.token !== refreshToken
+	);
 
 	//Generate and save new token
 	const accessToken = generateBusinessAccessToken(business._id);
-	const { refreshToken: newRefreshToken, unique } = generateBusinessRefreshToken(business._id);
+	const { refreshToken: newRefreshToken, unique } =
+		generateBusinessRefreshToken(business._id);
 	business.refreshTokens.push({ token: newRefreshToken, unique });
 
 	await business.save();
@@ -136,13 +174,16 @@ const refreshTokens = asyncHandler(async (req, res) => {
 		success: true,
 		accessToken,
 		refreshToken: newRefreshToken,
-        
 	});
 });
 
 //Google Login
 const googleLoginBusiness = asyncHandler(async (req, res) => {
-	const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, 'postmessage');
+	const client = new OAuth2Client(
+		process.env.GOOGLE_CLIENT_ID,
+		process.env.GOOGLE_CLIENT_SECRET,
+		'postmessage'
+	);
 	const { code } = req.body;
 
 	if (!code) {
@@ -164,7 +205,9 @@ const googleLoginBusiness = asyncHandler(async (req, res) => {
 		throw new Error('Invalid email');
 	}
 
-	let business = await Business.findOne({ email: new RegExp(`^${email}$`, 'i') });
+	let business = await Business.findOne({
+		email: new RegExp(`^${email}$`, 'i'),
+	});
 
 	if (!business) {
 		business = await Business.create({
@@ -185,7 +228,17 @@ const googleLoginBusiness = asyncHandler(async (req, res) => {
 
 //Update Business
 const updateBusiness = asyncHandler(async (req, res) => {
-	const { name, email, phone, category, bank, address, image, currency, rating } = req.body;
+	const {
+		name,
+		email,
+		phone,
+		category,
+		bank,
+		address,
+		image,
+		currency,
+		rating,
+	} = req.body;
 	const business = await Business.findById(req.business._id);
 
 	if (!business) {
@@ -224,52 +277,13 @@ const deleteBusiness = asyncHandler(async (req, res) => {
 
 //Get Business By ID
 const getBusinessById = asyncHandler(async (req, res) => {
-    const business = await Business.findById(req.params.id);
-    if (!business) {
-        return res.status(404).json({ message: 'Business not found' });
-    }
+	const business = await Business.findById(req.params.id);
+	if (!business) {
+		return res.status(404).json({ message: 'Business not found' });
+	}
 
-    res.status(200).json({ success: true, business });
-}); 
-
-const verifyAndUpdateCompanyNumber = asyncHandler(async (req, res) => {
-    const { companyNumber } = req.body;
-  
-    if (!companyNumber) {
-      res.status(400);
-      throw new Error('Company number is required');
-    }
-    const isBusiness = await Business.findOne({ companyNumber });
-    if (isBusiness) {
-      res.status(401);
-      throw new Error('Business already exists');
-    }
-
-  
-    const verification = await verifyCompanyNumber(companyNumber);
-  
-    if (!verification) {
-      res.status(402);
-      throw new Error('Company number not found in official registry');
-    }
-  
-    const business = await Business.findById(req.business._id);
-    if (!business) {
-      res.status(403);
-      throw new Error('Business not found');
-    }
-  
-    business.companyNumber = companyNumber;
-    business.isCompanyNumberVerified = true;
-    await business.save();
-  
-    res.status(200).json({
-      success: true,
-      message: 'Company verified and updated successfully',
-      company: verification
-    });
-  });
-  
+	res.status(200).json({ success: true, business });
+});
 
 export {
 	registerBusiness,
@@ -278,6 +292,5 @@ export {
 	googleLoginBusiness,
 	updateBusiness,
 	deleteBusiness,
-    getBusinessById,
-    verifyAndUpdateCompanyNumber,
+	getBusinessById,
 };

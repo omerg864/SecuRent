@@ -9,10 +9,10 @@ import {
 } from '../utils/functions.js';
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
-import valid from 'card-validator';
+import { sendEmail } from '../utils/functions.js';
 
-
-export const password_regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+export const password_regex =
+	/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 //Successfull login
 const successFullLogin = async (res, customer) => {
@@ -29,10 +29,9 @@ const successFullLogin = async (res, customer) => {
 		success: true,
 		accessToken,
 		refreshToken,
-        customer,
+		customer,
 	});
 };
-
 
 //Register a new customer
 const registerCustomer = asyncHandler(async (req, res) => {
@@ -55,8 +54,12 @@ const registerCustomer = asyncHandler(async (req, res) => {
 		);
 	}
 
-	const customerExists = await Costumer.findOne({ email: new RegExp(`^${email}$`, 'i') });
-	const businessExists = await Business.findOne({ email: new RegExp(`^${email}$`, 'i') });
+	const customerExists = await Costumer.findOne({
+		email: new RegExp(`^${email}$`, 'i'),
+	});
+	const businessExists = await Business.findOne({
+		email: new RegExp(`^${email}$`, 'i'),
+	});
 
 	if (customerExists || businessExists) {
 		res.status(409);
@@ -66,14 +69,35 @@ const registerCustomer = asyncHandler(async (req, res) => {
 	const salt = await bcrypt.genSalt(10);
 	const hashedPassword = await bcrypt.hash(password, salt);
 
-	await Costumer.create({
+	const customer = await Costumer.create({
 		name,
 		email,
 		password: hashedPassword,
 	});
 
+	const verificationCode = Math.floor(
+		100000 + Math.random() * 900000
+	).toString();
+	const subject = 'Verify Your Email Address';
+	const text = `Your verification code is: ${verificationCode}`;
+
+	const html = `
+			<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+				<h2 style="color: #333;">Verify Your Email</h2>
+				<p>Thank you for signing up. Please use the code below to verify your email address:</p>
+				<div style="font-size: 24px; font-weight: bold; margin: 20px 0; color:rgb(76, 87, 175);">${verificationCode}</div>
+				<p>If you didn't request this, please ignore this email.</p>
+			</div>
+		`;
+
+	const sent = await sendEmail(email, subject, text, html);
+
+	customer.verificationCode = verificationCode;
+	await customer.save();
+
 	res.status(201).json({
 		success: true,
+		sent,
 		message: 'Customer registered successfully',
 	});
 });
@@ -92,8 +116,9 @@ const loginCustomer = asyncHandler(async (req, res) => {
 		throw new Error('Invalid email');
 	}
 
-	const customer = await Costumer.findOne({ email: new RegExp(`^${email}$`, 'i') });
-
+	const customer = await Costumer.findOne({
+		email: new RegExp(`^${email}$`, 'i'),
+	});
 
 	if (!customer) {
 		res.status(404);
@@ -112,7 +137,11 @@ const loginCustomer = asyncHandler(async (req, res) => {
 
 //Google login for customers
 const googleLoginCustomer = asyncHandler(async (req, res) => {
-	const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, 'postmessage');
+	const client = new OAuth2Client(
+		process.env.GOOGLE_CLIENT_ID,
+		process.env.GOOGLE_CLIENT_SECRET,
+		'postmessage'
+	);
 	const { code } = req.body;
 
 	if (!code) {
@@ -134,7 +163,9 @@ const googleLoginCustomer = asyncHandler(async (req, res) => {
 		throw new Error('Invalid email');
 	}
 
-	let customer = await Costumer.findOne({ email: new RegExp(`^${email}$`, 'i') });
+	let customer = await Costumer.findOne({
+		email: new RegExp(`^${email}$`, 'i'),
+	});
 
 	if (!customer) {
 		customer = await Costumer.create({
@@ -261,14 +292,17 @@ const refreshTokens = asyncHandler(async (req, res) => {
 		throw new Error('Refresh token is required');
 	}
 
-    console.log("Using secret:", process.env.JWT_SECRET_REFRESH_COSTUMER);
+	console.log('Using secret:', process.env.JWT_SECRET_REFRESH_COSTUMER);
 
 	let decoded;
-    try {
-        decoded = jwt.verify(refreshToken, process.env.JWT_SECRET_REFRESH_COSTUMER);
-    } catch (err) {
-        throw new Error('Invalid or expired refresh token');
-    }
+	try {
+		decoded = jwt.verify(
+			refreshToken,
+			process.env.JWT_SECRET_REFRESH_COSTUMER
+		);
+	} catch (err) {
+		throw new Error('Invalid or expired refresh token');
+	}
 
 	const customer = await Costumer.findById(decoded.id);
 	if (!customer) {
@@ -293,7 +327,8 @@ const refreshTokens = asyncHandler(async (req, res) => {
 
 	// Generate new tokens
 	const newAccessToken = generateCustomerAccessToken(customer._id);
-	const { refreshToken: newRefreshToken, unique } = generateCustomerRefreshToken(customer._id);
+	const { refreshToken: newRefreshToken, unique } =
+		generateCustomerRefreshToken(customer._id);
 
 	// Store new refresh token
 	customer.refreshTokens.push({ token: newRefreshToken, unique });
@@ -306,51 +341,6 @@ const refreshTokens = asyncHandler(async (req, res) => {
 	});
 });
 
-// Update credit card info with validation
-const updateCustomerCreditCard = asyncHandler(async (req, res) => {
-	const { number, expiry, cvv, cardHolderName } = req.body;
-
-	if (!number || !expiry || !cvv || !cardHolderName) {
-		res.status(400);
-		throw new Error('Missing credit card details');
-	}
-
-
-	const numberValidation = valid.number(number);
-	const expiryValidation = valid.expirationDate(expiry);
-	const cvvValidation = valid.cvv(cvv);
-
-	if (!numberValidation.isValid || !expiryValidation.isValid || !cvvValidation.isValid) {
-		res.status(401);
-		throw new Error('Invalid credit card information');
-	}
-
-
-	const customer = await Costumer.findById(req.costumer._id);
-	if (!customer) {
-		res.status(402);
-		throw new Error('Customer not found');
-	}
-
-	customer.creditCard = {
-		number: `**** **** **** ${number.slice(-4)}`, 
-		expiry,
-		cardHolderName,
-		cardType: numberValidation.card?.niceType || 'Unknown'
-	};
-
-	await customer.save();
-
-	res.status(200).json({
-		success: true,
-		message: 'Credit card updated successfully',
-		card: customer.creditCard
-	});
-});
-
-
-
-
 export {
 	registerCustomer,
 	loginCustomer,
@@ -359,6 +349,5 @@ export {
 	deleteCustomer,
 	updateCustomerPassword,
 	getCustomerById,
-    refreshTokens,
-	updateCustomerCreditCard,
+	refreshTokens,
 };
