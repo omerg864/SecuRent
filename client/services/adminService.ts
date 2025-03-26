@@ -1,11 +1,11 @@
 import { client } from './httpClient';
 import { LoginResponse } from './interfaceService';
 
-const LoginUser = async (token: string) => {
+const LoginUser = async (email: string, password: string) => {
 	try {
 		const response = await client.post<LoginResponse>(
 			'admin/login/client',
-			{ token }
+			{ email, password }
 		);
 		return response.data;
 	} catch (error) {

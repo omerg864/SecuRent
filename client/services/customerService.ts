@@ -2,8 +2,6 @@ import { client } from './httpClient';
 import {
 	AuthData,
 	AuthResponse,
-	LoginCredentials,
-	CustomerLoginResponse,
 	CreditCardData,
 } from './interfaceService';
 import { checkToken } from './httpClient';
@@ -17,18 +15,6 @@ const registerCustomer = async (businessData: AuthData) => {
 		return response.data.success;
 	} catch (error) {
 		throw error || 'Registration failed.';
-	}
-};
-
-const loginCustomer = async (loginCredentials: LoginCredentials) => {
-	try {
-		const response = await client.post<CustomerLoginResponse>(
-			'customer/login',
-			loginCredentials
-		);
-		return response.data;
-	} catch (error) {
-		throw error || 'Login failed.';
 	}
 };
 
@@ -49,4 +35,4 @@ const updateCreditCard = async (creditCardData: CreditCardData) => {
 	}
 };
 
-export { registerCustomer, loginCustomer, updateCreditCard };
+export { registerCustomer, updateCreditCard };
