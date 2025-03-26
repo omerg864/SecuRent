@@ -1,11 +1,10 @@
 import { client } from './httpClient';
-import { checkToken } from './httpClient';
-import { GoogleLoginResponse } from './interfaceService';
+import { LoginResponse } from './interfaceService';
 
-const googleLogin = async (token: string) => {
+const LoginUser = async (token: string) => {
 	try {
-		const response = await client.post<GoogleLoginResponse>(
-			'admin/google-login/client',
+		const response = await client.post<LoginResponse>(
+			'admin/login/client',
 			{ token }
 		);
 		return response.data;
@@ -14,4 +13,4 @@ const googleLogin = async (token: string) => {
 	}
 };
 
-export { googleLogin };
+export { LoginUser };

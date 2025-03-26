@@ -16,9 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
 	BusinessLoginResponse,
 	CustomerLoginResponse,
-	GoogleLoginResponse,
 } from '@/services/interfaceService';
-import { googleLogin } from '@/services/adminService';
 import Toast from 'react-native-toast-message';
 
 const LoginScreen = () => {
@@ -26,15 +24,7 @@ const LoginScreen = () => {
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
 	const [loading, setLoading] = useState(false);
-	const [token, setToken] = useState('');
 	const router = useRouter();
-
-	/*const GoogleLogin = async () => {
-		await GoogleSignin.hasPlayServices();
-		const userInfo = (await GoogleSignin.signIn()).data;
-		console.log('u', userInfo);
-		return userInfo;
-	};*/
 
 	const handleLogin = async () => {
 		if (!email || !password) {
@@ -101,36 +91,6 @@ const LoginScreen = () => {
 	const handleGoogleLogin = async () => {
 		console.log('Google Login');
 	};
-
-	/*const handleGoogleLogin = async () => {
-		setLoading(true);
-		try {
-			const response = await GoogleLogin(); // Google sign-in
-			if (!response) {
-				setLoading(false);
-
-				return;
-			}
-			const { idToken } = response; // Check if idToken is directly available
-
-			console.log('idToken:', idToken); // Log idToken to check if it's retrieved
-
-			if (idToken) {
-				const response: GoogleLoginResponse = await googleLogin(
-					idToken
-				);
-				if (!response) {
-					setLoading(false);
-					return;
-				}
-				console.log('Backend Response:', response);
-			}
-		} catch (error) {
-			console.log('Login Error:', error);
-		} finally {
-			setLoading(false);
-		}
-	};*/
 
 	const handleRegister = () => {
 		router.push('/get-started');
