@@ -46,8 +46,8 @@ connectDB(() => {
 });
 
 // Routes setup
-app.use('api/admin', adminRoutes);
-app.use('api/transaction', transactionRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/transaction', transactionRoutes);
 app.use('/api/customer', customerRoutes);
 app.use('/api/business', businessRoutes);
 app.use('/api/items', itemRoutes);
