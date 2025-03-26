@@ -1,5 +1,5 @@
 import asyncHandler from 'express-async-handler';
-import Costumer from '../models/costumerModel.js';
+import Customer from '../models/customerModel.js';
 import Business from '../models/businessModel.js';
 import bcrypt from 'bcrypt';
 import { email_regex } from '../utils/regex.js';
@@ -55,7 +55,7 @@ const registerCustomer = asyncHandler(async (req, res) => {
 		);
 	}
 
-	const customerExists = await Costumer.findOne({
+	const customerExists = await Customer.findOne({
 		email: new RegExp(`^${email}$`, 'i'),
 	});
 	const businessExists = await Business.findOne({
@@ -70,7 +70,7 @@ const registerCustomer = asyncHandler(async (req, res) => {
 	const salt = await bcrypt.genSalt(10);
 	const hashedPassword = await bcrypt.hash(password, salt);
 
-	const customer = await Costumer.create({
+	const customer = await Customer.create({
 		name,
 		email,
 		password: hashedPassword,
@@ -117,7 +117,7 @@ const loginCustomer = asyncHandler(async (req, res) => {
 		throw new Error('Invalid email');
 	}
 
-	const customer = await Costumer.findOne({
+	const customer = await Customer.findOne({
 		email: new RegExp(`^${email}$`, 'i'),
 	});
 
@@ -164,12 +164,12 @@ const googleLoginCustomer = asyncHandler(async (req, res) => {
 		throw new Error('Invalid email');
 	}
 
-	let customer = await Costumer.findOne({
+	let customer = await Customer.findOne({
 		email: new RegExp(`^${email}$`, 'i'),
 	});
 
 	if (!customer) {
-		customer = await Costumer.create({
+		customer = await Customer.create({
 			name: payload?.name,
 			email,
 			image: payload?.picture,
@@ -186,7 +186,7 @@ const googleLoginCustomer = asyncHandler(async (req, res) => {
 //Update customer profile
 const updateCustomer = asyncHandler(async (req, res) => {
 	const { name, email, phone, address, image, creditCard, rating } = req.body;
-	const customer = await Costumer.findById(req.customer._id);
+	const customer = await Customer.findById(req.customer._id);
 
 	if (!customer) {
 		res.status(404);
@@ -219,7 +219,7 @@ const updateCustomer = asyncHandler(async (req, res) => {
 //Update customer password
 const updateCustomerPassword = asyncHandler(async (req, res) => {
 	const { oldPassword, newPassword } = req.body;
-	const customer = await Costumer.findById(req.customer._id);
+	const customer = await Customer.findById(req.customer._id);
 
 	if (!customer) {
 		res.status(404);
@@ -254,7 +254,7 @@ const updateCustomerPassword = asyncHandler(async (req, res) => {
 
 //Delete customer account
 const deleteCustomer = asyncHandler(async (req, res) => {
-	const customer = await Costumer.findById(req.customer._id);
+	const customer = await Customer.findById(req.customer._id);
 
 	if (!customer) {
 		res.status(404);
@@ -271,7 +271,7 @@ const deleteCustomer = asyncHandler(async (req, res) => {
 
 //Get customer by ID
 const getCustomerById = asyncHandler(async (req, res) => {
-	const customer = await Costumer.findById(req.params.id).select('-password');
+	const customer = await Customer.findById(req.params.id).select('-password');
 
 	if (!customer) {
 		res.status(404);
@@ -305,7 +305,7 @@ const refreshTokens = asyncHandler(async (req, res) => {
 		throw new Error('Invalid or expired refresh token');
 	}
 
-	const customer = await Costumer.findById(decoded.id);
+	const customer = await Customer.findById(decoded.id);
 	if (!customer) {
 		res.status(404);
 		throw new Error('Customer not found');
@@ -350,28 +350,30 @@ const updateCustomerCreditCard = asyncHandler(async (req, res) => {
 		throw new Error('Missing credit card details');
 	}
 
-
 	const numberValidation = valid.number(number);
 	const expiryValidation = valid.expirationDate(expiry);
 	const cvvValidation = valid.cvv(cvv);
 
-	if (!numberValidation.isValid || !expiryValidation.isValid || !cvvValidation.isValid) {
+	if (
+		!numberValidation.isValid ||
+		!expiryValidation.isValid ||
+		!cvvValidation.isValid
+	) {
 		res.status(401);
 		throw new Error('Invalid credit card information');
 	}
 
-
-	const customer = await Costumer.findById(req.costumer._id);
+	const customer = await Customer.findById(req.customer._id);
 	if (!customer) {
 		res.status(402);
 		throw new Error('Customer not found');
 	}
 
 	customer.creditCard = {
-		number: `**** **** **** ${number.slice(-4)}`, 
+		number: `**** **** **** ${number.slice(-4)}`,
 		expiry,
 		cardHolderName,
-		cardType: numberValidation.card?.niceType || 'Unknown'
+		cardType: numberValidation.card?.niceType || 'Unknown',
 	};
 
 	customer.isPaymentValid = true;
@@ -386,13 +388,13 @@ const updateCustomerCreditCard = asyncHandler(async (req, res) => {
 		success: true,
 		valid: customer.isValid,
 		message: 'Credit card updated successfully',
-		card: customer.creditCard
+		card: customer.creditCard,
 	});
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {
 	const { code } = req.body;
-	const customer = await Costumer.findById(req.customer._id);
+	const customer = await Customer.findById(req.customer._id);
 
 	if (!customer) {
 		res.status(404);
@@ -429,5 +431,5 @@ export {
 	getCustomerById,
 	refreshTokens,
 	updateCustomerCreditCard,
-	verifyEmail
+	verifyEmail,
 };

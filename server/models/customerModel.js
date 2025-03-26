@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const costumerScheme = mongoose.Schema(
+const customerScheme = mongoose.Schema(
 	{
 		name: {
 			type: String,
@@ -46,9 +46,9 @@ const costumerScheme = mongoose.Schema(
 				},
 			},
 		],
-        verificationCode:{
-            type: String,
-        },
+		verificationCode: {
+			type: String,
+		},
 		isValid: {
 			type: Boolean,
 			default: false,
@@ -64,4 +64,4 @@ const costumerScheme = mongoose.Schema(
 	},
 	{ timestamps: true }
 );
-export default mongoose.model('Costumer', costumerScheme);
+export default mongoose.model('Customer', customerScheme);
