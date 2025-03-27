@@ -34,5 +34,19 @@ const verifyCompanyNumber = async (companyNumber: string) => {
   }
 };
 
+const verifyEmailBusiness = async (code: string) => {
+  try {
+    const accessToken = await checkToken();
+    const response = await client.post<AuthResponse>("business/verify-email", {code}
+      , {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+    return response.data.success;
+  } catch (error) {
+    throw error || "Email verification failed.";
+  }
+} 
 
-export { registerBusiness, verifyCompanyNumber };
+
+export { registerBusiness, verifyCompanyNumber , verifyEmailBusiness }; 

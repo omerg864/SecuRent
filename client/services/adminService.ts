@@ -8,8 +8,7 @@ const LoginUser = async (email: string, password: string) => {
 			{ email, password }
 		);
 		return response.data;
-	} catch (error) {
-		console.log(error.response.data);
+	} catch (error: any) {
 		throw error || 'Login failed.';
 	}
 };
