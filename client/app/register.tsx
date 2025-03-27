@@ -8,13 +8,15 @@ import { ThemedTextInput } from "@/components/ui/ThemedTextInput";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import Toast from "react-native-toast-message";
 import Header from "@/components/ui/Header";
 import { useLocalSearchParams } from "expo-router";
-import { registerBusiness, loginBusiness } from "@/services/businessService";
-import { registerCustomer, loginCustomer } from "@/services/customerService";
+import { registerBusiness } from "@/services/businessService";
+import { registerCustomer } from "@/services/customerService";
+import { LoginUser } from "@/services/adminService";
 import { AuthData } from "@/services/interfaceService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ActivityIndicator } from "react-native";
 
 const RegisterScreen = () => {
   const [name, setName] = useState("");
@@ -23,6 +25,7 @@ const RegisterScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { accountType } = useLocalSearchParams();
 
@@ -30,32 +33,36 @@ const RegisterScreen = () => {
     router.back();
   };
 
-  const handleGoogleLogin = async () => {
-    alert("Google login not implemented yet.");
-  };
-
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
-      alert("Please fill in all fields.");
+      Toast.show({
+        type: "info",
+        text1: "Please fill in all fields",
+      });
       return;
     }
     if (password !== confirmPassword) {
-      alert("Passwords do not match.");
+      Toast.show({
+        type: "info",
+        text1: "Passwords do not match",
+      });
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      alert("Please enter a valid email address.");
+      Toast.show({
+        type: "info",
+        text1: "Email address is invalid",
+      });
       return;
     }
     //Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.
     const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
     if (!passwordRegex.test(password)) {
-      alert(
-        "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character."
-      );
+      alert("Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.");
       return;
     }
+    setLoading(true);
     try {
       const Data: AuthData = {
         name,
@@ -65,30 +72,39 @@ const RegisterScreen = () => {
       if (accountType === "business") {
         const response = await registerBusiness(Data);
         if (!response) {
+          setLoading(false);
           return;
         }
-        const loginResponse = await loginBusiness({ email, password });
+        const loginResponse = await LoginUser(email, password);
         if (!loginResponse.success) {
+          setLoading(false);
           return;
         }
         console.log("Business login response:", loginResponse);
         AsyncStorage.setItem("Access_Token", loginResponse.accessToken);
         AsyncStorage.setItem("Refresh_Token", loginResponse.refreshToken);
-        AsyncStorage.setItem("Business_Data", JSON.stringify(loginResponse.business));
-
+        AsyncStorage.setItem(
+          "Business_Data",
+          JSON.stringify(loginResponse.user)
+        );
       } else {
         const response = await registerCustomer(Data);
         if (!response) {
+          setLoading(false);
           return;
         }
-        const loginResponse = await loginCustomer({ email, password });
+        const loginResponse = await LoginUser(email, password);
         if (!loginResponse.success) {
+          setLoading(false);
           return;
         }
         console.log("Customer login response:", loginResponse);
         AsyncStorage.setItem("Access_Token", loginResponse.accessToken);
         AsyncStorage.setItem("Refresh_Token", loginResponse.refreshToken);
-        AsyncStorage.setItem("Customer_Data", JSON.stringify(loginResponse.customer));
+        AsyncStorage.setItem(
+          "Customer_Data",
+          JSON.stringify(loginResponse.user)
+        );
       }
       const expiration = new Date();
       expiration.setHours(expiration.getHours() + 23);
@@ -101,10 +117,19 @@ const RegisterScreen = () => {
       });
     } catch (error: any) {
       if (error.response?.status === 409 || error.response?.status === 403) {
-        alert("An account with that email already exists.");
+        Toast.show({
+          type: "error",
+          text1: "Email already exists",
+        });
+        setLoading(false);
         return;
       }
-      alert(error || "Registration failed.");
+      Toast.show({
+        type: "error",
+        text1: "Internal Server Error",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -205,44 +230,23 @@ const RegisterScreen = () => {
           />
         </View>
 
-         {/* Optional divider */}
-         <View className="flex-row items-center my-4">
-          <View className="flex-1 h-px bg-gray-300" />
-          <ThemedText className="mx-4 text-sm text-gray-500">or</ThemedText>
-          <View className="flex-1 h-px bg-gray-300" />
-        </View>
-
-        {/* Google Login Button */}
-        <View className="mt-2 mb-2">
-          <HapticButton
-            className="w-full h-12 border border-gray-300 rounded-full flex-row justify-center items-center bg-white"
-            onPress={handleGoogleLogin}
-          >
-            <AntDesign
-              name="google"
-              size={20}
-              color= "#000"
-              style={{ marginRight: 10 }}
-            />
-            <ThemedText
-              className="font-semibold"
-              darkColor="#000"
-              lightColor="#000"
-            >
-              Register with Google
-            </ThemedText>
-          </HapticButton>
-        </View>
-
-        <View className="flex-row justify-center mt-auto mb-14 items-baseline">
+        <View className="flex-row justify-center mt-auto mb-20 items-baseline">
           <HapticButton
             style={{ backgroundColor: Colors.light.tintBlue }}
-            className={`w-40 h-16 rounded-full justify-center items-center`}
+            className="w-40 h-16 rounded-full justify-center items-center"
             onPress={handleRegister}
+            disabled={loading}
           >
-            <ThemedText className="text-white font-semibold" lightColor="#fff">
-              Sign up
-            </ThemedText>
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <ThemedText
+                className="text-white font-semibold"
+                lightColor="#fff"
+              >
+                Sign up
+              </ThemedText>
+            )}
           </HapticButton>
         </View>
       </View>

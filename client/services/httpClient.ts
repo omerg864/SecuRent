@@ -47,9 +47,6 @@ const checkToken = async () => {
 	let token = await AsyncStorage.getItem('Access_Token');
 	const storedRefreshToken = await AsyncStorage.getItem('Refresh_Token');
 	const expiration = await AsyncStorage.getItem('Auth_Expiration');
-	console.log('Token:', token);
-	console.log('Refresh token:', storedRefreshToken);
-	console.log('Expiration:', expiration);
 	if (!token) {
 		if (!storedRefreshToken) {
 			throw new Error('User is not authenticated');

@@ -48,6 +48,7 @@ const LoginScreen = () => {
 			AsyncStorage.setItem('Access_Token', response.accessToken);
 			AsyncStorage.setItem('Refresh_Token', response.refreshToken);
 			if (response.user.role === 'Customer') {
+        console.log(response.user);
 				AsyncStorage.setItem(
 					'Customer_Data',
 					JSON.stringify(response.user)
@@ -66,12 +67,13 @@ const LoginScreen = () => {
 			} else {
 				router.replace('/customer');
 			}
-		} catch (error) {
-			console.log(error);
+		} catch (error: any) {
+      if (error.response.status === 404) {
 			Toast.show({
 				type: 'error',
-				text1: (error as any).message || 'Invalid email or password',
+				text1: 'Invalid email or password',
 			});
+    }
 		}
 		setLoading(false);
 	};
@@ -84,13 +86,13 @@ const LoginScreen = () => {
 		router.push('/restore-account');
 	};
 
-	if (loading) {
-		return (
-			<View className="flex-1 justify-center items-center">
-				<ActivityIndicator size="large" color={Colors.light.tint} />
-			</View>
-		);
-	}
+	// if (loading) {
+	// 	return (
+	// 		<View className="flex-1 justify-center items-center">
+	// 			<ActivityIndicator size="large" color={Colors.light.tint} />
+	// 		</View>
+	// 	);
+	// }
 
 	return (
 		<ParallaxScrollView
@@ -106,7 +108,7 @@ const LoginScreen = () => {
 		>
 			<Header title="Login" />
 
-			<View className="flex-1 px-6">
+			<View className="flex-1 px-6"> 
 				<ThemedText className="text-2xl font-bold mb-2">
 					Welcome back
 				</ThemedText>
@@ -174,13 +176,18 @@ const LoginScreen = () => {
 						style={{ backgroundColor: Colors.light.tintBlue }}
 						className={`w-40 h-16 rounded-full justify-center items-center`}
 						onPress={handleLogin}
+            disabled={loading}
 					>
+             {loading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
 						<ThemedText
 							className="text-white font-semibold"
 							lightColor="#fff"
 						>
 							Login
 						</ThemedText>
+            )}
 					</HapticButton>
 				</View>
 			</View>

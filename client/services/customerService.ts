@@ -35,4 +35,20 @@ const updateCreditCard = async (creditCardData: CreditCardData) => {
 	}
 };
 
-export { registerCustomer, updateCreditCard };
+const verifyEmailCustomer = async (code: string) => {
+  try {
+    const accessToken = await checkToken();
+    console.log("Access token:", accessToken);
+    const response = await client.post<AuthResponse>("customer/verify-email", {code}
+      , {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+    console.log(response);
+    return response.data.success;
+  } catch (error) {
+    throw error || "Email verification failed.";
+  }
+} 
+
+export { registerCustomer, updateCreditCard, verifyEmailCustomer };
