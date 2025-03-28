@@ -10,24 +10,28 @@ import HapticButton from "@/components/ui/HapticButton";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { verifyCompanyNumber } from "@/services/businessService";
-import { AuthResponse } from "@/services/interfaceService";
+import Toast from "react-native-toast-message";
 
 export default function VerifyBusinessNumberScreen() {
   const router = useRouter();
   const [businessNumber, setBusinessNumber] = useState("");
   const [loading, setLoading] = useState(false);
+  const [claimNumber, setClaimNumber] = useState(false);
   const params = useLocalSearchParams();
   const accountType = (params.accountType as string) || "business";
 
   const handleVerify = async () => {
     if (/^\d{9}$/.test(businessNumber.trim())) {
-      setLoading(true); // Show loader
+      setLoading(true);
       try {
         const response: any = await verifyCompanyNumber(businessNumber);
-        console.log(response.data);
 
         if (!response.data.success) {
-          console.log("Verification failed");
+          setLoading(false);
+          Toast.show({
+            type: "error",
+            text1: "Internal Server Error",
+          });
           return;
         }
 
@@ -49,28 +53,41 @@ export default function VerifyBusinessNumberScreen() {
           pathname: "./setup-screen",
           params: {
             accountType: accountType,
-            verifiedBusiness: "true",
           },
         });
       } catch (error: any) {
-        console.log(error);
         if (error.response?.status == 401) {
-          alert("Business number is taken by another business");
+          Toast.show({
+            type: "error",
+            text1: "Business number is taken by another business",
+          });
+          setClaimNumber(true);
         }
         if (error.response?.status == 402) {
-          alert("Business number is invalid");
+          Toast.show({
+            type: "error",
+            text1: "Business number is invalid",
+          });
         }
       } finally {
-        setLoading(false); // Hide loader
+        setLoading(false);
       }
     } else {
-      alert("Please enter a valid 9-digit business number.");
+      Toast.show({
+        type: "info",
+        text1: "Please enter a valid 9-digit business number",
+      });
     }
+  };
+
+  const handleClaim = async () => {
+    console.log("Claiming business number");
   };
 
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
+      onBack={() => router.back()}
       headerImage={
         <MaterialCommunityIcons
           name="check-outline"
@@ -95,19 +112,33 @@ export default function VerifyBusinessNumberScreen() {
             onChangeText={setBusinessNumber}
             className="w-full h-12 px-4 border border-gray-300 rounded-md"
             label="Business Number"
-            editable={!loading} // Disable input while loading
+            editable={!loading}
           />
 
           <HapticButton
             onPress={handleVerify}
             className="bg-indigo-600/30 py-3 mt-2 rounded-xl"
-            disabled={loading} // Disable button while loading
+            disabled={loading}
           >
             {loading ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
               <ThemedText className="text-white text-center text-lg font-semibold">
                 Verify Business Number
+              </ThemedText>
+            )}
+          </HapticButton>
+
+          <HapticButton
+            onPress={handleClaim}
+            className="bg-indigo-600/30 py-3 mt-2 rounded-xl"
+            visible={claimNumber}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <ThemedText className="text-white text-center text-lg font-semibold">
+                Claim Business Number
               </ThemedText>
             )}
           </HapticButton>

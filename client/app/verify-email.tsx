@@ -23,7 +23,7 @@ export default function VerifyEmailScreen() {
 
   const handleVerify = async () => {
     if (code.trim().length === 6) {
-      setLoading(true); 
+      setLoading(true);
       try {
         if (accountType === "business") {
           const response: any = await verifyEmailBusiness(code);
@@ -64,7 +64,6 @@ export default function VerifyEmailScreen() {
             pathname: "./setup-screen",
             params: {
               accountType: accountType,
-              verifiedEmail: "true",
             },
           });
         } else {
@@ -78,7 +77,7 @@ export default function VerifyEmailScreen() {
           });
         }
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     } else {
       Toast.show({
@@ -91,6 +90,7 @@ export default function VerifyEmailScreen() {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
+      onBack={() => router.back()}
       headerImage={
         <MaterialCommunityIcons
           name="email-check-outline"
