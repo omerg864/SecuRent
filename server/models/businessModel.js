@@ -68,5 +68,8 @@ const businessScheme = mongoose.Schema({
 		type: Boolean,
 		default: false,
 	},
+	bank : {
+		type: Object,
+	}
 });
 export default mongoose.model('Business', businessScheme);

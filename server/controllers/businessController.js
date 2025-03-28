@@ -355,8 +355,9 @@ const verifyAndUpdateCompanyNumber = asyncHandler(async (req, res) => {
 });
 
 const verifyBank = asyncHandler(async (req, res) => {
-	const { accountNumber, sortCode } = req.body;
+	const { accountNumber, sortCode ,bankName, accountHolderName } = req.body;
 	const business = await Business.findById(req.business._id);
+
 	if (!business) {
 		res.status(404);
 		throw new Error('Business not found');
@@ -366,10 +367,18 @@ const verifyBank = asyncHandler(async (req, res) => {
 		res.status(400);
 		throw new Error('Account number and sort code are required');
 	}
+	if (!bankName || !accountHolderName) {
+		res.status(401);
+		throw new Error('Bank name and account holder name are required');
+
+	}
+
 
 	const bank = {
 		accountNumber,
 		sortCode,
+		bankName,
+		accountHolderName,
 	};
 
 	business.bank = bank;
