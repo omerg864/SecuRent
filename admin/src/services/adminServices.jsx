@@ -1,6 +1,28 @@
 import axios from "axios";
 import { client, setAuthToken } from "./httpClient";
 
+const googleLogin = async (code) => {
+  try {
+    const response = await client.post("admin/google", { code });
+
+    localStorage.setItem("Access_Token", response.data.accessToken);
+    localStorage.setItem("Refresh_Token", response.data.refreshToken);
+
+    const expiration = new Date();
+    expiration.setHours(expiration.getHours() + 23);
+    localStorage.setItem("Auth_Expiration", expiration.toISOString());
+
+    localStorage.setItem("user", JSON.stringify(response.data.admin));
+
+    setAuthToken(response.data.accessToken);
+
+    return response.data.admin;
+  } catch (error) {
+    console.log("Google login error: ", error);
+    throw new Error(error.response?.data?.message || "Google login failed");
+  }
+};
+
 const login = async (email, password) => {
   try {
     const response = await client.post("admin/login", { email, password });
@@ -37,4 +59,4 @@ const register = async (adminData) => {
   }
 };
 
-export { register, login };
+export { register, login, googleLogin };

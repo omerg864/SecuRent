@@ -8,16 +8,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Loader from "../components/Loader";
 import { toast } from "react-toastify";
-import { login as loginService } from "../services/adminServices";
-
+import {
+  login as loginService,
+  googleLogin as googleLoginService,
+} from "../services/adminServices";
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [loginError, setLoginError] = useState(""); // Added for server errors
+  const [loginError, setLoginError] = useState("");
   const { login } = useAuth();
 
   const schema = z.object({
     email: z.string().email("Invalid email address"),
-    password: z.string().min(8, "Password must be at least 8 characters"), // Updated min length
+    password: z.string().min(8, "Password must be at least 8 characters"),
   });
 
   const {
@@ -39,31 +41,35 @@ const Login = () => {
         error.response?.data?.message ||
         error.message ||
         "Login failed, please try again.";
-      setLoginError(errorMessage); // Set server error
+      setLoginError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
-
   const loginWithGoogle = async (authResult) => {
     if (authResult["code"]) {
       setIsLoading(true);
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          _id: "1",
-          picture: "",
-          name: "John Doe",
-          email: "",
-          role: "Admin",
-        })
-      );
-      login();
-      setIsLoading(false);
+      setLoginError("");
+      try {
+        const user = await googleLoginService(authResult.code);
+        login(user);
+        toast.success(`Welcome back, ${user.name}!`);
+      } catch (error) {
+        console.error("Google login failed:", error);
+        const errorMessage =
+          error.response?.data?.message ||
+          error.message ||
+          "Google login failed, please try again.";
+        setLoginError(errorMessage);
+        toast.error(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       console.error(authResult);
       toast.error("Google login failed");
+      setIsLoading(false);
     }
   };
 
@@ -81,8 +87,12 @@ const Login = () => {
               <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
                 Sign In to Admin Panel
               </h2>
-
-              <form onSubmit={handleSubmit(handleLogin)}>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault(); // This prevents page refresh
+                  handleSubmit(handleLogin)(e);
+                }}
+              >
                 {/* Email Field */}
                 <div className="mb-4">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
