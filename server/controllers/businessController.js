@@ -13,9 +13,9 @@ import { sendEmail } from '../utils/functions.js';
 import { verifyCompanyNumber } from '../utils/externalFunctions.js';
 
 export const password_regex =
-	/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%?&])[A-Za-z\d@$!%*?&]{8,}$/;
+	/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-// Reusable login success function
+//Reusable login success function
 const successFullLogin = async (res, business) => {
 	const accessToken = generateBusinessAccessToken(business._id);
 	const { refreshToken, unique } = generateBusinessRefreshToken(business._id);
@@ -32,7 +32,7 @@ const successFullLogin = async (res, business) => {
 	});
 };
 
-// Register
+//Register
 const registerBusiness = asyncHandler(async (req, res) => {
 	const { name, email, password } = req.body;
 
@@ -72,7 +72,9 @@ const registerBusiness = asyncHandler(async (req, res) => {
 		password: hashedPassword,
 	});
 
-	const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+	const verificationCode = Math.floor(
+		100000 + Math.random() * 900000
+	).toString();
 	const subject = 'Verify Your Email Address';
 	const text = `Your verification code is: ${verificationCode}`;
 
@@ -97,7 +99,34 @@ const registerBusiness = asyncHandler(async (req, res) => {
 	});
 });
 
-// Login
+const verifyEmail = asyncHandler(async (req, res) => {
+	const { code } = req.body;
+	const business = await Business.findById(req.business._id);
+
+	if (!business) {
+		res.status(404);
+		throw new Error('Business not found');
+	}
+
+	if (code !== business.verificationCode) {
+		res.status(401);
+		throw new Error('Invalid verification code');
+	}
+
+	business.isEmailValid = true;
+	if (business.isCompanyNumberVerified && business.isBankValid === true) {
+		business.isValid = true;
+	}
+	await business.save();
+
+	res.status(200).json({
+		success: true,
+		valid: business.isValid,
+		message: 'Email verified successfully',
+	});
+});
+
+//Login
 const loginBusiness = asyncHandler(async (req, res) => {
 	const { email, password } = req.body;
 
@@ -124,7 +153,258 @@ const loginBusiness = asyncHandler(async (req, res) => {
 	await successFullLogin(res, business);
 });
 
+//Refresh Token
+const refreshTokens = asyncHandler(async (req, res) => {
+	const { refreshToken } = req.body;
+	if (!refreshToken) {
+		res.status(400);
+		throw new Error('Refresh token is required');
+	}
+
+	let decoded;
+	try {
+		decoded = jwt.verify(
+			refreshToken,
+			process.env.JWT_SECRET_REFRESH_BUSINESS
+		);
+	} catch (err) {
+		throw new Error('Invalid or expired refresh token');
+	}
+
+	const business = await Business.findById(decoded.id);
+	if (!business) {
+		res.status(404);
+		throw new Error('Business not found');
+	}
+
+	const storedToken = business.refreshTokens?.find(
+		(t) => t.token === refreshToken
+	);
+	if (!storedToken) {
+		res.status(403);
+		throw new Error('Refresh token not recognized');
+	}
+
+	//Remove old token
+	business.refreshTokens = business.refreshTokens.filter(
+		(t) => t.token !== refreshToken
+	);
+
+	//Generate and save new token
+	const accessToken = generateBusinessAccessToken(business._id);
+	const { refreshToken: newRefreshToken, unique } =
+		generateBusinessRefreshToken(business._id);
+	business.refreshTokens.push({ token: newRefreshToken, unique });
+
+	await business.save();
+
+	res.status(200).json({
+		success: true,
+		accessToken,
+		refreshToken: newRefreshToken,
+	});
+});
+
+//Google Login
+const googleLoginBusiness = asyncHandler(async (req, res) => {
+	const client = new OAuth2Client(
+		process.env.GOOGLE_CLIENT_ID,
+		process.env.GOOGLE_CLIENT_SECRET,
+		'postmessage'
+	);
+	const { code } = req.body;
+
+	if (!code) {
+		res.status(400);
+		throw new Error('Invalid code');
+	}
+
+	const response = await client.getToken(code);
+	const ticket = await client.verifyIdToken({
+		idToken: response.tokens.id_token,
+		audience: process.env.GOOGLE_CLIENT_ID,
+	});
+
+	const payload = ticket.getPayload();
+	const email = payload?.email;
+
+	if (!email) {
+		res.status(401);
+		throw new Error('Invalid email');
+	}
+
+	let business = await Business.findOne({
+		email: new RegExp(`^${email}$`, 'i'),
+	});
+
+	if (!business) {
+		business = await Business.create({
+			name: payload?.name,
+			email,
+			Image: payload?.picture,
+			phone: '',
+			category: [],
+			bank: {},
+			address: '',
+			currency: '',
+			rating: 0,
+		});
+	}
+
+	await successFullLogin(res, business);
+});
+
+//Update Business
+const updateBusiness = asyncHandler(async (req, res) => {
+	const {
+		name,
+		email,
+		phone,
+		category,
+		bank,
+		address,
+		image,
+		currency,
+		rating,
+	} = req.body;
+	const business = await Business.findById(req.business._id);
+
+	if (!business) {
+		res.status(404);
+		throw new Error('Business not found');
+	}
+
+	if (name) business.name = name;
+	if (email && email_regex.test(email)) business.email = email;
+	if (phone) business.phone = phone;
+	if (category) business.category = category;
+	if (bank) business.bank = bank;
+	if (address) business.address = address;
+	if (image) business.Image = image;
+	if (currency) business.currency = currency;
+	if (rating !== undefined) business.rating = rating;
+
+	await business.save();
+
+	return res.status(200).json({ success: true, business });
+});
+
+//Delete
+const deleteBusiness = asyncHandler(async (req, res) => {
+	const business = await Business.findById(req.business._id);
+	if (!business) {
+		return res.status(404).json({ message: 'Business not found' });
+	}
+
+	await business.deleteOne();
+	res.status(200).json({
+		success: true,
+		message: 'Business account deleted successfully',
+	});
+});
+
+//Get Business By ID
+const getBusinessById = asyncHandler(async (req, res) => {
+	const business = await Business.findById(req.params.id);
+	if (!business) {
+		return res.status(404).json({ message: 'Business not found' });
+	}
+
+	res.status(200).json({ success: true, business });
+});
+
+const verifyAndUpdateCompanyNumber = asyncHandler(async (req, res) => {
+	const { companyNumber } = req.body;
+
+	if (!companyNumber) {
+		res.status(400);
+		throw new Error('Company number is required');
+	}
+	const isBusiness = await Business.findOne({ companyNumber });
+	if (isBusiness) {
+		res.status(401);
+		throw new Error('Business already exists');
+	}
+
+	const verification = await verifyCompanyNumber(companyNumber);
+
+	if (!verification) {
+		res.status(402);
+		throw new Error('Company number not found in official registry');
+	}
+
+	const business = await Business.findById(req.business._id);
+	if (!business) {
+		res.status(403);
+		throw new Error('Business not found');
+	}
+
+	business.companyNumber = companyNumber;
+	business.isCompanyNumberVerified = true;
+	if (business.isEmailVerified && business.isBankValid === true) {
+		business.isValid = true;
+	}
+	await business.save();
+
+	res.status(200).json({
+		success: true,
+		valid: business.isValid,
+		message: 'Company verified and updated successfully',
+		company: verification,
+	});
+});
+
+const verifyBank = asyncHandler(async (req, res) => {
+	const { accountNumber, sortCode ,bankName, accountHolderName } = req.body;
+	const business = await Business.findById(req.business._id);
+
+	if (!business) {
+		res.status(404);
+		throw new Error('Business not found');
+	}
+
+	if (!accountNumber || !sortCode) {
+		res.status(400);
+		throw new Error('Account number and sort code are required');
+	}
+	if (!bankName || !accountHolderName) {
+		res.status(401);
+		throw new Error('Bank name and account holder name are required');
+
+	}
+
+
+	const bank = {
+		accountNumber,
+		sortCode,
+		bankName,
+		accountHolderName,
+	};
+
+	business.bank = bank;
+	business.isBankValid = true;
+	if (business.isEmailVerified && business.isCompanyNumberVerified) {
+		business.isValid = true;
+	}
+	await business.save();
+
+	res.status(200).json({
+		success: true,
+		valid: business.isValid,
+		message: 'Bank verified and updated successfully',
+		bank,
+	});
+});
+
 export {
 	registerBusiness,
 	loginBusiness,
+	refreshTokens,
+	googleLoginBusiness,
+	updateBusiness,
+	deleteBusiness,
+	getBusinessById,
+	verifyAndUpdateCompanyNumber,
+	verifyEmail,
+	verifyBank,
 };

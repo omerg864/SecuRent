@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+	View,
+	StyleSheet,
+	TouchableOpacity,
+	ActivityIndicator,
+} from 'react-native';
 import HapticButton from '@/components/ui/HapticButton';
 import { ThemedText } from '@/components/ui/ThemedText';
 import { Colors } from '@/constants/Colors';
@@ -9,15 +14,68 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import Entypo from '@expo/vector-icons/Entypo';
 import Header from '@/components/ui/Header';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LoginResponse } from '@/services/interfaceService';
+import Toast from 'react-native-toast-message';
+import { LoginUser } from '@/services/adminService';
 
 const LoginScreen = () => {
-	const [email, setEmail] = useState('Louis04real@gmail.com');
-	const [password, setPassword] = useState('password');
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
+	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 
-	const handleLogin = () => {
-		console.log('Login');
+	const handleLogin = async () => {
+		if (!email || !password) {
+			Toast.show({
+				type: 'info',
+				text1: 'Please fill in all fields',
+			});
+			return;
+		}
+		setLoading(true);
+		try {
+			const response: LoginResponse = await LoginUser(email, password);
+			if (!response) {
+				setLoading(false);
+				Toast.show({
+					type: 'error',
+					text1: 'Internal Server Error',
+				});
+				return;
+			}
+			AsyncStorage.setItem('Access_Token', response.accessToken);
+			AsyncStorage.setItem('Refresh_Token', response.refreshToken);
+			if (response.user.role === 'Customer') {
+        console.log(response.user);
+				AsyncStorage.setItem(
+					'Customer_Data',
+					JSON.stringify(response.user)
+				);
+			} else {
+				AsyncStorage.setItem(
+					'Business_Data',
+					JSON.stringify(response.user)
+				);
+			}
+			const expiration = new Date();
+			expiration.setHours(expiration.getHours() + 23);
+			AsyncStorage.setItem('Auth_Expiration', expiration.toISOString());
+			if (response.user.role === 'Business') {
+				router.replace('/business/business-home');
+			} else {
+				router.replace('/customer');
+			}
+		} catch (error: any) {
+      if (error.response.status === 404) {
+			Toast.show({
+				type: 'error',
+				text1: 'Invalid email or password',
+			});
+    }
+		}
+		setLoading(false);
 	};
 
 	const handleRegister = () => {
@@ -25,8 +83,16 @@ const LoginScreen = () => {
 	};
 
 	const handleForgotPassword = () => {
-		console.log('Forgot Password');
+		router.push('/restore-account');
 	};
+
+	// if (loading) {
+	// 	return (
+	// 		<View className="flex-1 justify-center items-center">
+	// 			<ActivityIndicator size="large" color={Colors.light.tint} />
+	// 		</View>
+	// 	);
+	// }
 
 	return (
 		<ParallaxScrollView
@@ -42,7 +108,7 @@ const LoginScreen = () => {
 		>
 			<Header title="Login" />
 
-			<View className="flex-1 px-6">
+			<View className="flex-1 px-6"> 
 				<ThemedText className="text-2xl font-bold mb-2">
 					Welcome back
 				</ThemedText>
@@ -99,7 +165,7 @@ const LoginScreen = () => {
 
 				<View className="flex-row justify-between mt-auto mb-14 items-baseline">
 					<HapticButton
-						className="w-24 h-12 bg-gray-100 rounded-full justify-center items-center"
+						className="w-24 h-12 bg-gray-100 rounded-full justify-center items-center border border-black"
 						onPress={handleRegister}
 					>
 						<ThemedText className="font-semibold" type="custom">
@@ -110,13 +176,18 @@ const LoginScreen = () => {
 						style={{ backgroundColor: Colors.light.tintBlue }}
 						className={`w-40 h-16 rounded-full justify-center items-center`}
 						onPress={handleLogin}
+            disabled={loading}
 					>
+             {loading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
 						<ThemedText
 							className="text-white font-semibold"
 							lightColor="#fff"
 						>
 							Login
 						</ThemedText>
+            )}
 					</HapticButton>
 				</View>
 			</View>

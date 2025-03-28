@@ -4,13 +4,23 @@ import { email_regex, password_regex } from '../utils/regex.js';
 import {
 	generateAdminAccessToken,
 	generateAdminRefreshToken,
+	generateBusinessAccessToken,
+	generateBusinessRefreshToken,
+	generateCustomerAccessToken,
+	generateCustomerRefreshToken,
 } from '../utils/functions.js';
 import bcrypt from 'bcrypt';
 import { OAuth2Client } from 'google-auth-library';
+import Business from '../models/businessModel.js';
+import Customer from '../models/customerModel.js';
 
-const successFullLogin = (res, admin) => {
+const successFullLogin = async (res, admin) => {
 	const accessToken = generateAdminAccessToken(admin._id);
-	const refreshToken = generateAdminRefreshToken(admin._id);
+	const { refreshToken, unique } = generateAdminRefreshToken(admin._id);
+
+	admin.refreshTokens.push({ token: refreshToken, unique });
+	await admin.save();
+
 	res.status(200).json({
 		success: true,
 		accessToken,
@@ -200,4 +210,91 @@ const verifyAdmin = asyncHandler(async (req, res) => {
 	});
 });
 
-export { login, register, googleLogin, updateAdmin, deleteAdmin, verifyAdmin };
+const successFullBusinessLogin = async (res, business) => {
+	const accessToken = generateBusinessAccessToken(business._id);
+	const { refreshToken, unique } = generateBusinessRefreshToken(business._id);
+
+	if (!business.refreshTokens) business.refreshTokens = [];
+	business.refreshTokens.push({ token: refreshToken, unique });
+	await business.save();
+
+	res.status(200).json({
+		success: true,
+		accessToken,
+		refreshToken,
+		user: business,
+	});
+};
+
+const successFullCustomerLogin = async (res, customer) => {
+	const accessToken = generateCustomerAccessToken(customer._id);
+	const { refreshToken, unique } = generateCustomerRefreshToken(customer._id);
+
+	customer.refreshTokens.push({
+		token: refreshToken,
+		unique,
+	});
+	await customer.save();
+
+	res.status(200).json({
+		success: true,
+		accessToken,
+		refreshToken,
+		user: customer,
+	});
+};
+
+const loginClient = asyncHandler(async (req, res) => {
+	const { email, password } = req.body;
+
+	console.log(email, password);
+
+	if (!email || !password) {
+		res.status(400);
+		throw new Error('Please fill in all fields');
+	}
+
+	const business = await Business.findOne({
+		email: new RegExp(`^${email}$`, 'i'),
+	});
+
+	if (business) {
+
+		const isMatch = await bcrypt.compare(password, business.password);
+
+		if (!isMatch) {
+			res.status(401);
+			throw new Error('Invalid email or password');
+		}
+
+		await successFullBusinessLogin(res, business);
+	} else {
+		const customer = await Customer.findOne({
+			email: new RegExp(`^${email}$`, 'i'),
+		});
+
+		if (!customer) {
+			res.status(404);
+			throw new Error('User not found');
+		}
+
+		const isMatch = await bcrypt.compare(password, customer.password);
+
+		if (!isMatch) {
+			res.status(401);
+			throw new Error('Invalid password');
+		}
+
+		await successFullCustomerLogin(res, customer);
+	}
+});
+
+export {
+	login,
+	register,
+	googleLogin,
+	updateAdmin,
+	deleteAdmin,
+	verifyAdmin,
+	loginClient,
+};

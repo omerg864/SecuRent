@@ -13,6 +13,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider } from '@/context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import '../global.css';
+import Toast from 'react-native-toast-message';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -25,20 +26,68 @@ export default function RootLayout() {
 
 	useEffect(() => {
 		if (loaded) {
-			AsyncStorage.getItem('user').then((user) => {
-				if (user) {
-					const parsedUser = JSON.parse(user);
-					if (parsedUser.role === 'customer') {
-						router.replace('/customer');
-					} else {
-						router.replace('/business');
+			const checkStorage = async () => {
+				try {
+					// await AsyncStorage.multiRemove([
+					//   "Business_Data",
+					//   "Customer_Data",
+					//   "Account_setup",
+					//   "current_account_type",
+					//   "completedSteps_business",
+					//   "completedSteps_personal",
+					//   "Access_Token",
+					//   "Refresh_Token",
+					//   "Auth_Expiration",
+					// ]);
+					const businessData = await AsyncStorage.getItem(
+						'Business_Data'
+					);
+					const customerData = await AsyncStorage.getItem(
+						'Customer_Data'
+					);
+
+					if (businessData) {
+						const setup_mode = await AsyncStorage.getItem(
+							'Account_setup'
+						);
+						const Account_Type = 'Business';
+						if (setup_mode === 'true') {
+							router.replace({
+								pathname: './setup-screen',
+								params: { Account_Type },
+							});
+							return;
+						}
+						router.replace('/business/business-home');
+						return;
 					}
-				} else {
-					//router.replace('/customer');
+
+					if (customerData) {
+						const setup_mode = await AsyncStorage.getItem(
+							'Account_setup'
+						);
+						const Account_Type = 'Personal';
+						if (setup_mode === 'true') {
+							router.replace({
+								pathname: './setup-screen',
+								params: { Account_Type },
+							});
+							return;
+						}
+
+						router.replace('/customer');
+						return;
+					}
+
 					router.replace('/login');
+				} catch (error) {
+					console.error('Error reading AsyncStorage:', error);
+				} finally {
+					SplashScreen.hideAsync();
 				}
-			});
-			SplashScreen.hideAsync();
+			};
+
+			checkStorage();
 		}
 	}, [loaded]);
 
@@ -62,8 +111,16 @@ export default function RootLayout() {
 					<Stack.Screen name="get-started" />
 					<Stack.Screen name="register" />
 					<Stack.Screen name="+not-found" />
+					<Stack.Screen name="bank-details" />
+					<Stack.Screen name="setup-screen" />
+					<Stack.Screen name="verification" />
+					<Stack.Screen name="verify-email" />
+					<Stack.Screen name="add-payment" />
+					<Stack.Screen name="reset-password" />
+					<Stack.Screen name="restore-account" />
 				</Stack>
 				<StatusBar style={colorScheme === 'dark' ? 'dark' : 'light'} />
+				<Toast />
 			</ThemeProvider>
 		</AuthProvider>
 	);

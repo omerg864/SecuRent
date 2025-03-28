@@ -3,8 +3,8 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { RxDashboard } from 'react-icons/rx';
 import { FiUser } from 'react-icons/fi';
 import { RiSettings5Line } from 'react-icons/ri';
-import { GrGroup } from "react-icons/gr";
-import { IoBusinessOutline } from "react-icons/io5";
+import { GrGroup } from 'react-icons/gr';
+import { IoBusinessOutline } from 'react-icons/io5';
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 	const location = useLocation();
 	const { pathname } = location;
@@ -63,8 +63,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 			icon: <RxDashboard />,
 		},
 		{
-			name: 'Costumers',
-			to: '/costumers',
+			name: 'Customers',
+			to: '/customers',
 			icon: <GrGroup />,
 		},
 		{

@@ -7,9 +7,10 @@ interface ButtonProps {
 	style?: StyleProp<any>;
 	children: React.ReactNode;
 	className?: string;
+	disabled?: boolean;
 }
 
-const Button = ({ onPress, style, children, className = '' }: ButtonProps) => {
+const Button = ({ onPress, style, children, className = '' , disabled = false}: ButtonProps) => {
 	const handlePress = () => {
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 		onPress();
@@ -20,6 +21,7 @@ const Button = ({ onPress, style, children, className = '' }: ButtonProps) => {
 			className={className}
 			style={{ ...style }}
 			onPress={handlePress}
+			disabled={disabled}
 		>
 			{children}
 		</TouchableOpacity>

@@ -24,7 +24,7 @@ const GetStartedScreen = () => {
 	};
 
 	const handlePersonal = () => {
-		router.push({
+		router.push({  
 			pathname: '/register',
 			params: { accountType: 'personal' },
 		});

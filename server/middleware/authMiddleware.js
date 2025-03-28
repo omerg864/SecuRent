@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 import asyncHandler from 'express-async-handler';
 import Admin from '../models/adminModel.js';
-import Costumer from '../models/costumerModel.js';
+import Customer from '../models/customerModel.js';
 import Business from '../models/businessModel.js';
 
-const authCostumer = asyncHandler(async (req, res, next) => {
+const authCustomer = asyncHandler(async (req, res, next) => {
 	const authHeader = req.headers['authorization'];
 	const token = authHeader && authHeader.split(' ')[1];
 
@@ -20,14 +20,14 @@ const authCostumer = asyncHandler(async (req, res, next) => {
 		throw new Error('Not authorized, token failed');
 	}
 
-	const costumer = await Costumer.findById(decoded.id);
+	const customer = await Customer.findById(decoded.id);
 
-	if (!costumer) {
+	if (!customer) {
 		res.status(404);
-		throw new Error('Costumer not found');
+		throw new Error('Customer not found');
 	}
 
-	req.costumer = costumer;
+	req.customer = customer;
 
 	next();
 });
@@ -88,4 +88,4 @@ const authAdmin = asyncHandler(async (req, res, next) => {
 	next();
 });
 
-export { authCostumer, authBusiness, authAdmin };
+export { authCustomer, authBusiness, authAdmin };

@@ -1,0 +1,18 @@
+meta {
+  name: login
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://securent.onrender.com/api/customer/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "omerg863@gmail.com",
+    "password": "OmerOmer886!"
+  }
+}
