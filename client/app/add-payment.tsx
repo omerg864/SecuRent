@@ -11,6 +11,7 @@ import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { updateCreditCard } from "@/services/customerService";
 import { CreditCardData } from "@/services/interfaceService";
+import Toast from "react-native-toast-message";
 
 const AddPaymentScreen = () => {
   const router = useRouter();
@@ -18,17 +19,20 @@ const AddPaymentScreen = () => {
   const [cardNumber, setCardNumber] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
   const [cvv, setCvv] = useState("");
-  const [loading, setLoading] = useState(false); // New loading state
+  const [loading, setLoading] = useState(false);
   const params = useLocalSearchParams();
   const accountType = (params.accountType as string) || "personal";
 
   const handleSavePayment = async () => {
     if (!cardholderName || !cardNumber || !expiryDate || !cvv) {
-      alert("Please fill in all fields");
+      Toast.show({
+        type: "info",
+        text1: "Please fill in all fields",
+      });
       return;
     }
 
-    setLoading(true); // Show loader
+    setLoading(true);
     try {
       const data: CreditCardData = {
         cardHolderName: cardholderName,
@@ -38,8 +42,12 @@ const AddPaymentScreen = () => {
       };
 
       const response: any = await updateCreditCard(data);
-      console.log(response.data);
       if (!response.data.success) {
+        setLoading(false);
+        Toast.show({
+          type: "error",
+          text1: "Internal Server Error",
+        });
         return;
       }
 
@@ -57,21 +65,24 @@ const AddPaymentScreen = () => {
         pathname: "/setup-screen",
         params: {
           accountType: accountType,
-          addedPayment: "true",
         },
       });
     } catch (error: any) {
       if (error.response?.status == 401) {
-        alert("Payment method is invalid");
+        Toast.show({
+          type: "error",
+          text1: "Invalid payment details",
+        });
       }
     } finally {
-      setLoading(false); // Hide loader
+      setLoading(false);
     }
   };
 
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
+      onBack={() => router.back()}
       headerImage={
         <Ionicons
           name="card-outline"
@@ -96,7 +107,7 @@ const AddPaymentScreen = () => {
               value={cardholderName}
               onChangeText={setCardholderName}
               label="Cardholder Name"
-              editable={!loading} // Disable input while loading
+              editable={!loading}
             />
 
             <ThemedTextInput
@@ -105,7 +116,7 @@ const AddPaymentScreen = () => {
               onChangeText={setCardNumber}
               label="Card Number"
               keyboardType="numeric"
-              editable={!loading} // Disable input while loading
+              editable={!loading}
             />
 
             <ThemedTextInput
@@ -123,7 +134,7 @@ const AddPaymentScreen = () => {
               }}
               label="Expiry Date (MM/YY)"
               keyboardType="numeric"
-              editable={!loading} // Disable input while loading
+              editable={!loading}
             />
 
             <ThemedTextInput
@@ -132,7 +143,7 @@ const AddPaymentScreen = () => {
               onChangeText={setCvv}
               label="CVV"
               keyboardType="numeric"
-              editable={!loading} // Disable input while loading
+              editable={!loading}
             />
           </View>
 
@@ -141,7 +152,7 @@ const AddPaymentScreen = () => {
             <HapticButton
               onPress={handleSavePayment}
               className="bg-indigo-600/30 py-3 px-8 rounded-xl w-full"
-              disabled={loading} // Disable button while loading
+              disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />

@@ -1,9 +1,13 @@
-import {checkToken, client } from "./httpClient";
+import { checkToken, client } from "./httpClient";
 import { AuthData, AuthResponse } from "./interfaceService";
+import { BankDetails } from "./interfaceService";
 
-const registerBusiness = async (businessData : AuthData) => {
+const registerBusiness = async (businessData: AuthData) => {
   try {
-    const response = await client.post<AuthResponse>("business/register", businessData);
+    const response = await client.post<AuthResponse>(
+      "business/register",
+      businessData
+    );
     return response.data.success;
   } catch (error) {
     throw error || "Registration failed.";
@@ -23,7 +27,7 @@ const verifyCompanyNumber = async (companyNumber: string) => {
 
     const response = await client.post<AuthResponse>(
       "business/verify-company-number",
-      {companyNumber}, 
+      { companyNumber },
       {
         headers: { Authorization: `Bearer ${accessToken}` },
       }
@@ -37,8 +41,10 @@ const verifyCompanyNumber = async (companyNumber: string) => {
 const verifyEmailBusiness = async (code: string) => {
   try {
     const accessToken = await checkToken();
-    const response = await client.post<AuthResponse>("business/verify-email", {code}
-      , {
+    const response = await client.post<AuthResponse>(
+      "business/verify-email",
+      { code },
+      {
         headers: { Authorization: `Bearer ${accessToken}` },
       }
     );
@@ -46,7 +52,27 @@ const verifyEmailBusiness = async (code: string) => {
   } catch (error) {
     throw error || "Email verification failed.";
   }
-} 
+};
 
+const updateBankDetails = async (bankDetails: BankDetails) => {
+  try {
+    const accessToken = await checkToken();
+    const response = await client.post<AuthResponse>(
+      "business/verify-bank",
+      bankDetails,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+    return response.data.success;
+  } catch (error) {
+    throw error || "Email verification failed.";
+  }
+};
 
-export { registerBusiness, verifyCompanyNumber , verifyEmailBusiness }; 
+export {
+  registerBusiness,
+  verifyCompanyNumber,
+  verifyEmailBusiness,
+  updateBankDetails,
+};

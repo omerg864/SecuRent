@@ -15,17 +15,20 @@ import HapticButton from "@/components/ui/HapticButton";
 import { Ionicons } from "@expo/vector-icons";
 import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
+import { ActivityIndicator } from "react-native";
+import { updateBankDetails } from "@/services/businessService";
+import { BankDetails } from "@/services/interfaceService";
 
 const BankDetailsScreen = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
-  // Get account type from params, default to "business" for this screen
   const accountType = (params.accountType as string) || "business";
-
   const [accountHolderName, setAccountHolderName] = useState("");
   const [bankName, setBankName] = useState("");
   const [branchNumber, setBranchNumber] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
+  const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
   const banks = [
@@ -45,49 +48,69 @@ const BankDetailsScreen = () => {
   ];
 
   const handleSaveDetails = async () => {
+    if (!accountHolderName || !bankName || !branchNumber || !accountNumber) {
+      Toast.show({
+        type: "info",
+        text1: "Please fill in all fields",
+      });
+      return;
+    }
+    if (branchNumber.length !== 3) {
+      Toast.show({
+        type: "info",
+        text1: "Branch number must be 3 digits",
+      });
+      return;
+    }
+    if (accountNumber.length !== 6) {
+      Toast.show({
+        type: "info",
+        text1: "Account number must be 6 digits",
+      });
+      return;
+    }
+    setLoading(true);
     try {
-      // Validate form fields
-      if (!accountHolderName || !bankName || !branchNumber || !accountNumber) {
-        alert("Please fill in all fields");
+      const data: BankDetails = {
+        accountHolderName,
+        bankName,
+        sortCode: branchNumber,
+        accountNumber,
+      };
+      const response: any = await updateBankDetails(data);
+      console.log(response);
+      if (!response) {
+        setLoading(false);
+        Toast.show({
+          type: "error",
+          text1: "Internal Server Error",
+        });
         return;
       }
-
-      // Mark this step as completed for the specific account type
       const storageKey = `completedSteps_${accountType}`;
-
-      // Get existing completed steps
       const savedSteps = await AsyncStorage.getItem(storageKey);
       const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
-
-      // Check if this step is already completed
       if (!completedSteps.includes("bank")) {
-        // Add this step to the completed steps
         completedSteps.push("bank");
-
-        // Save the updated completed steps
         await AsyncStorage.setItem(storageKey, JSON.stringify(completedSteps));
-
-        // For debugging
-        console.log(
-          `Bank details saved. Completed steps for ${accountType}:`,
-          completedSteps
-        );
       }
-
-      // Save the current account type for persistence
       await AsyncStorage.setItem("current_account_type", accountType);
 
-      // Navigate back to setup screen with both account type and completion status
       router.replace({
         pathname: "./setup-screen",
         params: {
           accountType: accountType,
-          addedBank: "true",
         },
       });
-    } catch (error) {
-      console.error("Error saving bank details:", error);
-      alert("There was an error saving your bank details. Please try again.");
+    } catch (error: any) {
+      if (error.response?.status == 404) {
+        Toast.show({
+          type: "error",
+          text1: "Internal Server Error",
+        });
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,6 +139,7 @@ const BankDetailsScreen = () => {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
+      onBack={() => router.back()}
       headerImage={
         <Ionicons
           name="cash-outline"
@@ -146,6 +170,7 @@ const BankDetailsScreen = () => {
               value={accountHolderName}
               onChangeText={setAccountHolderName}
               label="Account Holder Name"
+              editable={!loading}
             />
 
             {/* Bank Name Dropdown */}
@@ -154,6 +179,7 @@ const BankDetailsScreen = () => {
               <TouchableOpacity
                 className="h-12 w-full border border-gray-300 rounded-xl justify-center items-center"
                 onPress={() => setModalVisible(true)}
+                disabled={loading}
               >
                 <ThemedText className="text-lg text-gray-900">
                   {bankName || "Select Bank"}
@@ -168,6 +194,7 @@ const BankDetailsScreen = () => {
               onChangeText={setBranchNumber}
               label="Branch Number"
               keyboardType="numeric"
+              editable={!loading}
             />
 
             {/* Account Number */}
@@ -177,6 +204,7 @@ const BankDetailsScreen = () => {
               onChangeText={setAccountNumber}
               label="Account Number"
               keyboardType="numeric"
+              editable={!loading}
             />
           </View>
 
@@ -185,10 +213,15 @@ const BankDetailsScreen = () => {
             <HapticButton
               onPress={handleSaveDetails}
               className="bg-indigo-600/30 py-3 px-8 rounded-xl w-full"
+              disabled={loading}
             >
-              <ThemedText className="text-white text-center text-lg font-semibold">
-                Save Details
-              </ThemedText>
+              {loading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <ThemedText className="text-white text-center text-lg font-semibold">
+                  Save Details
+                </ThemedText>
+              )}
             </HapticButton>
           </View>
         </View>
