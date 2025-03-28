@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Add useNavigate
 import { MdOutlineEmail, MdLockOutline } from "react-icons/md";
 import { FiUser } from "react-icons/fi";
 import { useState } from "react";
@@ -12,12 +12,19 @@ import { register as registerAdmin } from "../services/adminServices";
 const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [registrationError, setRegistrationError] = useState("");
+  const navigate = useNavigate(); // Add this hook
 
   const schema = z
     .object({
       name: z.string().min(2, "name must be at least 2 characters long"),
       email: z.string().email("Invalid email address"),
-      password: z.string(),
+      password: z
+        .string()
+        .min(8, "Password must be at least 8 characters")
+        .regex(password_regex, {
+          message:
+            "Password must contain at least 1 uppercase, 1 lowercase, 1 number",
+        }),
       confirmPassword: z.string(),
     })
     .refine((data) => data.password === data.confirmPassword, {
@@ -47,6 +54,9 @@ const Register = () => {
 
       alert("Admin registered successfully!");
       console.log("Registration result:", result);
+      navigate("/login");
+
+      navigate("/login");
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
@@ -82,10 +92,17 @@ const Register = () => {
                       {...register("name")}
                       type="text"
                       placeholder="Enter your full name"
-                      className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className={`w-full rounded-lg border ${
+                        errors.name ? "border-red-500" : "border-stroke"
+                      } bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
                     />
                     <FiUser className="w-6 h-6 absolute right-4 top-4" />
                   </div>
+                  {errors.name && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.name.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mb-4">
@@ -97,11 +114,17 @@ const Register = () => {
                       {...register("email")}
                       type="email"
                       placeholder="Enter your email"
-                      className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className={`w-full rounded-lg border ${
+                        errors.email ? "border-red-500" : "border-stroke"
+                      } bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
                     />
-
                     <MdOutlineEmail className="w-6 h-6 absolute right-4 top-4" />
                   </div>
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mb-4">
@@ -113,11 +136,17 @@ const Register = () => {
                       {...register("password")}
                       type="password"
                       placeholder="Enter your password"
-                      className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className={`w-full rounded-lg border ${
+                        errors.password ? "border-red-500" : "border-stroke"
+                      } bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
                     />
-
                     <MdLockOutline className="w-6 h-6 absolute right-4 top-4" />
                   </div>
+                  {errors.password && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.password.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mb-6">
@@ -129,24 +158,34 @@ const Register = () => {
                       {...register("confirmPassword")}
                       type="password"
                       placeholder="Re-enter your password"
-                      className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className={`w-full rounded-lg border ${
+                        errors.confirmPassword
+                          ? "border-red-500"
+                          : "border-stroke"
+                      } bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
                     />
                     <MdLockOutline className="w-6 h-6 absolute right-4 top-4" />
                   </div>
+                  {errors.confirmPassword && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.confirmPassword.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mb-5">
                   <input
                     type="submit"
                     value="Create account"
-                    className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
+                    disabled={isSubmitting}
+                    className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90 disabled:opacity-70"
                   />
                 </div>
 
-                {registrationError ? (
-                  <p className="text-red-500">{registrationError}</p>
-                ) : (
-                  ""
+                {registrationError && (
+                  <div className="mb-4 p-3 text-sm text-red-500 bg-red-50 rounded-lg">
+                    {registrationError}
+                  </div>
                 )}
 
                 <div className="mt-6 text-center">

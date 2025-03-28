@@ -9,31 +9,38 @@ import { z } from "zod";
 import Loader from "../components/Loader";
 import { toast } from "react-toastify";
 import { login as loginService } from "../services/adminServices";
+
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState(""); // Added for server errors
   const { login } = useAuth();
-
-  // TODO: connect to the backend
 
   const schema = z.object({
     email: z.string().email("Invalid email address"),
-    password: z.string().min(2, "Password must be at least 8 characters"),
+    password: z.string().min(8, "Password must be at least 8 characters"), // Updated min length
   });
+
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(schema) });
 
   const handleLogin = async (data) => {
     setIsLoading(true);
+    setLoginError(""); // Clear previous errors
     try {
       const user = await loginService(data.email, data.password);
-      login(); // Update authentication state
+      login(user);
       toast.success(`Welcome back, ${user.name}!`);
     } catch (error) {
       console.error("Login failed:", error);
-      toast.error(error.message || "Login failed, please try again.");
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Login failed, please try again.";
+      setLoginError(errorMessage); // Set server error
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -76,6 +83,7 @@ const Login = () => {
               </h2>
 
               <form onSubmit={handleSubmit(handleLogin)}>
+                {/* Email Field */}
                 <div className="mb-4">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
                     Email
@@ -85,32 +93,55 @@ const Login = () => {
                       {...register("email")}
                       type="email"
                       placeholder="Enter your email"
-                      className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className={`w-full rounded-lg border ${
+                        errors.email ? "border-red-500" : "border-stroke"
+                      } bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
                     />
                     <MdOutlineEmail className="w-6 h-6 absolute right-4 top-4" />
                   </div>
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
 
+                {/* Password Field */}
                 <div className="mb-6">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
-                    Re-type Password
+                    Password
                   </label>
                   <div className="relative">
                     <input
                       {...register("password")}
                       type="password"
-                      placeholder="6+ Characters, 1 Capital letter"
-                      className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      placeholder="Enter your password"
+                      className={`w-full rounded-lg border ${
+                        errors.password ? "border-red-500" : "border-stroke"
+                      } bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
                     />
                     <MdLockOutline className="w-6 h-6 absolute right-4 top-4" />
                   </div>
+                  {errors.password && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.password.message}
+                    </p>
+                  )}
                 </div>
+
+                {/* Server Error Message */}
+                {loginError && (
+                  <div className="mb-4 p-3 text-sm text-red-500 bg-red-50 rounded-lg">
+                    {loginError}
+                  </div>
+                )}
 
                 <div className="mb-5">
                   <input
                     type="submit"
                     value="Sign In"
-                    className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
+                    disabled={isSubmitting}
+                    className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90 disabled:opacity-70"
                   />
                 </div>
 
@@ -118,7 +149,7 @@ const Login = () => {
 
                 <div className="mt-6 text-center">
                   <p>
-                    Don’t have any account?{" "}
+                    {"Don't have an account? "}
                     <Link to="/register" className="text-primary">
                       Sign Up
                     </Link>
