@@ -25,12 +25,25 @@ interface BusinessLoginResponse {
     phone: string;
     address: string;
     image: string;
-    category: string;
-    currency: string;
     rating: number;
     role: string;
+    category: string[];
+    currency: string;
+    verificationCode: string;
+    isValid: boolean;
+    isEmailValid: boolean;
+    isBankValid: boolean;
+    companyNumber: string;
+    isCompanyNumberVerified: boolean;
+    bank: {
+      accountNumber: string;
+      sortCode: string;
+      accountHolderName: string;
+      bankName: string;
+    };
   };
 }
+
 
 interface CustomerLoginResponse {
   success: boolean;
@@ -45,6 +58,17 @@ interface CustomerLoginResponse {
     image: string;
     rating: number;
     role: string;
+    currency: string;
+    verificationCode: string;
+    isValid: boolean;
+    isEmailValid: boolean;
+    isPaymentValid: boolean;
+    creditCard: {
+      number: string;
+      expiry: string;
+      cvv: string;
+      cardHolderName: string;
+    };
   };
 }
 

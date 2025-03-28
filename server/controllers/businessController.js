@@ -321,7 +321,7 @@ const verifyAndUpdateCompanyNumber = asyncHandler(async (req, res) => {
 		throw new Error('Company number is required');
 	}
 	const isBusiness = await Business.findOne({ companyNumber });
-	if (isBusiness) {
+	if (isBusiness && isBusiness._id.toString() !== req.business._id.toString()) {
 		res.status(401);
 		throw new Error('Business already exists');
 	}
