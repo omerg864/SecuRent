@@ -38,6 +38,7 @@ export default function RootLayout() {
 					//   "Access_Token",
 					//   "Refresh_Token",
 					//   "Auth_Expiration",
+					//   "Account_setup",
 					// ]);
 					const businessData = await AsyncStorage.getItem(
 						'Business_Data'
