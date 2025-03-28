@@ -1,61 +1,75 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState } from "react";
 
-// Create the provider
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-	const [isAuthenticated, setIsAuthenticated] = useState(
-		() => localStorage.getItem('isAuthenticated') === 'true'
-	);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    () => localStorage.getItem("isAuthenticated") === "true"
+  );
 
-	const [user, setUser] = useState(
-		() =>
-			JSON.parse(localStorage.getItem('user')) || {
-				_id: '1',
-				picture: '',
-				name: 'John Doe',
-				email: 'john@gmail.com',
-				role: 'Admin',
-				createdAt: '12/12/2021',
-				updatedAt: '12/12/2021',
-			}
-	);
+  // Safely parse user from localStorage
+  const getInitialUser = () => {
+    try {
+      const userString = localStorage.getItem("user");
+      if (!userString) return null;
+      return JSON.parse(userString);
+    } catch (error) {
+      console.error("Failed to parse user from localStorage:", error);
+      return null;
+    }
+  };
 
-	// Login function
-	const login = () => {
-		localStorage.setItem('isAuthenticated', 'true');
-		setUser(JSON.parse(localStorage.getItem('user')) || user);
-		setIsAuthenticated(true);
-	};
+  const [user, setUser] = useState(
+    () =>
+      getInitialUser() || {
+        _id: "1",
+        picture: "",
+        name: "John Doe",
+        email: "john@gmail.com",
+        role: "Admin",
+        createdAt: "12/12/2021",
+        updatedAt: "12/12/2021",
+      }
+  );
 
-	const updateUser = () => {
-		setUser(JSON.parse(localStorage.getItem('user')) || user);
-	};
+  const login = (userData) => {
+    localStorage.setItem("isAuthenticated", "true");
+    if (userData) {
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+    }
+    setIsAuthenticated(true);
+  };
 
-	// Logout function
-	const logout = () => {
-		localStorage.removeItem('accessToken');
-		localStorage.removeItem('refreshToken');
-		localStorage.removeItem('expiresAt');
-		localStorage.removeItem('user');
-		localStorage.setItem('isAuthenticated', 'false');
-		setIsAuthenticated(false);
-	};
+  const updateUser = () => {
+    const updatedUser = getInitialUser();
+    if (updatedUser) {
+      setUser(updatedUser);
+    }
+  };
 
-	return (
-		<AuthContext.Provider
-			value={{ isAuthenticated, login, logout, updateUser, user }}
-		>
-			{children}
-		</AuthContext.Provider>
-	);
+  const logout = () => {
+    localStorage.removeItem("Access_Token");
+    localStorage.removeItem("Refresh_Token");
+    localStorage.removeItem("Auth_Expiration");
+    localStorage.removeItem("user");
+    localStorage.setItem("isAuthenticated", "false");
+    setIsAuthenticated(false);
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{ isAuthenticated, login, logout, updateUser, user }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
-// Create a custom hook for consuming the context
 export const useAuth = () => {
-	const context = useContext(AuthContext);
-	if (!context) {
-		throw new Error('useAuth must be used within an AuthProvider');
-	}
-	return context;
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };
