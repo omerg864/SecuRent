@@ -22,7 +22,7 @@ router.post('/google-login', googleLoginCustomer); // Google OAuth Login
 router.post('/refresh-token', refreshTokens); // Refresh Customer Tokens
 
 // Protected Routes (Requires Authentication)
-router.put('/update/password', authCustomer, updateCustomerPassword); // Update Customer Password
+router.put('/update-password', authCustomer, updateCustomerPassword); // Update Customer Password
 router.put('/update', authCustomer, updateCustomer); // Update Customer Profile
 router.delete('/delete', authCustomer, deleteCustomer); // Delete Customer Account
 router.get('/:id', authCustomer, getCustomerById); // Get Customer by ID3

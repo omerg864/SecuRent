@@ -6,7 +6,8 @@ import {
 	deleteAdmin,
 	updateAdmin,
 	verifyAdmin,
-	loginClient
+	loginClient,
+	identifyUser,
 } from '../controllers/adminController.js';
 import { authAdmin } from '../middleware/authMiddleware.js';
 
@@ -16,6 +17,7 @@ router.post('/login', login);
 router.post('/register', register);
 router.post('/google', googleLogin);
 router.post('/login/client', loginClient);
+router.get('/identify-user', identifyUser);
 
 //! protected routes
 router.put('/update', authAdmin, updateAdmin);
