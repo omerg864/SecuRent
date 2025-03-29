@@ -47,8 +47,8 @@ export default function VerifyEmailScreen() {
             return;
           }
         }
-        const setup_mode = await AsyncStorage.getItem("Account_setup");
-        if (setup_mode === "true") {
+        const type = params.type as string;
+        if (!type) {
           const storageKey = `completedSteps_${accountType}`;
           const savedSteps = await AsyncStorage.getItem(storageKey);
           const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
@@ -60,7 +60,7 @@ export default function VerifyEmailScreen() {
             );
           }
           await AsyncStorage.setItem("current_account_type", accountType);
-          router.replace({
+          router.push({
             pathname: "./setup-screen",
             params: {
               accountType: accountType,

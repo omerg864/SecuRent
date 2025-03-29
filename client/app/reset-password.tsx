@@ -92,6 +92,7 @@ const ResetPasswordScreen = () => {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
+      onBack={() => router.back()}
       headerImage={
         <MaterialCommunityIcons
           name="lock-reset"
