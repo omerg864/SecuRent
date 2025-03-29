@@ -9,7 +9,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const BusinessHomePage = () => {
   const router = useRouter();
 
-  
   AsyncStorage.removeItem("Business_Data");
   AsyncStorage.removeItem("Access_Token");
   AsyncStorage.removeItem("Refresh_Token");
