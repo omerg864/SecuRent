@@ -9,25 +9,84 @@ import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Colors } from "@/constants/Colors";
-
+import Toast from "react-native-toast-message";
+import { updateBusinessPassword } from "@/services/businessService";
+import { ActivityIndicator } from "react-native";
+import { updateCustomerPassword } from "@/services/customerService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ResetPasswordScreen = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     if (!newPassword || !confirmPassword) {
-      alert("Please fill in all fields");
+      Toast.show({
+        type: "info",
+        text1: "Please fill in all fields",
+      });
       return;
     }
     if (newPassword !== confirmPassword) {
-      alert("Passwords do not match");
+      Toast.show({
+        type: "info",
+        text1: "Passwords do not match",
+      });
       return;
     }
-    router.dismissAll();
-    router.replace("/login");
+    const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      alert(
+        "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character."
+      );
+      return;
+    }
+    setLoading(true);
+    try {
+      const type: any = AsyncStorage.getItem("Type");
+      if (type === "customer") {
+        const response: any = await updateCustomerPassword(newPassword);
+        if (!response) {
+          setLoading(false);
+          Toast.show({
+            type: "error",
+            text1: "Internal Server Error",
+          });
+          return;
+        }
+      } else {
+        const response: any = await updateBusinessPassword(newPassword);
+        if (!response) {
+          setLoading(false);
+          Toast.show({
+            type: "error",
+            text1: "Internal Server Error",
+          });
+          return;
+        }
+        AsyncStorage.removeItem("Type");
+        Toast.show({
+          type: "success",
+          text1: "Password reset successfully",
+        });
+        router.dismissAll();
+        router.replace("/login");
+      }
+    } catch (error: any) {
+      if (error.response?.status == 404) {
+        Toast.show({
+          type: "info",
+          text1: "User not found with this email address",
+        });
+        setLoading(false);
+        return;
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -107,10 +166,15 @@ const ResetPasswordScreen = () => {
           <HapticButton
             onPress={handleResetPassword}
             className="bg-indigo-600/30 py-3 mt-2 rounded-xl"
+            disabled={loading}
           >
-            <ThemedText className="text-white text-center text-lg font-semibold">
-              Reset Password
-            </ThemedText>
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <ThemedText className="text-white text-center text-lg font-semibold">
+                Reset Password
+              </ThemedText>
+            )}
           </HapticButton>
         </View>
       </View>

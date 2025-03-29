@@ -15,10 +15,8 @@ import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import Entypo from "@expo/vector-icons/Entypo";
 import Header from "@/components/ui/Header";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { LoginResponse } from "@/services/interfaceService";
 import Toast from "react-native-toast-message";
 import { LoginUser } from "@/services/adminService";
-import { dismissAll } from "expo-router/build/global-state/routing";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -49,64 +47,65 @@ const LoginScreen = () => {
       }
       AsyncStorage.setItem("Access_Token", response.accessToken);
       AsyncStorage.setItem("Refresh_Token", response.refreshToken);
-	  const expiration = new Date();
+      const expiration = new Date();
       expiration.setHours(expiration.getHours() + 23);
       AsyncStorage.setItem("Auth_Expiration", expiration.toISOString());
-	  console.log("User"+response.user);
-	  console.log("Role"+response.user.role);
       if (response.user.role === "Customer") {
         AsyncStorage.setItem("Customer_Data", JSON.stringify(response.user));
-		if (!response.user.isValid) {
-			AsyncStorage.setItem("Account_setup", "true");
-			AsyncStorage.setItem("current_account_type", "personal");
-			let completedSteps = [];
-			if(response.user.isEmailValid) {
-				completedSteps.push("email");
-			}
-			if(response.user.isPaymentValid) {
-				completedSteps.push("payment");
-			}
-			AsyncStorage.setItem("completedSteps_personal", JSON.stringify(completedSteps));
-			router.replace({
-				pathname: "./setup-screen",
-				params: {
-					accountType: "personal",
-				},
-			});
-			return;
-		}
-		router.replace("/customer");
+        if (!response.user.isValid) {
+          AsyncStorage.setItem("Account_setup", "true");
+          AsyncStorage.setItem("current_account_type", "personal");
+          let completedSteps = [];
+          if (response.user.isEmailValid) {
+            completedSteps.push("email");
+          }
+          if (response.user.isPaymentValid) {
+            completedSteps.push("payment");
+          }
+          AsyncStorage.setItem(
+            "completedSteps_personal",
+            JSON.stringify(completedSteps)
+          );
+          router.replace({
+            pathname: "./setup-screen",
+            params: {
+              accountType: "personal",
+            },
+          });
+          return;
+        }
+        router.replace("/customer");
       } else {
         AsyncStorage.setItem("Business_Data", JSON.stringify(response.user));
-		console.log("User"+response.user);
-		console.log("Role"+response.user.role);
-		console.log("isValid"+response.user.isValid);
         if (!response.user.isValid) {
-			AsyncStorage.setItem("Account_setup", "true");
-			AsyncStorage.setItem("current_account_type", "business");
-			let completedSteps = [];
-			if(response.user.isEmailValid) {
-				completedSteps.push("email");
-			}
-			if(response.user.isBankValid) {
-				completedSteps.push("bank");
-			}
-			if(response.user.isCompanyNumberVerified) {
-				completedSteps.push("verification");
-			}
-			AsyncStorage.setItem("completedSteps_business", JSON.stringify(completedSteps));
-			router.replace({
-				pathname: "./setup-screen",
-				params: {
-					accountType: "business",
-				},
-			});
-			return;
-		}
-		router.replace("/business/business-home");
+          AsyncStorage.setItem("Account_setup", "true");
+          AsyncStorage.setItem("current_account_type", "business");
+          let completedSteps = [];
+          if (response.user.isEmailValid) {
+            completedSteps.push("email");
+          }
+          if (response.user.isBankValid) {
+            completedSteps.push("bank");
+          }
+          if (response.user.isCompanyNumberVerified) {
+            completedSteps.push("verification");
+          }
+          AsyncStorage.setItem(
+            "completedSteps_business",
+            JSON.stringify(completedSteps)
+          );
+          router.replace({
+            pathname: "./setup-screen",
+            params: {
+              accountType: "business",
+            },
+          });
+          return;
+        }
+        router.replace("/business/business-home");
       }
     } catch (error: any) {
-      if (error.response.status === 404) {
+      if (error.response.status === 401) {
         Toast.show({
           type: "error",
           text1: "Invalid email or password",

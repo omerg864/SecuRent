@@ -20,11 +20,6 @@ const verifyCompanyNumber = async (companyNumber: string) => {
     if (!accessToken) {
       throw new Error("Access token is missing or invalid.");
     }
-
-    console.log("Access token:", accessToken);
-    console.log("Authorization Header:", `Bearer ${accessToken}`);
-    console.log("Company number:", companyNumber);
-
     const response = await client.post<AuthResponse>(
       "business/verify-company-number",
       { companyNumber },
@@ -70,9 +65,27 @@ const updateBankDetails = async (bankDetails: BankDetails) => {
   }
 };
 
+const updateBusinessPassword = async (newPassword: string) => {
+  try {
+    const accessToken = await checkToken();
+    const response = await client.put<AuthResponse>(
+      "business/update-password",
+      { newPassword },
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+    console.log("Here" + response.data.success);
+    return response.data.success;
+  } catch (error) {
+    throw error || "Password update failed.";
+  }
+};
+
 export {
   registerBusiness,
   verifyCompanyNumber,
   verifyEmailBusiness,
   updateBankDetails,
+  updateBusinessPassword,
 };

@@ -7,21 +7,57 @@ import HapticButton from "@/components/ui/HapticButton";
 import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import { router } from "expo-router";
 import { StyleSheet } from "react-native";
+import { identifyUser } from "@/services/adminService";
+import { ActivityIndicator } from "react-native";
+import Toast from "react-native-toast-message";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const RestoreAccountScreen = () => {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleRestore = () => {
+  const handleRestore = async () => {
     if (!email) {
-      alert("Please fill in all fields");
+      Toast.show({
+        type: "info",
+        text1: "Please enter your email address",
+      });
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      alert("Please enter a valid email address.");
+      Toast.show({
+        type: "info",
+        text1: "Email address is invalid",
+      });
       return;
     }
-    router.replace("/verify-email");
+    setLoading(true);
+    try {
+      const response: any = await identifyUser(email);
+      if (!response.success) {
+        Toast.show({
+          type: "error",
+          text1: "Internal Server Error",
+        });
+        setLoading(false);
+        return;
+      }
+      AsyncStorage.setItem("Type", response.type);
+      AsyncStorage.setItem("Access_Token", response.accessToken);
+      router.replace("/verify-email");
+    } catch (error: any) {
+      if (error.response?.status == 404) {
+        Toast.show({
+          type: "info",
+          text1: "User not found with this email address",
+        });
+        setLoading(false);
+        return;
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -58,10 +94,15 @@ const RestoreAccountScreen = () => {
           <HapticButton
             onPress={handleRestore}
             className="bg-indigo-600/30 py-3 mt-2 rounded-xl"
+            disabled={loading}
           >
-            <ThemedText className="text-white text-center text-lg font-semibold">
-              Restore Account
-            </ThemedText>
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <ThemedText className="text-white text-center text-lg font-semibold">
+                Restore Account
+              </ThemedText>
+            )}
           </HapticButton>
         </View>
       </View>
