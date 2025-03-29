@@ -218,26 +218,12 @@ const updateCustomer = asyncHandler(async (req, res) => {
 
 //Update customer password
 const updateCustomerPassword = asyncHandler(async (req, res) => {
-	const { oldPassword, newPassword } = req.body;
+	const { newPassword } = req.body;
 	const customer = await Customer.findById(req.customer._id);
 
 	if (!customer) {
 		res.status(404);
 		throw new Error('Customer not found');
-	}
-
-	const isMatch = await bcrypt.compare(oldPassword, customer.password);
-
-	if (!isMatch) {
-		res.status(401);
-		throw new Error('Invalid password');
-	}
-
-	if (!password_regex.test(newPassword)) {
-		res.status(400);
-		throw new Error(
-			'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.'
-		);
 	}
 
 	const salt = await bcrypt.genSalt(10);

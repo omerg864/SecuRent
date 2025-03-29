@@ -13,6 +13,7 @@ import bcrypt from "bcrypt";
 import { OAuth2Client } from "google-auth-library";
 import Business from "../models/businessModel.js";
 import Customer from "../models/customerModel.js";
+import { sendEmail } from "../utils/functions.js";
 
 const successFullLogin = async (res, admin) => {
   const accessToken = generateAdminAccessToken(admin._id);
@@ -249,8 +250,6 @@ const successFullCustomerLogin = async (res, customer) => {
 const loginClient = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  console.log(email, password);
-
   if (!email || !password) {
     res.status(400);
     throw new Error("Please fill in all fields");
@@ -290,6 +289,82 @@ const loginClient = asyncHandler(async (req, res) => {
   }
 });
 
+const identifyUser = asyncHandler(async (req, res) => {
+  const { email } = req.query;
+
+  const business = await Business.findOne({
+    email: email,
+  });
+
+  if (business) {
+    const accessToken = generateBusinessAccessToken(business._id);
+
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+    const subject = "Verify Your Email";
+    const text = `Your verification code is: ${verificationCode}`;
+
+    const html = `
+				  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+					  <h2 style="color: #333;">Verify Your Email</h2>
+					  <p>Please use the code below to verify your email address:</p>
+					  <div style="font-size: 24px; font-weight: bold; margin: 20px 0; color:rgb(76, 87, 175);">${verificationCode}</div>
+					  <p>If you didn't request this, secure your email account.</p>
+				  </div>
+			  `;
+
+    await sendEmail(email, subject, text, html);
+
+    business.verificationCode = verificationCode;
+    await business.save();
+
+    res.status(200).json({
+      success: true,
+      user: business,
+      accessToken,
+      type: "business",
+    });
+  } else {
+    const customer = await Customer.findOne({
+      email: email,
+    });
+    
+    if (!customer) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+    const accessToken = generateCustomerAccessToken(customer._id);
+
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+    const subject = "Verify Your Email";
+    const text = `Your verification code is: ${verificationCode}`;
+
+    const html = `
+					<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+						<h2 style="color: #333;">Verify Your Email</h2>
+						<p>Please use the code below to verify your email address:</p>
+						<div style="font-size: 24px; font-weight: bold; margin: 20px 0; color:rgb(76, 87, 175);">${verificationCode}</div>
+						<p>If you didn't request this, secure your email account.</p>
+					</div>
+				`;
+
+    await sendEmail(email, subject, text, html);
+
+    customer.verificationCode = verificationCode;
+    await customer.save();
+
+    res.status(200).json({
+      success: true,
+      user: customer,
+      accessToken,
+      type: "customer",
+    });
+  }
+});
+
 export {
   login,
   register,
@@ -298,4 +373,5 @@ export {
   deleteAdmin,
   verifyAdmin,
   loginClient,
+  identifyUser,
 };
