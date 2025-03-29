@@ -16,7 +16,7 @@ const BusinessHomePage = () => {
 
   const handleNewTransaction = () => {
     // Navigate to new transaction page
-    router.push("./bank-details");
+    router.push("/business/new-transaction");
   };
 
   const handleTransactionPress = (id: string) => {
