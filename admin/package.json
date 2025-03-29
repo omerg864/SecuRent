@@ -13,6 +13,7 @@
 		"@hookform/resolvers": "^3.10.0",
 		"@react-oauth/google": "^0.12.1",
 		"apexcharts": "^4.4.0",
+		"axios": "^1.8.4",
 		"flatpickr": "^4.6.13",
 		"jsvectormap": "^1.6.0",
 		"react": "^18.3.1",
