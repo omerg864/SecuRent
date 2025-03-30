@@ -48,7 +48,10 @@ export default function VerifyBusinessNumberScreen() {
         }
 
         await AsyncStorage.setItem("current_account_type", accountType);
-
+        Toast.show({
+          type: "success",
+          text1: "Business verified successfully",
+        });
         router.replace({
           pathname: "./setup-screen",
           params: {

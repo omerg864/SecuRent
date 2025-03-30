@@ -75,6 +75,10 @@ const LoginScreen = () => {
           return;
         }
 		AsyncStorage.removeItem("Account_setup");
+		Toast.show({
+			type: "success",
+			text1: "Login successful",
+		});
         router.replace("/customer");
       } else {
         AsyncStorage.setItem("Business_Data", JSON.stringify(response.user));
@@ -104,6 +108,10 @@ const LoginScreen = () => {
           return;
         }
 		AsyncStorage.removeItem("Account_setup");
+		Toast.show({
+			type: "success",
+			text1: "Login successful",
+		});
         router.replace("/business/business-home");
       }
     } catch (error: any) {

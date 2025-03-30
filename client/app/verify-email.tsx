@@ -83,7 +83,7 @@ export default function VerifyEmailScreen() {
           });
         } else {
           await AsyncStorage.setItem("Type", JSON.stringify(type));
-          router.push("/reset-password");
+          router.replace("/reset-password");
         }
       } catch (error: any) {
         if (error.response?.status == 401) {

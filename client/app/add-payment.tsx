@@ -60,7 +60,10 @@ const AddPaymentScreen = () => {
         await AsyncStorage.setItem(storageKey, JSON.stringify(completedSteps));
       }
       await AsyncStorage.setItem("current_account_type", accountType);
-
+      Toast.show({
+        type: "success",
+        text1: "Payment method added successfully",
+      });
       router.replace({
         pathname: "/setup-screen",
         params: {
