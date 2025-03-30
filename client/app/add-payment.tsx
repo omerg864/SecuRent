@@ -71,12 +71,10 @@ const AddPaymentScreen = () => {
         },
       });
     } catch (error: any) {
-      if (error.response?.status == 401) {
         Toast.show({
           type: "error",
-          text1: "Invalid payment details",
+          text1: error.response.data.message,
         });
-      }
     } finally {
       setLoading(false);
     }

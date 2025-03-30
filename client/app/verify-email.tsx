@@ -26,10 +26,10 @@ export default function VerifyEmailScreen() {
   const params = useLocalSearchParams();
   const [loading, setLoading] = useState(false);
   const [loadingResend, setLoadingResend] = useState(false);
-  let accountType = (params.accountType as string);
+  let accountType = params.accountType as string;
   const [resendcode, setResendCode] = useState(false);
 
-  if (!accountType){
+  if (!accountType) {
     accountType = params.type as string;
   }
 
@@ -89,9 +89,14 @@ export default function VerifyEmailScreen() {
         if (error.response?.status == 401) {
           Toast.show({
             type: "error",
-            text1: "Invalid verification code",
+            text1: error.response.data.message,
           });
           setResendCode(true);
+        } else {
+          Toast.show({
+            type: "error",
+            text1: error.response.data.message,
+          });
         }
       } finally {
         setLoading(false);

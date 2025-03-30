@@ -62,13 +62,13 @@ export default () => {
           visible={show.date}
           onDismiss={() => setShow({ ...show, date: false })}
           date={date}
-          onConfirm={({ date }) => updateDate(date)}
+          onConfirm={({ date }: any) => updateDate(date)}
         />
 
         <TimePickerModal
           visible={show.time}
           onDismiss={() => setShow({ ...show, time: false })}
-          onConfirm={({ hours, minutes }) => updateTime(hours, minutes)}
+          onConfirm={({ hours, minutes } : any) => updateTime(hours, minutes)}
           hours={date.getHours()}
           minutes={date.getMinutes()}
         />

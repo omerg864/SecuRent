@@ -115,12 +115,10 @@ const LoginScreen = () => {
         router.replace("/business/business-home");
       }
     } catch (error: any) {
-      if (error.response.status === 401) {
         Toast.show({
           type: "error",
-          text1: "Invalid email or password",
+          text1: error.response.data.message,
         });
-      }
     }
     setLoading(false);
   };
@@ -207,7 +205,7 @@ const LoginScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <View className="flex-row justify-between mt-auto mb-14 items-baseline">
+        <View className="flex-row justify-between mt-auto mb-14 items-end">
           <HapticButton
             className="w-24 h-12 bg-gray-100 rounded-full justify-center items-center border border-black"
             onPress={handleRegister}

@@ -338,7 +338,7 @@ const verifyAndUpdateCompanyNumber = asyncHandler(async (req, res) => {
 
   business.companyNumber = companyNumber;
   business.isCompanyNumberVerified = true;
-  if (business.isEmailVerified && business.isBankValid) {
+  if (business.isEmailValid && business.isBankValid) {
     business.isValid = true;
   }
   await business.save();
@@ -378,7 +378,7 @@ const verifyBank = asyncHandler(async (req, res) => {
 
   business.bank = bank;
   business.isBankValid = true;
-  if (business.isEmailVerified && business.isCompanyNumberVerified) {
+  if (business.isEmailValid && business.isCompanyNumberVerified) {
     business.isValid = true;
   }
   await business.save();

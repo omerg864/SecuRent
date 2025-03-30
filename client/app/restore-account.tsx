@@ -44,6 +44,10 @@ const RestoreAccountScreen = () => {
         return;
       }
       AsyncStorage.setItem("Access_Token", response.accessToken);
+      AsyncStorage.setItem("Refresh_Token", response.refreshToken);
+      const expiration = new Date();
+      expiration.setHours(expiration.getHours() + 23);
+      AsyncStorage.setItem("Auth_Expiration", expiration.toISOString());
       //send as parameter to the next screen
       router.push({
         pathname: "./verify-email",
@@ -52,15 +56,13 @@ const RestoreAccountScreen = () => {
         },
       });
     } catch (error: any) {
-      if (error.response?.status == 404) {
         Toast.show({
-          type: "info",
-          text1: "User not found with this email address",
+          type: "error",
+          text1: error.response.data.message,
         });
         setLoading(false);
-        return;
       }
-    } finally {
+     finally {
       setLoading(false);
     }
   };
