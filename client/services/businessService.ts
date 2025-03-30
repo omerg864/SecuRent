@@ -82,10 +82,27 @@ const updateBusinessPassword = async (newPassword: string) => {
   }
 };
 
+const resendBusinessVerificationCode = async () => {
+  try {
+    const accessToken = await checkToken();
+    const response = await client.post<AuthResponse>(
+      "business/resend-code",
+      {},
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+    return response.data.success;
+  } catch (error) {
+    throw error || "Resend verification code failed.";
+  }
+}
+
 export {
   registerBusiness,
   verifyCompanyNumber,
   verifyEmailBusiness,
   updateBankDetails,
   updateBusinessPassword,
+  resendBusinessVerificationCode,
 };

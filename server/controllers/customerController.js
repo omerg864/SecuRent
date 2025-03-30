@@ -407,6 +407,41 @@ const verifyEmail = asyncHandler(async (req, res) => {
 	});
 });
 
+const resendVerificationCode = asyncHandler(async (req, res) => {
+	const customer = await Customer.findById(req.customer._id);
+
+	if (!customer) {
+		res.status(404);
+		throw new Error('Customer not found');
+	}
+
+	const verificationCode = Math.floor(
+		100000 + Math.random() * 900000
+	).toString();
+	const subject = 'Resend Verification Code';
+	const text = `Your new verification code is: ${verificationCode}`;
+
+	const html = `
+		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+			<h2 style="color: #333;">Verify Your Email</h2>
+			<p>Thank you for signing up. Please use the code below to verify your email address:</p>
+			<div style="font-size: 24px; font-weight: bold; margin: 20px 0; color:rgb(76, 87, 175);">${verificationCode}</div>
+			<p>If you didn't request this, please ignore this email.</p>
+		</div>
+		`;
+
+	const sent = await sendEmail(customer.email, subject, text, html);
+
+	customer.verificationCode = verificationCode;
+	await customer.save();
+
+	res.status(200).json({
+		success: true,
+		sent,
+		message: 'Verification code resent successfully',
+	});
+});
+
 export {
 	registerCustomer,
 	loginCustomer,
@@ -418,4 +453,5 @@ export {
 	refreshTokens,
 	updateCustomerCreditCard,
 	verifyEmail,
+	resendVerificationCode,
 };

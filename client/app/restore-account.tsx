@@ -43,9 +43,14 @@ const RestoreAccountScreen = () => {
         setLoading(false);
         return;
       }
-      AsyncStorage.setItem("Type", response.type);
       AsyncStorage.setItem("Access_Token", response.accessToken);
-      router.replace("/verify-email");
+      //send as parameter to the next screen
+      router.push({
+        pathname: "./verify-email",
+        params: {
+          type: response.type,
+        },
+      });
     } catch (error: any) {
       if (error.response?.status == 404) {
         Toast.show({

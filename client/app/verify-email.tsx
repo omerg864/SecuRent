@@ -9,8 +9,14 @@ import { ThemedTextInput } from "@/components/ui/ThemedTextInput";
 import HapticButton from "@/components/ui/HapticButton";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { verifyEmailBusiness } from "@/services/businessService";
-import { verifyEmailCustomer } from "@/services/customerService";
+import {
+  verifyEmailBusiness,
+  resendBusinessVerificationCode,
+} from "@/services/businessService";
+import {
+  verifyEmailCustomer,
+  resendCustomerVerificationCode,
+} from "@/services/customerService";
 import { ActivityIndicator } from "react-native";
 import Toast from "react-native-toast-message";
 
@@ -19,7 +25,13 @@ export default function VerifyEmailScreen() {
   const [code, setCode] = useState("");
   const params = useLocalSearchParams();
   const [loading, setLoading] = useState(false);
-  const accountType = (params.accountType as string) || "business";
+  const [loadingResend, setLoadingResend] = useState(false);
+  let accountType = (params.accountType as string);
+  const [resendcode, setResendCode] = useState(false);
+
+  if (!accountType){
+    accountType = params.type as string;
+  }
 
   const handleVerify = async () => {
     if (code.trim().length === 6) {
@@ -36,7 +48,6 @@ export default function VerifyEmailScreen() {
             return;
           }
         } else {
-          console.log("Customer verification");
           const response: any = await verifyEmailCustomer(code);
           if (!response) {
             Toast.show({
@@ -47,8 +58,12 @@ export default function VerifyEmailScreen() {
             return;
           }
         }
-        const setup_mode = await AsyncStorage.getItem("Account_setup");
-        if (setup_mode === "true") {
+        const type = params.type as string;
+        Toast.show({
+          type: "success",
+          text1: "Email verified successfully",
+        });
+        if (!type) {
           const storageKey = `completedSteps_${accountType}`;
           const savedSteps = await AsyncStorage.getItem(storageKey);
           const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
@@ -60,13 +75,14 @@ export default function VerifyEmailScreen() {
             );
           }
           await AsyncStorage.setItem("current_account_type", accountType);
-          router.replace({
+          router.push({
             pathname: "./setup-screen",
             params: {
               accountType: accountType,
             },
           });
         } else {
+          await AsyncStorage.setItem("Type", JSON.stringify(type));
           router.replace("/reset-password");
         }
       } catch (error: any) {
@@ -75,6 +91,7 @@ export default function VerifyEmailScreen() {
             type: "error",
             text1: "Invalid verification code",
           });
+          setResendCode(true);
         }
       } finally {
         setLoading(false);
@@ -84,6 +101,47 @@ export default function VerifyEmailScreen() {
         type: "info",
         text1: "Please enter a valid 6-digit verification code",
       });
+    }
+  };
+
+  const handleResend = async () => {
+    setLoadingResend(true);
+    try {
+      if (accountType === "business") {
+        const response: any = await resendBusinessVerificationCode();
+        if (!response) {
+          Toast.show({
+            type: "error",
+            text1: "Internal Server Error",
+          });
+          setLoadingResend(false);
+          return;
+        }
+      } else {
+        const response: any = await resendCustomerVerificationCode();
+        if (!response) {
+          Toast.show({
+            type: "error",
+            text1: "Internal Server Error",
+          });
+          setLoadingResend(false);
+          return;
+        }
+      }
+      Toast.show({
+        type: "success",
+        text1: "Verification code resent successfully",
+      });
+    } catch (error: any) {
+      if (error.response?.status == 404) {
+        Toast.show({
+          type: "error",
+          text1: "Internal Server Error",
+        });
+      }
+      setLoadingResend(false);
+    } finally {
+      setLoadingResend(false);
     }
   };
 
@@ -130,6 +188,22 @@ export default function VerifyEmailScreen() {
               </ThemedText>
             )}
           </HapticButton>
+
+          {resendcode && (
+            <HapticButton
+              onPress={handleResend}
+              disabled={loadingResend}
+              className="bg-indigo-600/30 py-3 mt-2 rounded-xl"
+            >
+              {loadingResend ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <ThemedText className="text-white text-center text-lg font-semibold">
+                  Resend Verification Code
+                </ThemedText>
+              )}
+            </HapticButton>
+          )}
         </View>
       </View>
     </ParallaxScrollView>

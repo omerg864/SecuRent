@@ -110,6 +110,10 @@ const RegisterScreen = () => {
       expiration.setHours(expiration.getHours() + 23);
       AsyncStorage.setItem("Auth_Expiration", expiration.toISOString());
       AsyncStorage.setItem("Account_setup", "true");
+      Toast.show({
+        type: "success",
+        text1: "Account created successfully",
+      });
       router.dismissAll();
       router.replace({
         pathname: "./setup-screen",

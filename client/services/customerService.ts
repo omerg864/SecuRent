@@ -59,10 +59,25 @@ const updateCustomerPassword = async (newPassword: string) => {
         headers: { Authorization: `Bearer ${accessToken}` },
       }
     );
-    console.log("Here" + response.data.success);
     return response.data.success;
   } catch (error) {
     throw error || "Password update failed.";
+  }
+};
+
+const resendCustomerVerificationCode = async () => {
+  try {
+	const accessToken = await checkToken();
+	const response = await client.post<AuthResponse>(
+	  "customer/resend-code",
+	  {},
+	  {
+		headers: { Authorization: `Bearer ${accessToken}` },
+	  }
+	);
+	return response.data.success;
+  } catch (error) {
+	throw error || "Resending verification code failed.";
   }
 };
 
@@ -71,4 +86,5 @@ export {
   updateCreditCard,
   verifyEmailCustomer,
   updateCustomerPassword,
+  resendCustomerVerificationCode,
 };
