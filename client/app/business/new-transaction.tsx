@@ -7,7 +7,9 @@ import {
   StyleSheet,
 } from "react-native";
 import { DatePickerModal, TimePickerModal } from "react-native-paper-dates";
-import { Button } from "react-native-paper";
+import HapticButton from "@/components/ui/HapticButton";
+import { ThemedText } from "@/components/ui/ThemedText";
+import Toast from "react-native-toast-message";
 
 const amounts = [100, 500, 1000];
 const format = {
@@ -27,6 +29,26 @@ export default () => {
   const updateDate = (d?: Date) => d && setDate(d);
   const updateTime = (h: number, m: number) =>
     setDate(new Date(date.setHours(h, m)));
+
+  const handleContinueButton = () => {
+    let error = "";
+    if (!desc) {
+      error = "Please fill item description";
+    }
+    if (!amount) {
+      error = "Amount must be set";
+    }
+    if (date < new Date()) {
+      error = "Date is not valid";
+    }
+    error === ""
+      ? Toast.show({
+          type: "success",
+          text1: "Success",
+        })
+      : Toast.show({ type: "error", text1: `${error}` });
+    console.log({ desc, amount, date });
+  };
 
   return (
     <View className="flex-1 p-6 bg-white">
@@ -62,22 +84,28 @@ export default () => {
           visible={show.date}
           onDismiss={() => setShow({ ...show, date: false })}
           date={date}
-          onConfirm={({ date }) => updateDate(date)}
+          onConfirm={({ date }) => {
+            updateDate(date);
+            setShow({ ...show, date: false });
+          }}
         />
 
         <TimePickerModal
           visible={show.time}
           onDismiss={() => setShow({ ...show, time: false })}
-          onConfirm={({ hours, minutes }) => updateTime(hours, minutes)}
+          onConfirm={({ hours, minutes }) => {
+            updateTime(hours, minutes);
+            setShow({ ...show, time: false });
+          }}
           hours={date.getHours()}
           minutes={date.getMinutes()}
         />
       </View>
 
       <View className="mb-8">
-        <Text className="text-lg font-semibold mb-3">SET AMOUNT</Text>
+        <Text className="text-lg font-semibold mb-3">Set Amount</Text>
         <View className="flex-row items-center mb-4">
-          <AmountBtn onPress={() => setAmount(Math.max(0, amount - 100))}>
+          <AmountBtn onPress={() => setAmount(Math.max(0, amount - 50))}>
             -
           </AmountBtn>
           <TouchableOpacity
@@ -99,7 +127,7 @@ export default () => {
               </Text>
             )}
           </TouchableOpacity>
-          <AmountBtn onPress={() => setAmount(amount + 100)}>+</AmountBtn>
+          <AmountBtn onPress={() => setAmount(amount + 50)}>+</AmountBtn>
         </View>
 
         <View className="flex-row justify-between">
@@ -125,13 +153,15 @@ export default () => {
         </View>
       </View>
 
-      <Button
-        mode="contained"
-        className="bg-blue-600 py-3 rounded-lg"
-        onPress={() => console.log({ desc, amount, date })}
+      <HapticButton
+        className="bg-white rounded-full py-4 items-center mb-5 shadow-lg mt-5"
+        style={{ backgroundColor: "#4338CA" }}
+        onPress={handleContinueButton}
       >
-        Continue
-      </Button>
+        <ThemedText className="text-white font-semibold text-lg">
+          Continue
+        </ThemedText>
+      </HapticButton>
     </View>
   );
 };
