@@ -76,14 +76,11 @@ const ResetPasswordScreen = () => {
       router.dismissAll();
       router.replace("/login");
     } catch (error: any) {
-      if (error.response?.status == 404) {
         Toast.show({
-          type: "info",
-          text1: "User not found with this email address",
+          type: "error",
+          text1: error.response.data.message,
         });
         setLoading(false);
-        return;
-      }
     } finally {
       setLoading(false);
     }

@@ -120,18 +120,11 @@ const RegisterScreen = () => {
         params: { accountType },
       });
     } catch (error: any) {
-      if (error.response?.status === 409 || error.response?.status === 403) {
         Toast.show({
           type: "error",
-          text1: "Email already exists",
+          text1: error.response.data.message,
         });
         setLoading(false);
-        return;
-      }
-      Toast.show({
-        type: "error",
-        text1: "Internal Server Error",
-      });
     } finally {
       setLoading(false);
     }
@@ -234,7 +227,7 @@ const RegisterScreen = () => {
           />
         </View>
 
-        <View className="flex-row justify-center mt-auto mb-20 items-baseline">
+        <View className="flex-row justify-center mt-auto mb-20 items-end">
           <HapticButton
             style={{ backgroundColor: Colors.light.tintBlue }}
             className="w-40 h-16 rounded-full justify-center items-center"

@@ -97,10 +97,10 @@ const CustomerHome: React.FC = () => {
 	const [maxDistance, setMaxDistance] = useState(10);
 	const [minRating, setMinRating] = useState(0);
 
-	// AsyncStorage.removeItem('Customer_Data');
-	// AsyncStorage.removeItem('Access_Token');
-	// AsyncStorage.removeItem('Refresh_Token');
-	// AsyncStorage.removeItem('Auth_Expiration');
+	AsyncStorage.removeItem('Customer_Data');
+	AsyncStorage.removeItem('Access_Token');
+	AsyncStorage.removeItem('Refresh_Token');
+	AsyncStorage.removeItem('Auth_Expiration');
 
 
 	const onBarcodeClick = () => {

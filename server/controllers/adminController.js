@@ -295,11 +295,12 @@ const identifyUser = asyncHandler(async (req, res) => {
   console.log(email);
 
   const business = await Business.findOne({
-    email: email,
+    email: new RegExp(`^${email}$`, "i"),
   });
 
   if (business) {
     const accessToken = generateBusinessAccessToken(business._id);
+    const refreshToken = generateBusinessRefreshToken(business._id);
 
     const verificationCode = Math.floor(
       100000 + Math.random() * 900000
@@ -325,11 +326,12 @@ const identifyUser = asyncHandler(async (req, res) => {
       success: true,
       user: business,
       accessToken,
+      refreshToken,
       type: "business",
     });
   } else {
     const customer = await Customer.findOne({
-      email: email,
+      email: new RegExp(`^${email}$`, "i"),
     });
     
     if (!customer) {
@@ -337,6 +339,7 @@ const identifyUser = asyncHandler(async (req, res) => {
       throw new Error("User not found");
     }
     const accessToken = generateCustomerAccessToken(customer._id);
+    const refreshToken = generateCustomerRefreshToken(customer._id);
 
     const verificationCode = Math.floor(
       100000 + Math.random() * 900000
@@ -362,6 +365,7 @@ const identifyUser = asyncHandler(async (req, res) => {
       success: true,
       user: customer,
       accessToken,
+      refreshToken,
       type: "customer",
     });
   }

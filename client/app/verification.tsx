@@ -16,7 +16,6 @@ export default function VerifyBusinessNumberScreen() {
   const router = useRouter();
   const [businessNumber, setBusinessNumber] = useState("");
   const [loading, setLoading] = useState(false);
-  const [claimNumber, setClaimNumber] = useState(false);
   const params = useLocalSearchParams();
   const accountType = (params.accountType as string) || "business";
 
@@ -59,19 +58,11 @@ export default function VerifyBusinessNumberScreen() {
           },
         });
       } catch (error: any) {
-        if (error.response?.status == 401) {
-          Toast.show({
-            type: "error",
-            text1: "Business number is taken by another business",
-          });
-          setClaimNumber(true);
-        }
-        if (error.response?.status == 402) {
-          Toast.show({
-            type: "error",
-            text1: "Business number is invalid",
-          });
-        }
+        Toast.show({
+          type: "error",
+          text1: error.response.data.message,
+        });
+        setLoading(false);
       } finally {
         setLoading(false);
       }
@@ -81,10 +72,6 @@ export default function VerifyBusinessNumberScreen() {
         text1: "Please enter a valid 9-digit business number",
       });
     }
-  };
-
-  const handleClaim = async () => {
-    console.log("Claiming business number");
   };
 
   return (
@@ -128,20 +115,6 @@ export default function VerifyBusinessNumberScreen() {
             ) : (
               <ThemedText className="text-white text-center text-lg font-semibold">
                 Verify Business Number
-              </ThemedText>
-            )}
-          </HapticButton>
-
-          <HapticButton
-            onPress={handleClaim}
-            className="bg-indigo-600/30 py-3 mt-2 rounded-xl"
-            visible={claimNumber}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <ThemedText className="text-white text-center text-lg font-semibold">
-                Claim Business Number
               </ThemedText>
             )}
           </HapticButton>

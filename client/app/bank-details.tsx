@@ -106,12 +106,10 @@ const BankDetailsScreen = () => {
         },
       });
     } catch (error: any) {
-      if (error.response?.status == 404) {
         Toast.show({
           type: "error",
-          text1: "Internal Server Error",
+          text1: error.response.data.message,
         });
-      }
     } finally {
       setLoading(false);
     }
@@ -173,6 +171,7 @@ const BankDetailsScreen = () => {
               value={accountHolderName}
               onChangeText={setAccountHolderName}
               label="Account Holder Name"
+              keyboardType="default"
               editable={!loading}
             />
 
