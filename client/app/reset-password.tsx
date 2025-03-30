@@ -46,7 +46,7 @@ const ResetPasswordScreen = () => {
     }
     setLoading(true);
     try {
-      const type: any = AsyncStorage.getItem("Type");
+      const type = await AsyncStorage.getItem("Type");
       if (type === "customer") {
         const response: any = await updateCustomerPassword(newPassword);
         if (!response) {
@@ -67,14 +67,14 @@ const ResetPasswordScreen = () => {
           });
           return;
         }
-        AsyncStorage.removeItem("Type");
-        Toast.show({
-          type: "success",
-          text1: "Password reset successfully",
-        });
-        router.dismissAll();
-        router.replace("/login");
       }
+      AsyncStorage.removeItem("Type");
+      Toast.show({
+        type: "success",
+        text1: "Password reset successfully",
+      });
+      router.dismissAll();
+      router.replace("/login");
     } catch (error: any) {
       if (error.response?.status == 404) {
         Toast.show({

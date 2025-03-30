@@ -10,7 +10,8 @@ import {
     verifyAndUpdateCompanyNumber,
     verifyBank,
     verifyEmail,
-    updateBusinessPassword
+    updateBusinessPassword,
+    resendVerificationCode
 } from '../controllers/businessController.js';
 import { authBusiness } from '../middleware/authMiddleware.js';
 
@@ -31,6 +32,7 @@ router.put('/update', authBusiness, updateBusiness);
 router.delete('/delete', authBusiness, deleteBusiness);
 router.get('/:id', authBusiness, getBusinessById);
 router.put('/update-password', authBusiness, updateBusinessPassword);
+router.post('/resend-code', authBusiness, resendVerificationCode);
 
 
 export default router;
