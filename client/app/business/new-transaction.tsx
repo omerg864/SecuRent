@@ -52,13 +52,13 @@ export default () => {
 
   return (
     <View className="flex-1 p-6 bg-white">
-      <Text className="text-2xl font-bold mb-8">New Transaction</Text>
-
+      <Text className="text-xl font-bold mb-2">New Transaction</Text>
+      <Text className="text-xl mb-8">Create new transaction for a customer</Text>
+      <Text className="text-lg font-semibold mb-2">Description</Text>
       <TextInput
         className="border border-gray-300 rounded-lg p-3 text-lg bg-gray-100 mb-6"
         value={desc}
         onChangeText={setDesc}
-        placeholder="Description"
       />
 
       <View className="mb-6">
@@ -136,7 +136,7 @@ export default () => {
               key={a}
               className={`border-2 rounded-lg py-4 flex-1 mx-1 items-center ${
                 amount === a
-                  ? "bg-blue-600 border-blue-600"
+                  ? "bg-indigo-600 border-indigo-600"
                   : "border-gray-300 bg-white"
               }`}
               onPress={() => setAmount(a)}
