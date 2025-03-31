@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { password_regex } from '../utils/regex';
 import { register as registerAdmin } from '../services/adminServices';
 import { toast } from 'react-toastify';
+import DarkModeSwitcher from '../components/Header/DarkModeSwitcher';
 
 const Register = () => {
 	const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +28,7 @@ const Register = () => {
 						'Password must contain at least 1 uppercase, 1 lowercase, 1 number',
 				}),
 			confirmPassword: z.string(),
-      code: z.string().min(6, 'Code must be at least 6 characters long'),
+			code: z.string().min(6, 'Code must be at least 6 characters long'),
 		})
 		.refine((data) => data.password === data.confirmPassword, {
 			path: ['confirmPassword'], // Path to show the error message on the confirmPassword field
@@ -52,7 +53,7 @@ const Register = () => {
 				email: data.email,
 				password: data.password,
 				role: 'admin',
-        code: data.code,
+				code: data.code,
 			});
 
 			toast.info('Admin registered successfully!');
@@ -79,6 +80,11 @@ const Register = () => {
 	return (
 		<main className="w-full p-8 shadow-default flex items-center justify-center dark:bg-boxdark-2">
 			<div className="max-w-2xl flex-1 w-full rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+				<ul className="flex p-2 justify-end">
+					{/* <!-- Dark Mode Toggler --> */}
+					<DarkModeSwitcher />
+					{/* <!-- Dark Mode Toggler --> */}
+				</ul>
 				<div className="flex flex-wrap items-center">
 					<div className="w-full border-stroke dark:border-strokedark xl:border-l-2">
 						<div className="w-full p-4 sm:p-12.5 xl:p-17.5">
@@ -186,7 +192,7 @@ const Register = () => {
 									)}
 								</div>
 
-                <div className="mb-6">
+								<div className="mb-6">
 									<label className="mb-2.5 block font-medium text-black dark:text-white">
 										Verification Code
 									</label>

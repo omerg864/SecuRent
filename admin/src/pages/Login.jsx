@@ -12,6 +12,7 @@ import {
 	login as loginService,
 	googleLogin as googleLoginService,
 } from '../services/adminServices';
+import DarkModeSwitcher from '../components/Header/DarkModeSwitcher';
 const Login = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [loginError, setLoginError] = useState('');
@@ -84,7 +85,12 @@ const Login = () => {
 	return (
 		<main className="w-full p-8 shadow-default flex items-center justify-center dark:bg-boxdark-2">
 			<div className="max-w-2xl flex-1 w-full rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-				<div className="flex flex-wrap items-center">
+				<ul className="flex p-2 justify-end">
+					{/* <!-- Dark Mode Toggler --> */}
+					<DarkModeSwitcher />
+					{/* <!-- Dark Mode Toggler --> */}
+				</ul>
+				<div className="flex flex-wrap items-center relative">
 					<div className="w-full border-stroke dark:border-strokedark xl:border-l-2">
 						<div className="w-full p-4 sm:p-12.5 xl:p-17.5">
 							<span className="mb-1.5 block font-medium">
