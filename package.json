@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "card-validator": "^10.0.2",
-    "react-native-paper": "^5.13.1",
-    "react-native-paper-dates": "^0.22.38"
-  }
-}
