@@ -9,42 +9,42 @@ import Businesses from './pages/Businesses';
 
 function App() {
 	return (
-		<DefaultLayout>
-			<Routes>
-				<Route
-					path="/"
-					element={
-						<ProtectedRoute>
-							<Dashboard />
-						</ProtectedRoute>
-					}
-				/>
-				<Route
-					path="/login"
-					element={
-						<UserRestrictedRoute>
-							<Login />
-						</UserRestrictedRoute>
-					}
-				/>
-				<Route
-					path="/businesses"
-					element={
-						<ProtectedRoute>
-							<Businesses />
-						</ProtectedRoute>
-					}
-				/>
-				<Route
-					path="/register"
-					element={
-						<UserRestrictedRoute>
-							<Register />
-						</UserRestrictedRoute>
-					}
-				/>
-			</Routes>
-		</DefaultLayout>
+			<DefaultLayout>
+				<Routes>
+					<Route
+						path="/"
+						element={
+							<ProtectedRoute>
+								<Dashboard />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/login"
+						element={
+							<UserRestrictedRoute>
+								<Login />
+							</UserRestrictedRoute>
+						}
+					/>
+					<Route
+						path="/businesses"
+						element={
+							<ProtectedRoute>
+								<Businesses />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/register"
+						element={
+							<UserRestrictedRoute>
+								<Register />
+							</UserRestrictedRoute>
+						}
+					/>
+				</Routes>
+			</DefaultLayout>
 	);
 }
 

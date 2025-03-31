@@ -22,7 +22,7 @@ const adminScheme = mongoose.Schema(
 		},
 		isVerified: {
 			type: Boolean,
-			default: false,
+			default: true,
 		},
 		picture: {
 			type: String,

@@ -38,7 +38,7 @@ const login = async (email, password) => {
 
     setAuthToken(response.data.accessToken);
 
-    return response.data.user; // Return user info
+    return response.data.admin; // Return user info
   } catch (error) {
     console.log("Login error: ", error);
     throw new Error(error.response?.data?.message || "Login failed");
