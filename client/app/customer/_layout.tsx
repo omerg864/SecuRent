@@ -20,6 +20,13 @@ export default function Layout() {
           }}
         />
         <Drawer.Screen
+          name="logout" // This is the name of the page and must match the url from root
+          options={{
+            drawerLabel: "Logout",
+            title: "Logout",
+          }}
+        />
+        <Drawer.Screen
           name="user/[id]" // This is the name of the page and must match the url from root
           options={{
             drawerLabel: "User",
