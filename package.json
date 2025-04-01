@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "card-validator": "^10.0.2",
+    "cloudinary": "^2.6.0"
+  }
+}
