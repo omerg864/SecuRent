@@ -11,6 +11,7 @@ import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
 import { sendEmail } from '../utils/functions.js';
 import valid from 'card-validator';
+import { uploadToCloudinary } from '../middleware/uploadMiddleware.js';
 
 export const password_regex =
 	/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -70,10 +71,18 @@ const registerCustomer = asyncHandler(async (req, res) => {
 	const salt = await bcrypt.genSalt(10);
 	const hashedPassword = await bcrypt.hash(password, salt);
 
+
+	let imageUrl = '';
+
+	if (req.file) {
+		imageUrl = await uploadToCloudinary(req.file.buffer, 'customers');
+	}
+
 	const customer = await Customer.create({
 		name,
 		email,
 		password: hashedPassword,
+		image: imageUrl || undefined, 
 	});
 
 	const verificationCode = Math.floor(
@@ -193,11 +202,17 @@ const updateCustomer = asyncHandler(async (req, res) => {
 		throw new Error('Customer not found');
 	}
 
+	if(req.file){
+		const imageUrl = await uploadToCloudinary(req.file.buffer, 'customers');
+		customer.image = imageUrl;
+	}
+	else if (image) {
+		customer.image = image;
+	}
 	if (name) customer.name = name;
 	if (email && email_regex.test(email)) customer.email = email;
 	if (phone) customer.phone = phone;
 	if (address) customer.address = address;
-	if (image) customer.image = image;
 	if (creditCard) customer.creditCard = creditCard;
 	if (rating !== undefined) customer.rating = rating;
 

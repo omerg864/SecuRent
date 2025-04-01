@@ -2,7 +2,6 @@ import multer from 'multer';
 import streamifier from 'streamifier';
 import cloudinary from '../config/cloud.js';
 
-// הגדרת multer לשמירה בזיכרון
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
