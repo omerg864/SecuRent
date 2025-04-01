@@ -14,6 +14,7 @@ import { OAuth2Client } from 'google-auth-library';
 import Business from '../models/businessModel.js';
 import Customer from '../models/customerModel.js';
 import { sendEmail } from '../utils/functions.js';
+import { uploadToCloudinary } from '../middleware/uploadMiddleware.js';
 
 const successFullLogin = async (res, admin) => {
 	const accessToken = generateAdminAccessToken(admin._id);
@@ -30,7 +31,7 @@ const successFullLogin = async (res, admin) => {
 			name: admin.name,
 			email: admin.email,
 			role: admin.role,
-			picture: admin.picture,
+			Image: admin.Image,
 		},
 	});
 };
@@ -73,6 +74,8 @@ const login = asyncHandler(async (req, res) => {
 
 const register = asyncHandler(async (req, res) => {
 	const { name, role, email, password, code } = req.body;
+	console.log('BODY:', req.body);
+	console.log('PASSWORD:', req.body.password);
 
 	if (!name || !role || !email || !password || !code) {
 		res.status(400);
@@ -105,11 +108,18 @@ const register = asyncHandler(async (req, res) => {
 	const salt = await bcrypt.genSalt(10);
 	const hashedPassword = await bcrypt.hash(password, salt);
 
+	let imageUrl = '';
+
+	if (req.file) {
+		imageUrl = await uploadToCloudinary(req.file.buffer, 'admins');
+	}
+
 	const admin = await Admin.create({
 		name,
 		role,
 		email,
 		password: hashedPassword,
+		Image: imageUrl,
 	});
 
 	res.status(201).json({
@@ -161,21 +171,23 @@ const googleLogin = asyncHandler(async (req, res) => {
 });
 
 const updateAdmin = asyncHandler(async (req, res) => {
-	// TODO: update picture in cloud
-	const { name, email, picture } = req.body;
+	const { name, email, Image } = req.body;
 	const admin = await Admin.findById(req.admin._id);
 
-	if (name) {
-		admin.name = name;
+	if (!admin) {
+		res.status(404);
+		throw new Error('Admin not found');
 	}
 
-	if (email && email_regex.test(email)) {
-		admin.email = email;
+	if (req.file) {
+		const imageUrl = await uploadToCloudinary(req.file.buffer, 'admins');
+		admin.Image = imageUrl;
+	} else if (Image) {
+		admin.Image = Image;
 	}
 
-	if (picture) {
-		admin.picture = picture;
-	}
+	if (name) admin.name = name;
+	if (email && email_regex.test(email)) admin.email = email;
 
 	await admin.save();
 
@@ -185,7 +197,7 @@ const updateAdmin = asyncHandler(async (req, res) => {
 			name: admin.name,
 			email: admin.email,
 			role: admin.role,
-			picture: admin.picture,
+			Image: admin.Image,
 		},
 	});
 });
