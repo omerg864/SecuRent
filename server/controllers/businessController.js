@@ -11,6 +11,7 @@ import {
 import { OAuth2Client } from "google-auth-library";
 import { sendEmail } from "../utils/functions.js";
 import { verifyCompanyNumber } from "../utils/externalFunctions.js";
+import { uploadToCloudinary } from '../middleware/uploadMiddleware.js';
 
 export const password_regex =
   /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -66,26 +67,30 @@ const registerBusiness = asyncHandler(async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
+  let imageUrl = '';
+  if (req.file) {
+    imageUrl = await uploadToCloudinary(req.file.buffer, 'businesses');
+  }
+
   const business = await Business.create({
     name,
     email,
     password: hashedPassword,
+    Image: imageUrl || undefined,
   });
 
-  const verificationCode = Math.floor(
-    100000 + Math.random() * 900000
-  ).toString();
+  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
   const subject = "Verify Your Email Address";
   const text = `Your verification code is: ${verificationCode}`;
 
   const html = `
-		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
-			<h2 style="color: #333;">Verify Your Email</h2>
-			<p>Thank you for signing up. Please use the code below to verify your email address:</p>
-			<div style="font-size: 24px; font-weight: bold; margin: 20px 0; color:rgb(76, 87, 175);">${verificationCode}</div>
-			<p>If you didn't request this, please ignore this email.</p>
-		</div>
-	`;
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+      <h2 style="color: #333;">Verify Your Email</h2>
+      <p>Thank you for signing up. Please use the code below to verify your email address:</p>
+      <div style="font-size: 24px; font-weight: bold; margin: 20px 0; color:rgb(76, 87, 175);">${verificationCode}</div>
+      <p>If you didn't request this, please ignore this email.</p>
+    </div>
+  `;
 
   const sent = await sendEmail(email, subject, text, html);
 
@@ -280,6 +285,10 @@ const updateBusiness = asyncHandler(async (req, res) => {
   if (image) business.Image = image;
   if (currency) business.currency = currency;
   if (rating !== undefined) business.rating = rating;
+  if (req.file) {
+    const imageUrl = await uploadToCloudinary(req.file.buffer, 'businesses');
+    business.Image = imageUrl;
+  }
 
   await business.save();
 

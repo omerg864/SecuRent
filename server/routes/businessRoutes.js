@@ -14,11 +14,12 @@ import {
     resendVerificationCode
 } from '../controllers/businessController.js';
 import { authBusiness } from '../middleware/authMiddleware.js';
+import { upload } from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
 
 // Public Routes
-router.post('/register', registerBusiness);
+router.post('/register', upload.single('image'), registerBusiness);
 router.post('/login', loginBusiness);
 router.post('/google-login', googleLoginBusiness);
 router.post('/refresh-token', refreshTokens);
@@ -28,7 +29,7 @@ router.post('/verify-email', authBusiness, verifyEmail);
 
 
 // Protected Routes (Requires Authentication)
-router.put('/update', authBusiness, updateBusiness);
+router.put('/update', authBusiness, upload.single('image'), updateBusiness);
 router.delete('/delete', authBusiness, deleteBusiness);
 router.get('/:id', authBusiness, getBusinessById);
 router.put('/update-password', authBusiness, updateBusinessPassword);
