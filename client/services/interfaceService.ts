@@ -88,6 +88,11 @@ interface BankDetails {
   bankName: string;
 }
 
+interface ItemId {
+  _id: string;
+  temporary: boolean;
+}
+
 export type {
   AuthData,
   LoginCredentials,
@@ -97,4 +102,5 @@ export type {
   CreditCardData,
   LoginResponse,
   BankDetails,
+  ItemId
 };

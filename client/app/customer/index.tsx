@@ -22,7 +22,6 @@ import * as Location from 'expo-location';
 import { getDistance } from '@/utils/functions';
 import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const businesses_obj: Business[] = [
 	{
