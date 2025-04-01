@@ -1,21 +1,28 @@
 import asyncHandler from 'express-async-handler';
 import Item from '../models/itemModel.js';
-
+import { uploadToCloudinary, deleteFromCloudinary } from '../middleware/uploadMiddleware.js';
 
 const createItem = asyncHandler(async (req, res) => {
     const { description, amount, price, currency } = req.body;
 
-    if ( !description || !amount || !price || !currency) {
+    if (!description || !amount || !price || !currency) {
         res.status(400);
         throw new Error('Please provide all required fields');
     }
 
+    let imageUrl = '';
+
+    if (req.file) {
+        imageUrl = await uploadToCloudinary(req.file.buffer, 'items');
+    }
+
     const item = await Item.create({
-        business:req.business._id,
+        business: req.business._id,
         description,
         amount,
         price,
         currency,
+        image: imageUrl || undefined,
     });
 
     res.status(201).json({
@@ -24,7 +31,6 @@ const createItem = asyncHandler(async (req, res) => {
     });
 });
 
-
 const getItems = asyncHandler(async (req, res) => {
     const items = await Item.find().populate('business', 'name image rating');
     res.status(200).json({
@@ -32,7 +38,6 @@ const getItems = asyncHandler(async (req, res) => {
         items,
     });
 });
-
 
 const getItemById = asyncHandler(async (req, res) => {
     const { id } = req.params;
@@ -49,11 +54,10 @@ const getItemById = asyncHandler(async (req, res) => {
     });
 });
 
-
 const updateItem = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { description, amount, price, currency } = req.body;
-    
+
     const item = await Item.findById(id);
     if (!item) {
         res.status(404);
@@ -65,18 +69,22 @@ const updateItem = asyncHandler(async (req, res) => {
         throw new Error('Not authorized to update this item');
     }
 
+    if (req.file) {
+        const imageUrl = await uploadToCloudinary(req.file.buffer, 'items');
+        item.image = imageUrl;
+    }
+
     item.description = description || item.description;
     item.amount = amount ?? item.amount;
     item.price = price ?? item.price;
     item.currency = currency || item.currency;
-    
+
     await item.save();
     res.status(200).json({
         success: true,
         item,
     });
 });
-
 
 const deleteItem = asyncHandler(async (req, res) => {
     const { id } = req.params;
@@ -90,6 +98,10 @@ const deleteItem = asyncHandler(async (req, res) => {
     if (item.business.toString() !== req.business._id.toString()) {
         res.status(403);
         throw new Error('Not authorized to delete this item');
+    }
+
+    if (item.image) {
+        await deleteFromCloudinary(item.image);
     }
 
     await item.deleteOne();

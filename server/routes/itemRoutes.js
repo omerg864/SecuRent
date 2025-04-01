@@ -1,4 +1,5 @@
 import express from 'express';
+import { upload } from '../middleware/uploadMiddleware.js';
 import {
     createItem,
     getItems,
@@ -10,10 +11,10 @@ import { authBusiness } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/',authBusiness , createItem);
+router.post('/', authBusiness, upload.single('image'), createItem);
+router.put('/:id',authBusiness ,upload.single('image'), updateItem);
 router.get('/', getItems);
 router.get('/:id',authBusiness ,getItemById);
-router.put('/:id',authBusiness , updateItem);
 router.delete('/:id',authBusiness , deleteItem);
 
 export default router;

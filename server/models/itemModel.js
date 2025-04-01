@@ -22,7 +22,11 @@ const ItemSchema = mongoose.Schema(
         currency:{
             type: String,
             required: true,
-        }
+        },
+        image:{
+            type: String,
+        },
+    
     },
     { timestamps: true }
 );
