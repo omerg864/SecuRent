@@ -397,6 +397,29 @@ const identifyUser = asyncHandler(async (req, res) => {
   }
 });
 
+const deleteAdminImage = asyncHandler(async (req, res) => {
+  const admin = await Admin.findById(req.admin._id);
+
+  if (!admin) {
+    res.status(404);
+    throw new Error("Admin not found");
+  }
+
+  if (!admin.image) {
+    res.status(404);
+    throw new Error("Admin image not found");
+  }
+
+  await deleteImage(admin.image, true);
+  admin.image = "";
+  await admin.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Admin image deleted successfully",
+  });
+});
+
 export {
   login,
   register,
@@ -406,4 +429,5 @@ export {
   verifyAdmin,
   loginClient,
   identifyUser,
+  deleteAdminImage,
 };

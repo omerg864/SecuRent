@@ -11,8 +11,8 @@ import {
 import { OAuth2Client } from "google-auth-library";
 import { sendEmail } from "../utils/functions.js";
 import { verifyCompanyNumber } from "../utils/externalFunctions.js";
-import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
-import { v4 as uuidv4 } from 'uuid';
+import { uploadToCloudinary, deleteImage } from "../utils/cloudinary.js";
+import { v4 as uuidv4 } from "uuid";
 
 export const password_regex =
   /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -68,9 +68,9 @@ const registerBusiness = asyncHandler(async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  let imageUrl = '';
+  let imageUrl = "";
   if (req.file) {
-    const imageID = uuidv4(); 
+    const imageID = uuidv4();
     imageUrl = await uploadToCloudinary(
       req.file.buffer,
       `${process.env.CLOUDINARY_BASE_FOLDER}/businesses`,
@@ -85,7 +85,9 @@ const registerBusiness = asyncHandler(async (req, res) => {
     Image: imageUrl || undefined,
   });
 
-  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const verificationCode = Math.floor(
+    100000 + Math.random() * 900000
+  ).toString();
   const subject = "Verify Your Email Address";
   const text = `Your verification code is: ${verificationCode}`;
 
@@ -282,7 +284,7 @@ const updateBusiness = asyncHandler(async (req, res) => {
 
   if (req.file) {
     if (business.Image) {
-      await deleteImage(business.Image, true); 
+      await deleteImage(business.Image, true);
     }
     const imageID = uuidv4();
     const imageUrl = await uploadToCloudinary(
@@ -473,6 +475,29 @@ const resendVerificationCode = asyncHandler(async (req, res) => {
   });
 });
 
+const deleteBusinessImage = asyncHandler(async (req, res) => {
+  const business = await Business.findById(req.business._id);
+
+  if (!business) {
+    res.status(404);
+    throw new Error("Business not found");
+  }
+
+  if (!business.Image) {
+    res.status(404);
+    throw new Error("Business image not found");
+  }
+
+  await deleteImage(business.Image, true);
+  business.Image = "";
+  await business.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Business image deleted successfully",
+  });
+});
+
 export {
   registerBusiness,
   loginBusiness,
@@ -486,4 +511,5 @@ export {
   verifyBank,
   updateBusinessPassword,
   resendVerificationCode,
+  deleteBusinessImage,
 };
