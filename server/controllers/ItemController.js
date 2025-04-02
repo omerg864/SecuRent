@@ -2,7 +2,6 @@ import asyncHandler from "express-async-handler";
 import Item from "../models/itemModel.js";
 import { uploadToCloudinary, deleteImage } from "../utils/cloudinary.js";
 import { v4 as uuidv4 } from "uuid";
-import e from "express";
 
 const createItem = asyncHandler(async (req, res) => {
   const { description, amount, price, currency } = req.body;
