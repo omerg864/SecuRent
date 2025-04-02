@@ -11,7 +11,8 @@ import {
 import { OAuth2Client } from "google-auth-library";
 import { sendEmail } from "../utils/functions.js";
 import { verifyCompanyNumber } from "../utils/externalFunctions.js";
-import { uploadToCloudinary } from '../middleware/uploadMiddleware.js';
+import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
+import { v4 as uuidv4 } from 'uuid';
 
 export const password_regex =
   /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -69,7 +70,12 @@ const registerBusiness = asyncHandler(async (req, res) => {
 
   let imageUrl = '';
   if (req.file) {
-    imageUrl = await uploadToCloudinary(req.file.buffer, 'businesses');
+    const imageID = uuidv4(); 
+    imageUrl = await uploadToCloudinary(
+      req.file.buffer,
+      `${process.env.CLOUDINARY_BASE_FOLDER}/businesses`,
+      imageID
+    );
   }
 
   const business = await Business.create({
@@ -187,12 +193,10 @@ const refreshTokens = asyncHandler(async (req, res) => {
     throw new Error("Refresh token not recognized");
   }
 
-  //Remove old token
   business.refreshTokens = business.refreshTokens.filter(
     (t) => t.token !== refreshToken
   );
 
-  //Generate and save new token
   const accessToken = generateBusinessAccessToken(business._id);
   const { refreshToken: newRefreshToken, unique } =
     generateBusinessRefreshToken(business._id);
@@ -269,11 +273,26 @@ const updateBusiness = asyncHandler(async (req, res) => {
     currency,
     rating,
   } = req.body;
-  const business = await Business.findById(req.business._id);
 
+  const business = await Business.findById(req.business._id);
   if (!business) {
     res.status(404);
     throw new Error("Business not found");
+  }
+
+  if (req.file) {
+    if (business.Image) {
+      await deleteImage(business.Image, true); 
+    }
+    const imageID = uuidv4();
+    const imageUrl = await uploadToCloudinary(
+      req.file.buffer,
+      `${process.env.CLOUDINARY_BASE_FOLDER}/businesses`,
+      imageID
+    );
+    business.Image = imageUrl;
+  } else if (image) {
+    business.Image = image;
   }
 
   if (name) business.name = name;
@@ -282,13 +301,8 @@ const updateBusiness = asyncHandler(async (req, res) => {
   if (category) business.category = category;
   if (bank) business.bank = bank;
   if (address) business.address = address;
-  if (image) business.Image = image;
   if (currency) business.currency = currency;
   if (rating !== undefined) business.rating = rating;
-  if (req.file) {
-    const imageUrl = await uploadToCloudinary(req.file.buffer, 'businesses');
-    business.Image = imageUrl;
-  }
 
   await business.save();
 
@@ -300,6 +314,10 @@ const deleteBusiness = asyncHandler(async (req, res) => {
   const business = await Business.findById(req.business._id);
   if (!business) {
     return res.status(404).json({ message: "Business not found" });
+  }
+
+  if (business.Image) {
+    await deleteImage(business.Image, true);
   }
 
   await business.deleteOne();
@@ -326,6 +344,7 @@ const verifyAndUpdateCompanyNumber = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Company number is required");
   }
+
   const isBusiness = await Business.findOne({ companyNumber });
   if (isBusiness && isBusiness._id.toString() !== req.business._id.toString()) {
     res.status(401);
@@ -333,7 +352,6 @@ const verifyAndUpdateCompanyNumber = asyncHandler(async (req, res) => {
   }
 
   const verification = await verifyCompanyNumber(companyNumber);
-
   if (!verification) {
     res.status(402);
     throw new Error("Company number not found in official registry");
@@ -373,6 +391,7 @@ const verifyBank = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Account number and sort code are required");
   }
+
   if (!bankName || !accountHolderName) {
     res.status(401);
     throw new Error("Bank name and account holder name are required");
