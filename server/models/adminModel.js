@@ -24,7 +24,7 @@ const adminScheme = mongoose.Schema(
 			type: Boolean,
 			default: true,
 		},
-		picture: {
+		image: {
 			type: String,
 		},
 		refreshTokens: [
