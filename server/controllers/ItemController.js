@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import Item from '../models/itemModel.js';
-import { uploadToCloudinary, deleteFromCloudinary } from '../middleware/uploadMiddleware.js';
+import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
+import { v4 as uuidv4 } from 'uuid'; 
 
 const createItem = asyncHandler(async (req, res) => {
     const { description, amount, price, currency } = req.body;
@@ -13,7 +14,12 @@ const createItem = asyncHandler(async (req, res) => {
     let imageUrl = '';
 
     if (req.file) {
-        imageUrl = await uploadToCloudinary(req.file.buffer, 'items');
+        const imageID = uuidv4(); 
+        imageUrl = await uploadToCloudinary(
+            req.file.buffer,
+            `${process.env.CLOUDINARY_BASE_FOLDER}/items`,
+            imageID
+        );
     }
 
     const item = await Item.create({
@@ -22,7 +28,7 @@ const createItem = asyncHandler(async (req, res) => {
         amount,
         price,
         currency,
-        image: imageUrl || undefined,
+        image: imageUrl,
     });
 
     res.status(201).json({
@@ -70,7 +76,15 @@ const updateItem = asyncHandler(async (req, res) => {
     }
 
     if (req.file) {
-        const imageUrl = await uploadToCloudinary(req.file.buffer, 'items');
+        if (item.image) {
+            await deleteImage(item.image, true); 
+        }
+        const imageID = uuidv4();
+        const imageUrl = await uploadToCloudinary(
+            req.file.buffer,
+            `${process.env.CLOUDINARY_BASE_FOLDER}/items`,
+            imageID
+        );
         item.image = imageUrl;
     }
 
@@ -101,9 +115,9 @@ const deleteItem = asyncHandler(async (req, res) => {
     }
 
     if (item.image) {
-        await deleteFromCloudinary(item.image);
+        await deleteImage(item.image, true);
     }
-
+    
     await item.deleteOne();
     res.status(200).json({
         success: true,
