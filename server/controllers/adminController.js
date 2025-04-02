@@ -172,7 +172,7 @@ const googleLogin = asyncHandler(async (req, res) => {
 });
 
 const updateAdmin = asyncHandler(async (req, res) => {
-  const { name, email, image } = req.body;
+  const { name, email, image, imageDeleteFlag } = req.body;
   const admin = await Admin.findById(req.admin._id);
 
   if (!admin) {
@@ -190,9 +190,11 @@ const updateAdmin = asyncHandler(async (req, res) => {
       `${process.env.CLOUDINARY_BASE_FOLDER}/admins`,
       imageID
     );
-    admin.image = imageUrl;
-  } else if (image) {
-    admin.image = image;
+  } else if (imageDeleteFlag) {
+    if (admin.image) {
+      await deleteImage(admin.image, true);
+    }
+    admin.image = "";
   }
 
   if (name) admin.name = name;
@@ -397,29 +399,6 @@ const identifyUser = asyncHandler(async (req, res) => {
   }
 });
 
-const deleteAdminImage = asyncHandler(async (req, res) => {
-  const admin = await Admin.findById(req.admin._id);
-
-  if (!admin) {
-    res.status(404);
-    throw new Error("Admin not found");
-  }
-
-  if (!admin.image) {
-    res.status(404);
-    throw new Error("Admin image not found");
-  }
-
-  await deleteImage(admin.image, true);
-  admin.image = "";
-  await admin.save();
-
-  res.status(200).json({
-    success: true,
-    message: "Admin image deleted successfully",
-  });
-});
-
 export {
   login,
   register,
@@ -429,5 +408,4 @@ export {
   verifyAdmin,
   loginClient,
   identifyUser,
-  deleteAdminImage,
 };

@@ -65,7 +65,7 @@ const getItemById = asyncHandler(async (req, res) => {
 
 const updateItem = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { description, amount, price, currency } = req.body;
+  const { description, amount, price, currency, imageDeleteFlag } = req.body;
 
   const item = await Item.findById(id);
   if (!item) {
@@ -88,7 +88,11 @@ const updateItem = asyncHandler(async (req, res) => {
       `${process.env.CLOUDINARY_BASE_FOLDER}/items`,
       imageID
     );
-    item.image = imageUrl;
+  } else if (imageDeleteFlag) {
+    if (item.image) {
+      await deleteImage(item.image, true);
+    }
+    item.image = "";
   }
 
   item.description = description || item.description;
@@ -128,40 +132,4 @@ const deleteItem = asyncHandler(async (req, res) => {
   });
 });
 
-const deleteItemImage = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const item = await Item.findById(id);
-
-  if (!item) {
-    res.status(404);
-    throw new Error("Item not found");
-  }
-
-  if (!item.business.equals(req.business._id)) {
-    res.status(403);
-    throw new Error("Not authorized to delete this item image");
-  }
-
-  if (!item.image) {
-    res.status(404);
-    throw new Error("Item image not found");
-  }
-
-  await deleteImage(item.image, true);
-  item.image = "";
-  await item.save();
-
-  res.status(200).json({
-    success: true,
-    message: "Item image deleted successfully",
-  });
-});
-
-export {
-  createItem,
-  getItems,
-  getItemById,
-  updateItem,
-  deleteItem,
-  deleteItemImage,
-};
+export { createItem, getItems, getItemById, updateItem, deleteItem };

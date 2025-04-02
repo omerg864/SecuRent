@@ -23,7 +23,6 @@ router.get("/identify-user", identifyUser);
 
 //! protected routes
 router.put("/update", authAdmin, upload.single("Image"), updateAdmin);
-router.delete("/image", authAdmin, deleteAdminImage);
 router.delete("/:id", authAdmin, deleteAdmin);
 router.put("/verify/:id", authAdmin, verifyAdmin);
 

@@ -199,7 +199,7 @@ const googleLoginCustomer = asyncHandler(async (req, res) => {
 
 //Update customer profile
 const updateCustomer = asyncHandler(async (req, res) => {
-  const { name, email, phone, address, image, creditCard, rating } = req.body;
+  const { name, email, phone, address, image, creditCard, rating, imageDeleteFlag } = req.body;
   const customer = await Customer.findById(req.customer._id);
 
   if (!customer) {
@@ -218,7 +218,12 @@ const updateCustomer = asyncHandler(async (req, res) => {
       imageID
     );
     customer.image = imageUrl;
-  } else if (image) customer.image = image;
+  }else if (imageDeleteFlag) {
+    if (customer.image) {
+      await deleteImage(customer.image, true);
+    }
+    customer.image = "";
+  }
 
   if (name) customer.name = name;
   if (email && email_regex.test(email)) customer.email = email;
@@ -469,29 +474,6 @@ const resendVerificationCode = asyncHandler(async (req, res) => {
   });
 });
 
-const deleteCustomerImage = asyncHandler(async (req, res) => {
-  const customer = await Customer.findById(req.customer._id);
-
-  if (!customer) {
-    res.status(404);
-    throw new Error("Customer not found");
-  }
-
-  if (!customer.image) {
-    res.status(404);
-    throw new Error("Customer image not found");
-  }
-
-  await deleteImage(customer.image, true);
-  customer.image = "";
-  await customer.save();
-
-  res.status(200).json({
-    success: true,
-    message: "Customer image deleted successfully",
-  });
-});
-
 export {
   registerCustomer,
   loginCustomer,
@@ -503,6 +485,5 @@ export {
   refreshTokens,
   updateCustomerCreditCard,
   verifyEmail,
-  resendVerificationCode,
-  deleteCustomerImage,
+  resendVerificationCode
 };

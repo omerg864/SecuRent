@@ -32,6 +32,4 @@ router.get("/:id", authCustomer, getCustomerById); // Get Customer by ID3
 router.put("/update/credit-card", authCustomer, updateCustomerCreditCard); // Update Customer Credit Card
 router.post("/verify-email", authCustomer, verifyEmail); // Verify Customer Email
 router.post("/resend-code", authCustomer, resendVerificationCode); // Resend Verification Code
-router.delete('/image', authCustomer, deleteCustomerImage);
-
 export default router;
