@@ -11,7 +11,6 @@ import {
   updateCustomerCreditCard,
   verifyEmail,
   resendVerificationCode,
-  deleteCustomerImage,
 } from "../controllers/customerController.js";
 import { authCustomer } from "../middleware/authMiddleware.js";
 import { upload } from "../middleware/uploadMiddleware.js";

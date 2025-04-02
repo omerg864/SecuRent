@@ -6,7 +6,6 @@ import {
     getItemById,
     updateItem,
     deleteItem,
-    deleteItemImage,
 } from '../controllers/ItemController.js';
 import { authBusiness } from '../middleware/authMiddleware.js';
 
