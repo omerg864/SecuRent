@@ -43,7 +43,7 @@
 			"typedRoutes": true
 		},
 		"extra": {
-			"apiUrl": "https://3n822pvm-3000.euw.devtunnels.ms/api/"
+			"apiUrl": "https://securent.onrender.com/api/"
 		}
 	}
 }
