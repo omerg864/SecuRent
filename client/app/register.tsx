@@ -8,16 +8,24 @@ import { ThemedTextInput } from "@/components/ui/ThemedTextInput";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import Toast from "react-native-toast-message";
 import Header from "@/components/ui/Header";
 import { useLocalSearchParams } from "expo-router";
+import { registerBusiness } from "@/services/businessService";
+import { registerCustomer } from "@/services/customerService";
+import { LoginUser } from "@/services/adminService";
+import { AuthData } from "@/services/interfaceService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ActivityIndicator } from "react-native";
 
 const RegisterScreen = () => {
-  const [name, setName] = useState("Louis04real");
-  const [email, setEmail] = useState("Louis04real@gmail.com");
-  const [password, setPassword] = useState("password");
-  const [confirmPassword, setConfirmPassword] = useState("confirm password");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { accountType } = useLocalSearchParams();
 
@@ -25,12 +33,101 @@ const RegisterScreen = () => {
     router.back();
   };
 
-  const handleRegister = () => {
-    router.dismissAll();
-    router.replace({
-      pathname: "./setup-screen",
-      params: { accountType },
-    });
+  const handleRegister = async () => {
+    if (!name || !email || !password || !confirmPassword) {
+      Toast.show({
+        type: "info",
+        text1: "Please fill in all fields",
+      });
+      return;
+    }
+    if (password !== confirmPassword) {
+      Toast.show({
+        type: "info",
+        text1: "Passwords do not match",
+      });
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Toast.show({
+        type: "info",
+        text1: "Email address is invalid",
+      });
+      return;
+    }
+    //Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.
+    const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+      alert("Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const Data: AuthData = {
+        name,
+        email,
+        password,
+      };
+      if (accountType === "business") {
+        const response = await registerBusiness(Data);
+        if (!response) {
+          setLoading(false);
+          return;
+        }
+        const loginResponse = await LoginUser(email, password);
+        if (!loginResponse.success) {
+          setLoading(false);
+          return;
+        }
+        console.log("Business login response:", loginResponse);
+        AsyncStorage.setItem("Access_Token", loginResponse.accessToken);
+        AsyncStorage.setItem("Refresh_Token", loginResponse.refreshToken);
+        AsyncStorage.setItem(
+          "Business_Data",
+          JSON.stringify(loginResponse.user)
+        );
+      } else {
+        const response = await registerCustomer(Data);
+        if (!response) {
+          setLoading(false);
+          return;
+        }
+        const loginResponse = await LoginUser(email, password);
+        if (!loginResponse.success) {
+          setLoading(false);
+          return;
+        }
+        console.log("Customer login response:", loginResponse);
+        AsyncStorage.setItem("Access_Token", loginResponse.accessToken);
+        AsyncStorage.setItem("Refresh_Token", loginResponse.refreshToken);
+        AsyncStorage.setItem(
+          "Customer_Data",
+          JSON.stringify(loginResponse.user)
+        );
+      }
+      const expiration = new Date();
+      expiration.setHours(expiration.getHours() + 23);
+      AsyncStorage.setItem("Auth_Expiration", expiration.toISOString());
+      AsyncStorage.setItem("Account_setup", "true");
+      Toast.show({
+        type: "success",
+        text1: "Account created successfully",
+      });
+      router.dismissAll();
+      router.replace({
+        pathname: "./setup-screen",
+        params: { accountType },
+      });
+    } catch (error: any) {
+        Toast.show({
+          type: "error",
+          text1: error.response.data.message,
+        });
+        setLoading(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -130,15 +227,23 @@ const RegisterScreen = () => {
           />
         </View>
 
-        <View className="flex-row justify-center mt-auto mb-14 items-baseline">
+        <View className="flex-row justify-center mt-auto mb-20 items-end">
           <HapticButton
             style={{ backgroundColor: Colors.light.tintBlue }}
-            className={`w-40 h-16 rounded-full justify-center items-center`}
+            className="w-40 h-16 rounded-full justify-center items-center"
             onPress={handleRegister}
+            disabled={loading}
           >
-            <ThemedText className="text-white font-semibold" lightColor="#fff">
-              Sign up
-            </ThemedText>
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <ThemedText
+                className="text-white font-semibold"
+                lightColor="#fff"
+              >
+                Sign up
+              </ThemedText>
+            )}
           </HapticButton>
         </View>
       </View>

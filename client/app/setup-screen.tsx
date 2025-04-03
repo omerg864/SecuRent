@@ -65,12 +65,6 @@ export default function SetupScreen() {
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [accountType, setAccountType] = useState<string>("business");
 
-  useEffect(() => {
-    console.log("Current account type:", accountType);
-    console.log("Completed steps:", completedSteps);
-    console.log("Params:", params);
-  }, [accountType, completedSteps, params]);
-
   useFocusEffect(
     useCallback(() => {
       const loadData = async () => {
@@ -78,7 +72,6 @@ export default function SetupScreen() {
           let currentAccountType = params.accountType as string;
 
           if (!currentAccountType) {
-            // await AsyncStorage.removeItem(ACCOUNT_TYPE_KEY)
             const savedAccountType = await AsyncStorage.getItem(
               ACCOUNT_TYPE_KEY
             );
@@ -90,15 +83,12 @@ export default function SetupScreen() {
           setAccountType(currentAccountType);
 
           const storageKey = `completedSteps_${currentAccountType}`;
-          // await AsyncStorage.removeItem(storageKey)
           const savedSteps = await AsyncStorage.getItem(storageKey);
 
           if (savedSteps) {
             const parsedSteps = JSON.parse(savedSteps);
-            console.log(`Loaded steps for ${currentAccountType}:`, parsedSteps);
             setCompletedSteps(parsedSteps);
           } else {
-            console.log(`No saved steps found for ${currentAccountType}`);
             setCompletedSteps([]);
           }
         } catch (error) {
@@ -121,8 +111,12 @@ export default function SetupScreen() {
   useFocusEffect(
     useCallback(() => {
       if (remainingSteps.length === 0 && completedSteps.length > 0) {
+        AsyncStorage.removeItem(`completedSteps_${accountType}`);
+        AsyncStorage.removeItem(accountType);
+        AsyncStorage.removeItem("Account_setup");
         const homeRoute =
           accountType === "personal" ? "/customer" : "/business/business-home";
+        router.dismissAll();
         router.replace(homeRoute);
       }
     }, [remainingSteps.length, completedSteps.length, accountType])

@@ -9,66 +9,151 @@ import { ThemedTextInput } from "@/components/ui/ThemedTextInput";
 import HapticButton from "@/components/ui/HapticButton";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  verifyEmailBusiness,
+  resendBusinessVerificationCode,
+} from "@/services/businessService";
+import {
+  verifyEmailCustomer,
+  resendCustomerVerificationCode,
+} from "@/services/customerService";
+import { ActivityIndicator } from "react-native";
+import Toast from "react-native-toast-message";
 
 export default function VerifyEmailScreen() {
   const router = useRouter();
   const [code, setCode] = useState("");
   const params = useLocalSearchParams();
-  // Get account type from params, use the correct account type based on context
-  const accountType = (params.accountType as string) || "business";
+  const [loading, setLoading] = useState(false);
+  const [loadingResend, setLoadingResend] = useState(false);
+  let accountType = params.accountType as string;
+  const [resendcode, setResendCode] = useState(false);
+
+  if (!accountType) {
+    accountType = params.type as string;
+  }
 
   const handleVerify = async () => {
-    // Add verification logic (e.g., API call) here
     if (code.trim().length === 6) {
+      setLoading(true);
       try {
-        // Mark this step as completed for the specific account type
-        const storageKey = `completedSteps_${accountType}`;
-
-        // Get existing completed steps
-        const savedSteps = await AsyncStorage.getItem(storageKey);
-        const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
-
-        // Check if this step is already completed
-        if (!completedSteps.includes("email")) {
-          // Add this step to the completed steps
-          completedSteps.push("email");
-
-          // Save the updated completed steps
-          await AsyncStorage.setItem(
-            storageKey,
-            JSON.stringify(completedSteps)
-          );
-
-          // For debugging
-          console.log(
-            `Email verification completed. Completed steps for ${accountType}:`,
-            completedSteps
-          );
+        if (accountType === "business") {
+          const response: any = await verifyEmailBusiness(code);
+          if (!response) {
+            Toast.show({
+              type: "error",
+              text1: "Internal Server Error",
+            });
+            setLoading(false);
+            return;
+          }
+        } else {
+          const response: any = await verifyEmailCustomer(code);
+          if (!response) {
+            Toast.show({
+              type: "error",
+              text1: "Internal Server Error",
+            });
+            setLoading(false);
+            return;
+          }
         }
-
-        // Save the current account type for persistence
-        await AsyncStorage.setItem("current_account_type", accountType);
-
-        // Navigate back to setup screen with both account type and completion status
-        router.replace({
-          pathname: "/setup-screen",
-          params: {
-            accountType: accountType,
-            verifiedEmail: "true",
-          },
+        const type = params.type as string;
+        Toast.show({
+          type: "success",
+          text1: "Email verified successfully",
         });
-      } catch (error) {
-        console.error("Error verifying email:", error);
-        alert("There was an error verifying your email. Please try again.");
+        if (!type) {
+          const storageKey = `completedSteps_${accountType}`;
+          const savedSteps = await AsyncStorage.getItem(storageKey);
+          const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
+          if (!completedSteps.includes("email")) {
+            completedSteps.push("email");
+            await AsyncStorage.setItem(
+              storageKey,
+              JSON.stringify(completedSteps)
+            );
+          }
+          await AsyncStorage.setItem("current_account_type", accountType);
+          router.push({
+            pathname: "./setup-screen",
+            params: {
+              accountType: accountType,
+            },
+          });
+        } else {
+          await AsyncStorage.setItem("Type", JSON.stringify(type));
+          router.replace("/reset-password");
+        }
+      } catch (error: any) {
+        if (error.response?.status == 401) {
+          Toast.show({
+            type: "error",
+            text1: error.response.data.message,
+          });
+          setResendCode(true);
+        } else {
+          Toast.show({
+            type: "error",
+            text1: error.response.data.message,
+          });
+        }
+      } finally {
+        setLoading(false);
       }
     } else {
-      alert("Please enter a valid 6-digit code.");
+      Toast.show({
+        type: "info",
+        text1: "Please enter a valid 6-digit verification code",
+      });
+    }
+  };
+
+  const handleResend = async () => {
+    setLoadingResend(true);
+    try {
+      if (accountType === "business") {
+        const response: any = await resendBusinessVerificationCode();
+        if (!response) {
+          Toast.show({
+            type: "error",
+            text1: "Internal Server Error",
+          });
+          setLoadingResend(false);
+          return;
+        }
+      } else {
+        const response: any = await resendCustomerVerificationCode();
+        if (!response) {
+          Toast.show({
+            type: "error",
+            text1: "Internal Server Error",
+          });
+          setLoadingResend(false);
+          return;
+        }
+      }
+      Toast.show({
+        type: "success",
+        text1: "Verification code resent successfully",
+      });
+    } catch (error: any) {
+      if (error.response?.status == 404) {
+        Toast.show({
+          type: "error",
+          text1: "Internal Server Error",
+        });
+      }
+      setLoadingResend(false);
+    } finally {
+      setLoadingResend(false);
     }
   };
 
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
+      onBack={() => router.back()}
       headerImage={
         <MaterialCommunityIcons
           name="email-check-outline"
@@ -88,27 +173,42 @@ export default function VerifyEmailScreen() {
 
         <View className="space-y-4 mt-8 flex-col gap-4">
           <ThemedTextInput
-            placeholder="Enter verification code"
-            keyboardType="numeric"
+            className="w-full h-12 px-4 border border-gray-300 rounded-md"
             value={code}
             onChangeText={setCode}
-            containerClassName="border border-white p-3 rounded-xl"
-            style={{
-              color: "white",
-              fontSize: 18,
-              textAlign: "center",
-              textAlignVertical: "center",
-            }} // Centers text and cursor
+            keyboardType="numeric"
+            label="Verification Code"
           />
 
           <HapticButton
             onPress={handleVerify}
             className="bg-indigo-600/30 py-3 mt-2 rounded-xl"
+            disabled={loading}
           >
-            <ThemedText className="text-white text-center text-lg font-semibold">
-              Verify Email
-            </ThemedText>
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <ThemedText className="text-white text-center text-lg font-semibold">
+                Verify Email
+              </ThemedText>
+            )}
           </HapticButton>
+
+          {resendcode && (
+            <HapticButton
+              onPress={handleResend}
+              disabled={loadingResend}
+              className="bg-indigo-600/30 py-3 mt-2 rounded-xl"
+            >
+              {loadingResend ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <ThemedText className="text-white text-center text-lg font-semibold">
+                  Resend Verification Code
+                </ThemedText>
+              )}
+            </HapticButton>
+          )}
         </View>
       </View>
     </ParallaxScrollView>

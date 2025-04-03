@@ -1,0 +1,19 @@
+meta {
+  name: Register Customer
+  type: http
+  seq: 3
+}
+
+post {
+  url: https://securent.onrender.com/api/customer/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Omer Gaizinger",
+    "email": "Omerg863@gmail.com",
+    "password": "OmerOmer886!"
+  }
+}

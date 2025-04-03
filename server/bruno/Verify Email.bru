@@ -1,0 +1,21 @@
+meta {
+  name: Verify Email
+  type: http
+  seq: 4
+}
+
+post {
+  url: https://securent.onrender.com/api/customer/verify-email
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZTQyMTc3NTlmMWEyZmM0YzJkODk1ZCIsInVuaXF1ZSI6ImY0ZGZiNGVhLWU5M2YtNGQ1Zi05MzBjLTVhZTIwMDVkYjVhOCIsImlhdCI6MTc0MzAwNDE1NywiZXhwIjoxNzQzMDkwNTU3fQ.mE5Nsw2YcZ3i94HEru5V-0zZDlJ4EeQaCz2Ll04BMbg
+}
+
+body:json {
+  {
+    "code": "832369"
+  }
+}

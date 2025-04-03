@@ -4,13 +4,14 @@ import HapticButton from "@/components/ui/HapticButton";
 import { ThemedText } from "@/components/ui/ThemedText";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BusinessHomePage = () => {
   const router = useRouter();
-
-  const handleNewTransaction = () => {
+  
+  const handleNewTransaction = () => { 
     // Navigate to new transaction page
-    router.push("./bank-details");
+    router.push("/business/new-transaction");
   };
 
   const handleTransactionPress = (id: string) => {
