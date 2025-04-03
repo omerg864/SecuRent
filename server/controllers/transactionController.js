@@ -79,7 +79,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 	const item = Item.findById(id);
 	if (!item) {
 		res.status(404);
-		throw new Error('Item not found');
+		throw new Error('Transaction details not found');
 	}
 
 	// TODO: use paypal for create transaction

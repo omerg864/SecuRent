@@ -5,6 +5,7 @@ import {
 	TouchableOpacity,
 	TextInput,
 	StyleSheet,
+	ActivityIndicator,
 } from 'react-native';
 import { ca, DatePickerModal, TimePickerModal } from 'react-native-paper-dates';
 import HapticButton from '@/components/ui/HapticButton';
@@ -12,7 +13,7 @@ import { ThemedText } from '@/components/ui/ThemedText';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
 import { createItem } from '@/services/itemService';
-import { ItemId } from '@/services/interfaceService';
+import { Item } from '@/services/interfaceService';
 
 const amounts = [100, 500, 1000];
 const format = {
@@ -59,12 +60,7 @@ export default () => {
 			// create temporary item
 			setIsLoading(true);
 			try {
-				const response: ItemId = await createItem(
-					desc,
-					date,
-					price,
-					true
-				);
+				const response = await createItem(desc, date, price, true);
 				if (!response) {
 					setIsLoading(false);
 					Toast.show({
@@ -81,7 +77,7 @@ export default () => {
 				router.push({
 					pathname: 'QRCodeScreen',
 					params: {
-						id: response._id,
+						id: response.item._id,
 					},
 				});
 			} catch (error: any) {
@@ -210,10 +206,18 @@ export default () => {
 				className="bg-white rounded-full py-4 items-center mb-5 shadow-lg mt-5"
 				style={{ backgroundColor: '#4338CA' }}
 				onPress={handleContinueButton}
+				disabled={isLoading}
 			>
-				<ThemedText className="text-white font-semibold text-lg">
-					Continue
-				</ThemedText>
+				{isLoading ? (
+					<ActivityIndicator size="small" color="#FFFFFF" />
+				) : (
+					<ThemedText
+						className="text-white font-semibold text-lg"
+						lightColor="#fff"
+					>
+						Continue
+					</ThemedText>
+				)}
 			</HapticButton>
 		</View>
 	);

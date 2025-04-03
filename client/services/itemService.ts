@@ -1,5 +1,5 @@
 import { checkToken, client } from './httpClient';
-import { ItemId } from './interfaceService';
+import { Item } from './interfaceService';
 
 const createItem = async (
 	description: string,
@@ -9,7 +9,7 @@ const createItem = async (
 ) => {
 	try {
 		const accessToken = await checkToken();
-		const response = await client.post<ItemId>(
+		const response = await client.post<{item: Item, success: boolean}>(
 			'item',
 			{
 				temporary,

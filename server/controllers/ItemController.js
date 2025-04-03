@@ -26,7 +26,7 @@ const createItem = asyncHandler(async (req, res) => {
 		business: req.business._id,
 		description,
 		price,
-		currency: req.business.currency,
+		currency: req.business.currency || 'USD',
 		image: imageUrl,
 		temporary,
 	});
