@@ -40,7 +40,7 @@ const businessScheme = mongoose.Schema({
 	address: {
 		type: String,
 	},
-	Image: {
+	image: {
 		type: String,
 	},
 	currency: {

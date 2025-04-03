@@ -6,10 +6,13 @@ import {
 	TextInput,
 	StyleSheet,
 } from 'react-native';
-import { DatePickerModal, TimePickerModal } from 'react-native-paper-dates';
+import { ca, DatePickerModal, TimePickerModal } from 'react-native-paper-dates';
 import HapticButton from '@/components/ui/HapticButton';
 import { ThemedText } from '@/components/ui/ThemedText';
 import Toast from 'react-native-toast-message';
+import { router } from 'expo-router';
+import { createItem } from '@/services/itemService';
+import { ItemId } from '@/services/interfaceService';
 
 const amounts = [100, 500, 1000];
 const format = {
@@ -20,13 +23,14 @@ const format = {
 };
 
 export default () => {
-  const startDate = useRef<Date>(new Date());
+	const startDate = useRef<Date>(new Date());
 
 	const [desc, setDesc] = useState('');
-	const [amount, setAmount] = useState(0);
+	const [price, setPrice] = useState(0);
 	const [date, setDate] = useState(new Date());
 	const [show, setShow] = useState({ date: false, time: false });
 	const [editAmount, setEditAmount] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 
 	const updateDate = (d?: Date) => d && setDate(d);
 	const updateTime = (h: number, m: number) =>
@@ -36,26 +40,58 @@ export default () => {
 		let error = '';
 		if (!desc) {
 			error = 'Please fill item description';
-      Toast.show({ type: 'error', text1: `${error}` });
-      return;
+			Toast.show({ type: 'error', text1: `${error}` });
+			return;
 		}
-		if (!amount) {
-			error = 'Amount must be set';
-      Toast.show({ type: 'error', text1: `${error}` });
-      return;
+		if (!price) {
+			error = 'Price must be set';
+			Toast.show({ type: 'error', text1: `${error}` });
+			return;
 		}
 		if (date < startDate.current) {
 			error = 'Date is not valid';
-      Toast.show({ type: 'error', text1: `${error}` });
-      return;
+			Toast.show({ type: 'error', text1: `${error}` });
+			return;
 		}
 		if (error) {
 			Toast.show({ type: 'error', text1: `${error}` });
 		} else {
-			Toast.show({
-				type: 'success',
-				text1: 'Success',
-			});
+			// create temporary item
+			setIsLoading(true);
+			try {
+				const response: ItemId = await createItem(
+					desc,
+					date,
+					price,
+					true
+				);
+				if (!response) {
+					setIsLoading(false);
+					Toast.show({
+						type: 'error',
+						text1: 'Internal Server Error',
+					});
+					return;
+				}
+				setDesc('');
+				setPrice(0);
+				setDate(new Date());
+				setShow({ date: false, time: false });
+				setEditAmount(false);
+				router.push({
+					pathname: 'QRCodeScreen',
+					params: {
+						id: response._id,
+					},
+				});
+			} catch (error: any) {
+				console.log(error.response);
+				Toast.show({
+					type: 'error',
+					text1: error.response.data.message,
+				});
+			}
+			setIsLoading(false);
 		}
 	};
 
@@ -116,10 +152,10 @@ export default () => {
 			</View>
 
 			<View className="mb-8">
-				<Text className="text-lg font-semibold mb-3">Set Amount</Text>
+				<Text className="text-lg font-semibold mb-3">Set Price</Text>
 				<View className="flex-row items-center mb-4">
 					<AmountBtn
-						onPress={() => setAmount(Math.max(0, amount - 50))}
+						onPress={() => setPrice(Math.max(0, price - 50))}
 					>
 						-
 					</AmountBtn>
@@ -131,20 +167,18 @@ export default () => {
 							<TextInput
 								className="text-2xl font-medium text-center"
 								keyboardType="numeric"
-								value={amount.toString()}
-								onChangeText={(t) =>
-									setAmount(parseInt(t) || 0)
-								}
+								value={price.toString()}
+								onChangeText={(t) => setPrice(parseInt(t) || 0)}
 								onBlur={() => setEditAmount(false)}
 								autoFocus
 							/>
 						) : (
 							<Text className="text-2xl font-medium">
-								{format.currency(amount)}
+								{format.currency(price)}
 							</Text>
 						)}
 					</TouchableOpacity>
-					<AmountBtn onPress={() => setAmount(amount + 50)}>
+					<AmountBtn onPress={() => setPrice(price + 50)}>
 						+
 					</AmountBtn>
 				</View>
@@ -154,17 +188,15 @@ export default () => {
 						<TouchableOpacity
 							key={a}
 							className={`border-2 rounded-lg py-4 flex-1 mx-1 items-center ${
-								amount === a
+								price === a
 									? 'bg-indigo-600 border-indigo-600'
 									: 'border-gray-300 bg-white'
 							}`}
-							onPress={() => setAmount(a)}
+							onPress={() => setPrice(a)}
 						>
 							<Text
 								className={`text-lg ${
-									amount === a
-										? 'text-white'
-										: 'text-gray-700'
+									price === a ? 'text-white' : 'text-gray-700'
 								}`}
 							>
 								{format.currency(a)}

@@ -7,6 +7,9 @@ const ReviewSchema = mongoose.Schema(
 			ref: 'Business',
 			required: true,
 		},
+		images: {
+			type: [String],
+		},
 		customer: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Customer',

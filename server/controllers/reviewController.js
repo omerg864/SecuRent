@@ -26,11 +26,17 @@ const createReview = asyncHandler(async (req, res) => {
 
 	const rating = parseInt(result.data[0].text);
 
+	let images = [];
+	if (req.files) {
+		images = await uploadReviewImages(req.files);
+	}
+
 	const review = await Review.create({
 		business,
 		customer: req.customer.id,
 		rating,
 		content,
+		images,
 	});
 
 	res.status(201).json({
@@ -64,9 +70,24 @@ const getReviewById = asyncHandler(async (req, res) => {
 	});
 });
 
+const uploadReviewImages = async (images) => {
+	const promises = [];
+	for (let i = 0; i < images.length; i++) {
+		const imageID = uuidv4();
+		promises.push(
+			uploadToCloudinary(
+				images[i].buffer,
+				`${process.env.CLOUDINARY_BASE_FOLDER}/reviews`,
+				imageID
+			)
+		);
+	}
+	return await Promise.all(promises);
+};
+
 const updateReview = asyncHandler(async (req, res) => {
 	const { id } = req.params;
-	const { content } = req.body;
+	const { content, imagesDeleted } = req.body;
 
 	const review = await Review.findById(id);
 	if (!review) {
@@ -82,6 +103,25 @@ const updateReview = asyncHandler(async (req, res) => {
 	if (review.customer.toString() !== req.customer._id.toString()) {
 		res.status(403);
 		throw new Error('Not authorized to update this review');
+	}
+
+	let images = review.images || [];
+	for (let i = 0; i < imagesDeleted.length; i++) {
+		const imageUrl = imagesDeleted[i];
+		if (imageUrl && imageUrl !== '' && review.images.includes(imageUrl)) {
+			await deleteImage(imageUrl, true);
+			images = images.filter((img) => img !== imageUrl);
+		}
+	}
+
+	let imagesAdded = [];
+
+	if (req.files) {
+		imagesAdded = await uploadReviewImages(req.files);
+	}
+
+	if (imagesAdded.length > 0) {
+		images = [...images, ...imagesAdded];
 	}
 
 	if (review.content !== content) {
@@ -126,6 +166,17 @@ const deleteReview = asyncHandler(async (req, res) => {
 		res.status(403);
 		throw new Error('Not authorized to delete this review');
 	}
+
+	const promises = [];
+
+	for (let i = 0; i < review.images.length; i++) {
+		const imageUrl = review.images[i];
+		if (imageUrl && imageUrl !== '') {
+			promises.push(deleteImage(imageUrl, true));
+		}
+	}
+
+	await Promise.all(promises);
 
 	await review.deleteOne();
 	res.status(200).json({

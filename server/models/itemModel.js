@@ -15,14 +15,18 @@ const ItemSchema = mongoose.Schema(
             type: Number,
             required: true,
         },
-        price:{
-            type: Number,
-            required: true,
-        },
         currency:{
             type: String,
             required: true,
-        }
+        },
+        image:{
+            type: String,
+        },
+        temporary:{
+            type: Boolean,
+            default: false,
+        },
+    
     },
     { timestamps: true }
 );

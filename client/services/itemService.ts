@@ -4,7 +4,7 @@ import { ItemId } from './interfaceService';
 const createItem = async (
 	description: string,
 	date: Date,
-	amount: number,
+	price: number,
 	temporary: boolean
 ) => {
 	try {
@@ -15,7 +15,7 @@ const createItem = async (
 				temporary,
 				description,
 				date,
-				amount,
+				price,
 			},
 			{
 				headers: { Authorization: `Bearer ${accessToken}` },
