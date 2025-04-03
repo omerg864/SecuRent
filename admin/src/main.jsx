@@ -8,17 +8,19 @@ import 'jsvectormap/dist/jsvectormap.css';
 import 'flatpickr/dist/flatpickr.min.css';
 import { AuthProvider } from './context/AuthContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { ToastContainer } from 'react-toastify';
 
 createRoot(document.getElementById('root')).render(
 	<StrictMode>
-		<AuthProvider>
-			<GoogleOAuthProvider
-				clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
-			>
-				<Router>
-					<App />
-				</Router>
-			</GoogleOAuthProvider>
-		</AuthProvider>
+		<ToastContainer />
+			<AuthProvider>
+				<GoogleOAuthProvider
+					clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
+				>
+					<Router>
+						<App />
+					</Router>
+				</GoogleOAuthProvider>
+			</AuthProvider>
 	</StrictMode>
 );

@@ -19,6 +19,20 @@ export default function Layout() {
             title: "Home",
           }}
         />
+        <Drawer.Screen
+          name="new-transaction"
+          options={{
+            drawerLabel: "new-transaction",
+            title: "",
+          }}
+        />
+                <Drawer.Screen
+          name="logout"
+          options={{
+            drawerLabel: "Logout",
+            title: "Logout",
+          }}
+        />
       </Drawer>
     </GestureHandlerRootView>
   );

@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+"use client";
+
+import { useState } from "react";
 import {
   View,
   ScrollView,
@@ -6,21 +8,27 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { ThemedTextInput } from "@/components/ui/ThemedTextInput";
 import { ThemedText } from "@/components/ui/ThemedText";
 import HapticButton from "@/components/ui/HapticButton";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "@/constants/Colors";
 import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
+import { ActivityIndicator } from "react-native";
+import { updateBankDetails } from "@/services/businessService";
+import { BankDetails } from "@/services/interfaceService";
 
 const BankDetailsScreen = () => {
   const router = useRouter();
-
+  const params = useLocalSearchParams();
+  const accountType = (params.accountType as string) || "business";
   const [accountHolderName, setAccountHolderName] = useState("");
   const [bankName, setBankName] = useState("");
   const [branchNumber, setBranchNumber] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
+  const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
   const banks = [
@@ -39,11 +47,72 @@ const BankDetailsScreen = () => {
     { label: "Bank Massad", value: "bank_massad" },
   ];
 
-  const handleSaveDetails = () => {
-    router.replace({
-      pathname: "/business-setup",
-      params: { addedBank: "true" }, 
-    });
+  const handleSaveDetails = async () => {
+    if (!accountHolderName || !bankName || !branchNumber || !accountNumber) {
+      Toast.show({
+        type: "info",
+        text1: "Please fill in all fields",
+      });
+      return;
+    }
+    if (branchNumber.length !== 3) {
+      Toast.show({
+        type: "info",
+        text1: "Branch number must be 3 digits",
+      });
+      return;
+    }
+    if (accountNumber.length !== 6) {
+      Toast.show({
+        type: "info",
+        text1: "Account number must be 6 digits",
+      });
+      return;
+    }
+    setLoading(true);
+    try {
+      const data: BankDetails = {
+        accountHolderName,
+        bankName,
+        sortCode: branchNumber,
+        accountNumber,
+      };
+      const response: any = await updateBankDetails(data);
+      console.log(response);
+      if (!response) {
+        setLoading(false);
+        Toast.show({
+          type: "error",
+          text1: "Internal Server Error",
+        });
+        return;
+      }
+      const storageKey = `completedSteps_${accountType}`;
+      const savedSteps = await AsyncStorage.getItem(storageKey);
+      const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
+      if (!completedSteps.includes("bank")) {
+        completedSteps.push("bank");
+        await AsyncStorage.setItem(storageKey, JSON.stringify(completedSteps));
+      }
+      await AsyncStorage.setItem("current_account_type", accountType);
+      Toast.show({
+        type: "success",
+        text1: "Bank details saved successfully",
+      });
+      router.replace({
+        pathname: "./setup-screen",
+        params: {
+          accountType: accountType,
+        },
+      });
+    } catch (error: any) {
+        Toast.show({
+          type: "error",
+          text1: error.response.data.message,
+        });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderBankItem = ({
@@ -71,6 +140,7 @@ const BankDetailsScreen = () => {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
+      onBack={() => router.back()}
       headerImage={
         <Ionicons
           name="cash-outline"
@@ -101,6 +171,8 @@ const BankDetailsScreen = () => {
               value={accountHolderName}
               onChangeText={setAccountHolderName}
               label="Account Holder Name"
+              keyboardType="default"
+              editable={!loading}
             />
 
             {/* Bank Name Dropdown */}
@@ -109,6 +181,7 @@ const BankDetailsScreen = () => {
               <TouchableOpacity
                 className="h-12 w-full border border-gray-300 rounded-xl justify-center items-center"
                 onPress={() => setModalVisible(true)}
+                disabled={loading}
               >
                 <ThemedText className="text-lg text-gray-900">
                   {bankName || "Select Bank"}
@@ -123,6 +196,7 @@ const BankDetailsScreen = () => {
               onChangeText={setBranchNumber}
               label="Branch Number"
               keyboardType="numeric"
+              editable={!loading}
             />
 
             {/* Account Number */}
@@ -132,6 +206,7 @@ const BankDetailsScreen = () => {
               onChangeText={setAccountNumber}
               label="Account Number"
               keyboardType="numeric"
+              editable={!loading}
             />
           </View>
 
@@ -140,10 +215,15 @@ const BankDetailsScreen = () => {
             <HapticButton
               onPress={handleSaveDetails}
               className="bg-indigo-600/30 py-3 px-8 rounded-xl w-full"
+              disabled={loading}
             >
-              <ThemedText className="text-white text-center text-lg font-semibold">
-                Save Details
-              </ThemedText>
+              {loading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <ThemedText className="text-white text-center text-lg font-semibold">
+                  Save Details
+                </ThemedText>
+              )}
             </HapticButton>
           </View>
         </View>

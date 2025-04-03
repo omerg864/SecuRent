@@ -22,6 +22,7 @@ import * as Location from 'expo-location';
 import { getDistance } from '@/utils/functions';
 import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const businesses_obj: Business[] = [
 	{
@@ -95,6 +96,7 @@ const CustomerHome: React.FC = () => {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [maxDistance, setMaxDistance] = useState(10);
 	const [minRating, setMinRating] = useState(0);
+
 
 	const onBarcodeClick = () => {
 		router.push('/customer/QRScanner');
