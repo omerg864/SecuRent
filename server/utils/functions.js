@@ -88,3 +88,30 @@ export const generateBusinessRefreshToken = (id) => {
 	);
 	return { refreshToken, unique };
 };
+export const decodeAdminToken = (token) => {
+	try {
+		const decoded = jwt.verify(token, process.env.JWT_SECRET_ADMIN_ACCESS);
+		return decoded.id;
+	} catch (error) {
+		return null;
+	}
+}
+
+export const decodeCustomerToken = (token) => {
+	try {
+		const decoded = jwt.verify(token, process.env.JWT_SECRET_CUSTOMER_ACCESS);
+		return decoded.id;
+	} catch (error) {
+		return null;
+	}
+}
+
+export const decodeBusinessToken = (token) => {
+	try {
+		const decoded = jwt.verify(token, process.env.JWT_SECRET_BUSINESS_ACCESS);
+		return decoded.id;
+	} catch (error) {
+		return null;
+	}
+}
+
