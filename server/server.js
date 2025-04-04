@@ -14,11 +14,17 @@ import businessRoutes from './routes/businessRoutes.js';
 import itemRoutes from './routes/itemRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import cors from 'cors';
+import { WebSocketServer } from 'ws';
+import http from 'http';
 
 const config = dotenv.config();
 const PORT = process.env.PORT || 3000;
 
 const app = express();
+
+const server = http.createServer(app);
+
+const wss = new WebSocketServer({ server });
 
 // Enable CORS first
 const corsOptions = {
@@ -39,7 +45,7 @@ app.use(rateLimiterMiddleware);
 // Database connection
 connectDB(() => {
 	if (process.env.NODE_ENV !== 'test') {
-		app.listen(PORT, () => {
+		server.listen(PORT, () => {
 			console.log(`Server is running on port ${PORT}`.green.bold);
 		});
 	}
@@ -55,3 +61,5 @@ app.use('/api/review', reviewRoutes);
 
 // Error handler middleware should be last
 app.use(errorHandler);
+
+export { wss };
