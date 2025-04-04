@@ -11,6 +11,7 @@ const admins = [];
 const businesses = [];
 
 wss.on('connection', (ws, req) => {
+	ws.send('Welcome to the WebSocket server!');
 	const parameters = url.parse(req.url, true);
 	if (!parameters.query.token || !parameters.query.type) {
 		ws.close();
@@ -45,6 +46,7 @@ wss.on('connection', (ws, req) => {
 	}
 
 	ws.on('close', async () => {
+		console.log('Client disconnected:', ws.id);
 		if (ws.type === 'admin') {
 			admins.splice(admins.indexOf(ws), 1);
 		} else if (ws.type === 'customer') {
