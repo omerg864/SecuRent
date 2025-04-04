@@ -24,6 +24,7 @@ wss.on('connection', (ws, req) => {
 		if (!ws.id) {
 			return;
 		}
+		console.log('Admin connected:', ws.id);
 		admins.push(ws);
 	} else if (type === 'customer') {
 		ws.id = decodeCustomerToken(parameters.query.token);
@@ -31,6 +32,7 @@ wss.on('connection', (ws, req) => {
 		if (!ws.id) {
 			return;
 		}
+		console.log('Customer connected:', ws.id);
 		customers.push(ws);
 	} else if (type === 'business') {
 		ws.id = decodeBusinessToken(parameters.query.token);
@@ -38,6 +40,7 @@ wss.on('connection', (ws, req) => {
 		if (!ws.id) {
 			return;
 		}
+		console.log('Business connected:', ws.id);
 		businesses.push(ws);
 	}
 

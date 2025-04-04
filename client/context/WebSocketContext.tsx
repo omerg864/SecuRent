@@ -1,9 +1,14 @@
-import React, { createContext, useContext } from 'react';
-import useWebSocket, { ReadyState } from 'react-native-use-websocket';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import useWebSocket, {
+	ReadyState,
+	SendMessage,
+} from 'react-native-use-websocket';
 import Constants from 'expo-constants';
+import { checkToken } from '@/services/httpClient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface WebSocketContextType {
-	sendMessage: (message: string) => void;
+	sendMessage: SendMessage | null;
 	lastMessage: WebSocketMessageEvent | null;
 	readyState: ReadyState;
 }
@@ -12,21 +17,42 @@ const WebSocketContext = createContext<WebSocketContextType | undefined>(
 	undefined
 );
 
-export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
-	children,
-}) => {
-	const socketUrl = Constants.expoConfig?.extra?.socketUrl as string;
+export const WebSocketProvider: React.FC<{
+	children: React.ReactNode;
+}> = ({ children }) => {
+	const socketUrl = Constants.expoConfig?.extra?.webSocketUrl as string;
+	const [wsUrl, setWsUrl] = useState<string | null>(null);
 
-	const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl, {
-		// Everything here is temporary till we'll decide on the connection format that we want to use.
+	useEffect(() => {
+		const init = async () => {
+			try {
+				const token = await checkToken();
+				const type = await AsyncStorage.getItem('current_account_type');
+				setWsUrl(`${socketUrl}?token=${token}&type=${type}`);
+			} catch (error) {
+				console.error('WebSocket token error:', error);
+			}
+		};
 
-		shouldReconnect: () => true, // Should make the server live at all time
-		reconnectInterval: 1500, // Reconnect after 1.5 seconds
-		share: true, // Keeps the connection alive across all components
-		onOpen: () => console.log('✅ WebSocket connected!'),
-		onClose: (event) => console.log('❌ WebSocket closed:', event),
-		onMessage: (event) => console.log('📩 Message received:', event.data),
-	});
+		init();
+	}, [wsUrl]);
+
+	const { sendMessage, lastMessage, readyState } = useWebSocket(
+		wsUrl,
+		{
+			shouldReconnect: () => true,
+			reconnectInterval: 1500,
+			share: true,
+			onOpen: () => console.log('✅ WebSocket connected'),
+			onClose: (event) => console.log('❌ WebSocket closed', event),
+			onMessage: (event) =>
+				console.log('📨 Message received', event.data),
+			onError: (event) => console.log('❌ WebSocket error', event),
+		},
+		Boolean(wsUrl)
+	);
+
+	if (!wsUrl) return null; // or loading spinner
 
 	return (
 		<WebSocketContext.Provider
@@ -37,7 +63,6 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
 	);
 };
 
-// Custom hook for using WebSocket in components
 export const useWebSocketContext = () => {
 	const context = useContext(WebSocketContext);
 	if (!context) {

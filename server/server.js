@@ -24,6 +24,7 @@ const app = express();
 
 const server = http.createServer(app);
 
+// websocket url: `ws://localhost:${PORT}` or `wss://yourdomain.com`
 const wss = new WebSocketServer({ server });
 
 // Enable CORS first
