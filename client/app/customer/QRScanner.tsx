@@ -14,6 +14,7 @@ import {
 	View,
 	Alert,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 export default function QRScannerScreen() {
 	const [facing, setFacing] = useState<CameraType>('back');
@@ -25,6 +26,9 @@ export default function QRScannerScreen() {
 		if (!permission) {
 			requestPermission();
 		}
+		return () => {
+			setScanned(false);
+		};
 	}, []);
 
 	if (!permission) {
@@ -33,8 +37,8 @@ export default function QRScannerScreen() {
 
 	if (!permission.granted) {
 		return (
-			<View style={styles.container}>
-				<Text style={styles.message}>
+			<View className="flex-1 justify-center items-center px-4">
+				<Text className="text-center mb-4 text-base">
 					We need your permission to access the camera
 				</Text>
 				<Button onPress={requestPermission} title="Grant Permission" />
@@ -45,14 +49,51 @@ export default function QRScannerScreen() {
 	const handleBarCodeScanned = (result: BarcodeScanningResult) => {
 		if (!scanned) {
 			setScanned(true);
-			Alert.alert('QR Code Scanned', `Data: ${result.data}`, [
-				{ text: 'OK', onPress: () => setScanned(false) },
-			]);
+			const data = result.data;
+			// extract id from the scanned data data is in the format of secuRent://id
+			const app_name = data.split('://')[0];
+			if (app_name !== 'secuRent') {
+				Toast.show({
+					type: 'error',
+					text1: 'Invalid QR Code',
+					text2: 'Please scan a valid QR code.',
+				});
+				setScanned(false);
+				return;
+			}
+			const id = data.split('://')[1];
+			// check if id is valid
+			if (!id) {
+				Toast.show({
+					type: 'error',
+					text1: 'Invalid QR Code',
+					text2: 'Please scan a valid QR code.',
+				});
+				setScanned(false);
+				return;
+			}
+
+			// TODO: navigate to the approve transaction screen with the id
+			Toast.show({
+				type: 'success',
+				text1: 'QR Code',
+			});
+			/*
+			router.push({
+				pathname: 'approve-transaction',
+				params: { id },
+			}); 
+			*/
 		}
 	};
 
+	const goBack = () => {
+		setScanned(false);
+		router.back();
+	}
+
 	return (
-		<View style={styles.container}>
+		<View className="flex-1 justify-center">
 			<CameraView
 				style={styles.camera}
 				facing={facing}
@@ -61,20 +102,20 @@ export default function QRScannerScreen() {
 				}}
 				onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
 			>
-				<View style={styles.buttonContainer}>
+				<View className="absolute bottom-5 flex-row w-full justify-around px-5">
 					<TouchableOpacity
-						style={styles.button}
+						className="bg-black/60 px-4 py-2 rounded-lg"
 						onPress={() =>
 							setFacing(facing === 'back' ? 'front' : 'back')
 						}
 					>
-						<Text style={styles.text}>Flip Camera</Text>
+						<Text className="text-white text-lg">Flip Camera</Text>
 					</TouchableOpacity>
 					<TouchableOpacity
-						style={styles.button}
-						onPress={() => router.back()}
+						className="bg-black/60 px-4 py-2 rounded-lg"
+						onPress={goBack}
 					>
-						<Text style={styles.text}>Go Back</Text>
+						<Text className="text-white text-lg">Go Back</Text>
 					</TouchableOpacity>
 				</View>
 			</CameraView>
@@ -83,32 +124,7 @@ export default function QRScannerScreen() {
 }
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		justifyContent: 'center',
-	},
-	message: {
-		textAlign: 'center',
-		paddingBottom: 10,
-	},
 	camera: {
 		flex: 1,
-	},
-	buttonContainer: {
-		position: 'absolute',
-		bottom: 20,
-		flexDirection: 'row',
-		width: '100%',
-		justifyContent: 'space-around',
-		paddingHorizontal: 20,
-	},
-	button: {
-		backgroundColor: 'rgba(0,0,0,0.6)',
-		padding: 10,
-		borderRadius: 10,
-	},
-	text: {
-		fontSize: 18,
-		color: 'white',
 	},
 });
