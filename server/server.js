@@ -14,11 +14,15 @@ import businessRoutes from './routes/businessRoutes.js';
 import itemRoutes from './routes/itemRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import cors from 'cors';
+import http from 'http';
+import { setUpWebSocket } from './config/websocket.js';
 
 const config = dotenv.config();
 const PORT = process.env.PORT || 3000;
 
 const app = express();
+
+const server = http.createServer(app);
 
 // Enable CORS first
 const corsOptions = {
@@ -39,8 +43,9 @@ app.use(rateLimiterMiddleware);
 // Database connection
 connectDB(() => {
 	if (process.env.NODE_ENV !== 'test') {
-		app.listen(PORT, () => {
+		server.listen(PORT, () => {
 			console.log(`Server is running on port ${PORT}`.green.bold);
+			setUpWebSocket(server);
 		});
 	}
 });
