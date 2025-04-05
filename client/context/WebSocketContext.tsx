@@ -21,38 +21,47 @@ export const WebSocketProvider: React.FC<{
 	children: React.ReactNode;
 }> = ({ children }) => {
 	const socketUrl = Constants.expoConfig?.extra?.webSocketUrl as string;
-	const [wsUrl, setWsUrl] = useState<string | null>(null);
+
+	const authWebSocket = async () => {
+		try {
+			const token = await checkToken();
+			const type = await AsyncStorage.getItem('current_account_type');
+			sendMessage(
+				JSON.stringify({
+					type: 'auth',
+					data: {
+						token,
+						type,
+					},
+				})
+			);
+		} catch (error) {
+			console.error('WebSocket token error:', error);
+		}
+	};
+
+	const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl, {
+		shouldReconnect: () => true,
+		reconnectInterval: 1500,
+		share: true,
+		onOpen: () => console.log('✅ WebSocket connected'),
+		onClose: (event) => console.log('❌ WebSocket closed', event),
+		onMessage: (event) => console.log('📨 Message received', event.data),
+		onError: (event) => console.log('❌ WebSocket error', event),
+	});
 
 	useEffect(() => {
-		const init = async () => {
+		if (lastMessage) {
 			try {
-				const token = await checkToken();
-				const type = await AsyncStorage.getItem('current_account_type');
-				setWsUrl(`${socketUrl}?token=${token}&type=${type}`);
+				const parsedMessage = JSON.parse(lastMessage.data);
+				if (parsedMessage.type === 'auth') {
+					authWebSocket();
+				}
 			} catch (error) {
-				console.error('WebSocket token error:', error);
+				console.error('Error parsing WebSocket message:', error);
 			}
-		};
-
-		init();
-	}, [wsUrl]);
-
-	const { sendMessage, lastMessage, readyState } = useWebSocket(
-		wsUrl,
-		{
-			shouldReconnect: () => true,
-			reconnectInterval: 1500,
-			share: true,
-			onOpen: () => console.log('✅ WebSocket connected'),
-			onClose: (event) => console.log('❌ WebSocket closed', event),
-			onMessage: (event) =>
-				console.log('📨 Message received', event.data),
-			onError: (event) => console.log('❌ WebSocket error', event),
-		},
-		Boolean(wsUrl)
-	);
-
-	if (!wsUrl) return null; // or loading spinner
+		}
+	}, [lastMessage]);
 
 	return (
 		<WebSocketContext.Provider
