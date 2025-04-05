@@ -33,17 +33,13 @@ const verifyCompanyNumber = async (companyNumber: string) => {
   }
 };
 
-const verifyEmailBusiness = async (code: string) => {
+const verifyEmailBusiness = async (code: string, userId: string) => {
   try {
-    const accessToken = await checkToken();
     const response = await client.post<AuthResponse>(
       "business/verify-email",
-      { code },
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }
+      { code , userId }
     );
-    return response.data.success;
+    return response.data;
   } catch (error) {
     throw error || "Email verification failed.";
   }
@@ -82,15 +78,11 @@ const updateBusinessPassword = async (newPassword: string) => {
   }
 };
 
-const resendBusinessVerificationCode = async () => {
+const resendBusinessVerificationCode = async (userId: string) => {
   try {
-    const accessToken = await checkToken();
     const response = await client.post<AuthResponse>(
       "business/resend-code",
-      {},
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }
+      { userId }
     );
     return response.data.success;
   } catch (error) {

@@ -13,6 +13,7 @@ const handleLogout = async () => {
         await AsyncStorage.removeItem("Access_Token");
         await AsyncStorage.removeItem("Refresh_Token");
         await AsyncStorage.removeItem("Auth_Expiration");
+        await AsyncStorage.removeItem("UserID");
 
         router.replace("/login"); 
     } catch (error) {

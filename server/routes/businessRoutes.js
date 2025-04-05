@@ -29,13 +29,13 @@ router.post(
 	verifyAndUpdateCompanyNumber
 );
 router.post('/verify-bank', authBusiness, verifyBank);
-router.post('/verify-email', authBusiness, verifyEmail);
+router.post('/verify-email', verifyEmail);
+router.post('/resend-code', resendVerificationCode);
 
 // Protected Routes (Requires Authentication)
 router.put('/update', authBusiness, upload.single('image'), updateBusiness);
 router.delete('/delete', authBusiness, deleteBusiness);
 router.get('/:id', authBusiness, getBusinessById);
 router.put('/update-password', authBusiness, updateBusinessPassword);
-router.post('/resend-code', authBusiness, resendVerificationCode);
 
 export default router;
