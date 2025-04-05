@@ -25,7 +25,13 @@ export const WebSocketProvider: React.FC<{
 	const authWebSocket = async () => {
 		try {
 			const token = await checkToken();
-			const type = await AsyncStorage.getItem('current_account_type');
+			const businessData = await AsyncStorage.getItem(
+				'Business_Data'
+			);
+			let type = 'customer';
+			if (businessData) {
+				type = 'business';
+			}
 			sendMessage(
 				JSON.stringify({
 					type: 'auth',
@@ -36,7 +42,7 @@ export const WebSocketProvider: React.FC<{
 				})
 			);
 		} catch (error) {
-			console.error('WebSocket token error:', error);
+			console.debug('WebSocket token error:', error);
 		}
 	};
 
@@ -51,14 +57,14 @@ export const WebSocketProvider: React.FC<{
 	});
 
 	useEffect(() => {
-		if (lastMessage) {
+		if (lastMessage && lastMessage.data) {
 			try {
 				const parsedMessage = JSON.parse(lastMessage.data);
 				if (parsedMessage.type === 'auth') {
 					authWebSocket();
 				}
 			} catch (error) {
-				console.error('Error parsing WebSocket message:', error);
+				console.debug('Error parsing WebSocket message:', error);
 			}
 		}
 	}, [lastMessage]);
