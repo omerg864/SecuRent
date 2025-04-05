@@ -113,8 +113,8 @@ const registerBusiness = asyncHandler(async (req, res) => {
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {
-	const { code } = req.body;
-	const business = await Business.findById(req.business._id);
+	const { code , userId } = req.body;
+	const business = await Business.findById(userId);
 
 	if (!business) {
 		res.status(404);
@@ -130,12 +130,21 @@ const verifyEmail = asyncHandler(async (req, res) => {
 	if (business.isCompanyNumberVerified && business.isBankValid) {
 		business.isValid = true;
 	}
-	await business.save();
+
+  const accessToken = generateBusinessAccessToken(business._id);
+  console.log('accessToken', accessToken);
+  const { refreshToken, unique } = generateBusinessRefreshToken(business._id);
+  if (!business.refreshTokens) business.refreshTokens = [];
+  business.refreshTokens.push({ token: refreshToken, unique: true });
+  await business.save();
+
 
 	res.status(200).json({
 		success: true,
 		valid: business.isValid,
 		message: 'Email verified successfully',
+    accessToken,
+    refreshToken,
 	});
 });
 
@@ -450,7 +459,8 @@ const updateBusinessPassword = asyncHandler(async (req, res) => {
 });
 
 const resendVerificationCode = asyncHandler(async (req, res) => {
-	const business = await Business.findById(req.business._id);
+  const { userId } = req.body;
+	const business = await Business.findById(userId);
 
 	if (!business) {
 		res.status(404);

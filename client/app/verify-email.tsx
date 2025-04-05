@@ -37,8 +37,10 @@ export default function VerifyEmailScreen() {
     if (code.trim().length === 6) {
       setLoading(true);
       try {
+        const userId = await AsyncStorage.getItem("UserID");
+        let response: any;
         if (accountType === "business") {
-          const response: any = await verifyEmailBusiness(code);
+          response = await verifyEmailBusiness(code, userId as string);
           if (!response) {
             Toast.show({
               type: "error",
@@ -48,7 +50,7 @@ export default function VerifyEmailScreen() {
             return;
           }
         } else {
-          const response: any = await verifyEmailCustomer(code);
+          response = await verifyEmailCustomer(code, userId as string);
           if (!response) {
             Toast.show({
               type: "error",
@@ -82,6 +84,11 @@ export default function VerifyEmailScreen() {
             },
           });
         } else {
+          await AsyncStorage.setItem("Access_Token", response.accessToken);
+          await AsyncStorage.setItem("Refresh_Token", response.refreshToken);
+          const expiration = new Date();
+          expiration.setHours(expiration.getHours() + 23);
+          await AsyncStorage.setItem("Auth_Expiration", expiration.toISOString());
           await AsyncStorage.setItem("Type", JSON.stringify(type));
           router.replace("/reset-password");
         }
@@ -112,8 +119,9 @@ export default function VerifyEmailScreen() {
   const handleResend = async () => {
     setLoadingResend(true);
     try {
+      const userId = await AsyncStorage.getItem("UserID");
       if (accountType === "business") {
-        const response: any = await resendBusinessVerificationCode();
+        const response: any = await resendBusinessVerificationCode(userId as string);
         if (!response) {
           Toast.show({
             type: "error",
@@ -123,7 +131,7 @@ export default function VerifyEmailScreen() {
           return;
         }
       } else {
-        const response: any = await resendCustomerVerificationCode();
+        const response: any = await resendCustomerVerificationCode(userId as string);
         if (!response) {
           Toast.show({
             type: "error",

@@ -19,7 +19,7 @@ interface BusinessLoginResponse {
   accessToken: string;
   refreshToken: string;
   user: {
-    id: string;
+    _id: string;
     name: string;
     email: string;
     phone: string;
@@ -50,7 +50,7 @@ interface CustomerLoginResponse {
   accessToken: string;
   refreshToken: string;
   user: {
-    id: string;
+    _id: string;
     name: string;
     email: string;
     phone: string;

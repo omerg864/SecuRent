@@ -365,10 +365,8 @@ const identifyUser = asyncHandler(async (req, res) => {
 
 		res.status(200).json({
 			success: true,
-			user: business,
-			accessToken,
-			refreshToken,
 			type: 'business',
+      userId: business._id,
 		});
 	} else {
 		const customer = await Customer.findOne({
@@ -404,10 +402,8 @@ const identifyUser = asyncHandler(async (req, res) => {
 
 		res.status(200).json({
 			success: true,
-			user: customer,
-			accessToken,
-			refreshToken,
 			type: 'customer',
+      userId : customer._id,
 		});
 	}
 });
