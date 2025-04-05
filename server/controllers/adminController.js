@@ -13,6 +13,7 @@ import bcrypt from 'bcrypt';
 import { OAuth2Client } from 'google-auth-library';
 import Business from '../models/businessModel.js';
 import Customer from '../models/customerModel.js';
+import Transaction from '../models/transactionModel.js';
 import { sendEmail } from '../utils/functions.js';
 import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -412,6 +413,87 @@ const identifyUser = asyncHandler(async (req, res) => {
 	}
 });
 
+const adminAnalytics = asyncHandler(async (req, res) => {
+	const numCustomers = await Customer.countDocuments();
+	const numBusinesses = await Business.countDocuments();
+	const numTransactions = await Transaction.countDocuments();
+	const numActiveTransactions = await Transaction.countDocuments({
+		status: 'open',
+	});
+	const numChargedTransactions = await Transaction.countDocuments({
+		status: 'charged',
+	});
+	const now = new Date();
+	const oneYearAgo = new Date(now);
+	oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+	const numChargedTransactionsLastYear = await Transaction.countDocuments({
+		createdAt: { $gte: oneYearAgo },
+		status: 'charged',
+	});
+
+	const numTransactionsLastYear = await Transaction.countDocuments({
+		createdAt: { $gte: oneYearAgo },
+	});
+
+	const startOfWeek = (date) => {
+		const day = date.getDay();
+		const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday
+		return new Date(date.setDate(diff));
+	};
+
+	const endOfWeek = (date) => {
+		const start = startOfWeek(new Date(date));
+		return new Date(start.setDate(start.getDate() + 6));
+	};
+	const startOfThisWeek = startOfWeek(new Date(now));
+	const endOfThisWeek = endOfWeek(new Date(now));
+
+	const startOfLastWeek = new Date(startOfThisWeek);
+	startOfLastWeek.setDate(startOfThisWeek.getDate() - 7);
+	const endOfLastWeek = new Date(endOfThisWeek);
+	endOfLastWeek.setDate(endOfThisWeek.getDate() - 7);
+
+	const numClosedTransactionsThisWeek = await Transaction.countDocuments({
+		createdAt: { $gte: startOfThisWeek, $lte: endOfThisWeek },
+		status: 'closed',
+	});
+
+	const numClosedTransactionsLastWeek = await Transaction.countDocuments({
+		createdAt: { $gte: startOfLastWeek, $lte: endOfLastWeek },
+		status: 'closed',
+	});
+
+	const numChargedTransactionsThisWeek = await Transaction.countDocuments({
+		createdAt: { $gte: startOfThisWeek, $lte: endOfThisWeek },
+		status: 'charged',
+	});
+
+	const numChargedTransactionsLastWeek = await Transaction.countDocuments({
+		createdAt: { $gte: startOfLastWeek, $lte: endOfLastWeek },
+		status: 'charged',
+	});
+
+	res.status(200).json({
+		success: true,
+		analytics: {
+			numCustomers,
+			numBusinesses,
+			numTransactions,
+			numActiveTransactions,
+			numChargedTransactions,
+			numTransactionsLastYear,
+			numChargedTransactionsLastYear,
+			oneYearAgo,
+			now,
+			numClosedTransactionsThisWeek,
+			numClosedTransactionsLastWeek,
+			numChargedTransactionsThisWeek,
+			numChargedTransactionsLastWeek,
+		},
+	});
+});
+
 export {
 	login,
 	register,
@@ -421,4 +503,5 @@ export {
 	verifyAdmin,
 	loginClient,
 	identifyUser,
+	adminAnalytics
 };
