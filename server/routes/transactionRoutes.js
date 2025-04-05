@@ -10,21 +10,27 @@ import {
 	getTransactionAdmin,
 	getCustomerTransactionsAdmin,
 	getBusinessTransactionsAdmin,
+	createTransactionFromItem,
 } from '../controllers/transactionController.js';
-import { authAdmin } from '../middleware/authMiddleware.js';
+import {
+	authAdmin,
+	authBusiness,
+	authCustomer,
+} from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 // TODO: add middleware business to protect routes
-router.get('/business', getBusinessTransactions);
-router.get('/business/:id', getTransactionByBusiness);
-router.put('/release/:id', releaseDeposit);
-router.put('/charge/:id', chargeDeposit);
+router.get('/business', authBusiness, getBusinessTransactions);
+router.get('/business/:id', authBusiness, getTransactionByBusiness);
+router.put('/release/:id', authBusiness, releaseDeposit);
+router.put('/charge/:id', authBusiness, chargeDeposit);
 
 // TODO: add middleware customer to protect routes
-router.get('/customer', getCustomerTransactions);
-router.get('/customer/:id', getTransactionByCustomer);
-router.post('/', createTransaction);
+router.get('/customer', authCustomer, getCustomerTransactions);
+router.get('/customer/:id', authCustomer, getTransactionByCustomer);
+router.post('/', authCustomer, createTransaction);
+router.post('/:id', authCustomer, createTransactionFromItem);
 
 //! Admin routes
 router.get('/admin/:id', authAdmin, getTransactionAdmin);

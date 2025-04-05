@@ -24,8 +24,8 @@ export default function Layout() {
 					<Drawer.Screen
 						name="new-transaction"
 						options={{
-							drawerLabel: 'new-transaction',
-							title: '',
+							drawerLabel: 'New Transaction',
+							title: 'New Transaction',
 						}}
 					/>
 					<Drawer.Screen
