@@ -1,17 +1,41 @@
 // QRCodeScreen.tsx
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import HapticButton from '@/components/ui/HapticButton';
 import { Ionicons } from '@expo/vector-icons';
+import { useWebSocketContext } from '@/context/WebSocketContext';
+import Toast from 'react-native-toast-message';
 
 const QRCodeScreen = () => {
 	const router = useRouter();
 	// parameter to be passed in the QR code
 	const { id } = useLocalSearchParams();
 	const transactionUrl = `secuRent://${id}`;
+
+	const { lastMessage } = useWebSocketContext();
+
+	useEffect(() => {
+		if (
+			lastMessage &&
+			lastMessage.data &&
+			lastMessage.data.type === 'newTransaction'
+		) {
+			const item = lastMessage.data.item;
+			if (item) {
+				if (item._id === id) {
+					router.dismissAll();
+					router.replace('/business/business-home');
+					Toast.show({
+						type: 'success',
+						text1: 'Transaction Created',
+					});
+				}
+			}
+		}
+	}, [lastMessage]);
 
 	const resetToHome = () => {
 		router.dismissAll();
@@ -48,7 +72,7 @@ const QRCodeScreen = () => {
 			</View>
 
 			{/* Continue Button */}
-			<View className='mb-10'>
+			<View className="mb-10">
 				<TouchableOpacity
 					className="bg-[#3B28CC] py-4 rounded-xl items-center"
 					onPress={resetToHome}

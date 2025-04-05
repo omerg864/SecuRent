@@ -78,19 +78,17 @@ export default function QRScannerScreen() {
 				type: 'success',
 				text1: 'QR Code',
 			});
-			/*
 			router.push({
 				pathname: 'approve-transaction',
 				params: { id },
-			}); 
-			*/
+			});
 		}
 	};
 
 	const goBack = () => {
 		setScanned(false);
 		router.back();
-	}
+	};
 
 	return (
 		<View className="flex-1 justify-center">

@@ -1,5 +1,5 @@
 import { checkToken, client } from './httpClient';
-import { AuthData, AuthResponse, ItemId } from './interfaceService';
+import { AuthData, AuthResponse } from './interfaceService';
 import { BankDetails } from './interfaceService';
 
 const registerBusiness = async (businessData: AuthData) => {
