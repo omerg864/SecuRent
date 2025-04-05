@@ -99,7 +99,7 @@ export const decodeAdminToken = (token) => {
 
 export const decodeCustomerToken = (token) => {
 	try {
-		const decoded = jwt.verify(token, process.env.JWT_SECRET_CUSTOMER_ACCESS);
+		const decoded = jwt.verify(token, process.env.JWT_SECRET_ACCESS_COSTUMER);
 		return decoded.id;
 	} catch (error) {
 		return null;
@@ -108,7 +108,7 @@ export const decodeCustomerToken = (token) => {
 
 export const decodeBusinessToken = (token) => {
 	try {
-		const decoded = jwt.verify(token, process.env.JWT_SECRET_BUSINESS_ACCESS);
+		const decoded = jwt.verify(token, process.env.JWT_SECRET_ACCESS_BUSINESS);
 		return decoded.id;
 	} catch (error) {
 		return null;

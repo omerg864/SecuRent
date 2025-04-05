@@ -14,8 +14,8 @@ import businessRoutes from './routes/businessRoutes.js';
 import itemRoutes from './routes/itemRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import cors from 'cors';
-import { WebSocketServer } from 'ws';
 import http from 'http';
+import { setUpWebSocket } from './config/websocket.js';
 
 const config = dotenv.config();
 const PORT = process.env.PORT || 3000;
@@ -23,8 +23,6 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 
 const server = http.createServer(app);
-
-const wss = new WebSocketServer({ server });
 
 // Enable CORS first
 const corsOptions = {
@@ -47,6 +45,7 @@ connectDB(() => {
 	if (process.env.NODE_ENV !== 'test') {
 		server.listen(PORT, () => {
 			console.log(`Server is running on port ${PORT}`.green.bold);
+			setUpWebSocket(server);
 		});
 	}
 });
@@ -61,5 +60,3 @@ app.use('/api/review', reviewRoutes);
 
 // Error handler middleware should be last
 app.use(errorHandler);
-
-export { wss };
