@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import Transaction from '../models/transactionModel.js';
 import Item from '../models/itemModel.js';
+import { businesses } from '../config/websocket.js';
 
 const getBusinessTransactions = asyncHandler(async (req, res) => {
 	const transactions = await Transaction.find({
@@ -96,6 +97,23 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 
 	if (item.temporary) {
 		Item.findByIdAndDelete(id);
+	}
+
+	const businessAssociated = businesses.filter(
+		(ws) => ws.id === item.business.toString()
+	);
+
+	if (businessAssociated.length > 0) {
+		for (const ws of businessAssociated) {
+			ws.send(
+				JSON.stringify({
+					type: 'newTransaction',
+					data: {
+						item
+					},
+				})
+			);
+		}
 	}
 
 	res.status(201).json({

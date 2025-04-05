@@ -43,8 +43,8 @@
 			"typedRoutes": true
 		},
 		"extra": {
-			"apiUrl": "https://securent-dev.onrender.com/api/",
-			"webSocketUrl": "wss://securent-dev.onrender.com"
+			"apiUrl": "https://securent.onrender.com/api/",
+			"webSocketUrl": "wss://securent.onrender.com"
 		}
 	}
 }
