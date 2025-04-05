@@ -1,5 +1,5 @@
 import { checkToken, client } from './httpClient';
-import { AuthData, AuthResponse, ItemId } from './interfaceService';
+import { AuthData, AuthResponse } from './interfaceService';
 import { BankDetails } from './interfaceService';
 
 const registerBusiness = async (businessData: AuthData) => {
@@ -33,20 +33,16 @@ const verifyCompanyNumber = async (companyNumber: string) => {
 	}
 };
 
-const verifyEmailBusiness = async (code: string) => {
-	try {
-		const accessToken = await checkToken();
-		const response = await client.post<AuthResponse>(
-			'business/verify-email',
-			{ code },
-			{
-				headers: { Authorization: `Bearer ${accessToken}` },
-			}
-		);
-		return response.data.success;
-	} catch (error) {
-		throw error || 'Email verification failed.';
-	}
+const verifyEmailBusiness = async (code: string, userId: string) => {
+  try {
+    const response = await client.post<AuthResponse>(
+      "business/verify-email",
+      { code , userId }
+    );
+    return response.data;
+  } catch (error) {
+    throw error || "Email verification failed.";
+  }
 };
 
 const updateBankDetails = async (bankDetails: BankDetails) => {
@@ -82,21 +78,17 @@ const updateBusinessPassword = async (newPassword: string) => {
 	}
 };
 
-const resendBusinessVerificationCode = async () => {
-	try {
-		const accessToken = await checkToken();
-		const response = await client.post<AuthResponse>(
-			'business/resend-code',
-			{},
-			{
-				headers: { Authorization: `Bearer ${accessToken}` },
-			}
-		);
-		return response.data.success;
-	} catch (error) {
-		throw error || 'Resend verification code failed.';
-	}
-};
+const resendBusinessVerificationCode = async (userId: string) => {
+  try {
+    const response = await client.post<AuthResponse>(
+      "business/resend-code",
+      { userId }
+    );
+    return response.data.success;
+  } catch (error) {
+    throw error || "Resend verification code failed.";
+  }
+}
 
 export {
 	registerBusiness,

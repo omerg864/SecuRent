@@ -31,19 +31,13 @@ const updateCreditCard = async (creditCardData: CreditCardData) => {
   }
 };
 
-const verifyEmailCustomer = async (code: string) => {
+const verifyEmailCustomer = async (code: string, userId: string) => {
   try {
-    const accessToken = await checkToken();
-    console.log("Access token:", accessToken);
     const response = await client.post<AuthResponse>(
       "customer/verify-email",
-      { code },
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }
+      { code, userId}
     );
-    console.log(response);
-    return response.data.success;
+    return response.data;
   } catch (error) {
     throw error || "Email verification failed.";
   }
@@ -65,15 +59,11 @@ const updateCustomerPassword = async (newPassword: string) => {
   }
 };
 
-const resendCustomerVerificationCode = async () => {
+const resendCustomerVerificationCode = async (userId : string) => {
   try {
-	const accessToken = await checkToken();
 	const response = await client.post<AuthResponse>(
 	  "customer/resend-code",
-	  {},
-	  {
-		headers: { Authorization: `Bearer ${accessToken}` },
-	  }
+	  {userId}
 	);
 	return response.data.success;
   } catch (error) {

@@ -15,60 +15,60 @@ interface AuthResponse {
 }
 
 interface BusinessLoginResponse {
-	success: boolean;
-	accessToken: string;
-	refreshToken: string;
-	user: {
-		id: string;
-		name: string;
-		email: string;
-		phone: string;
-		address: string;
-		image: string;
-		rating: number;
-		role: string;
-		category: string[];
-		currency: string;
-		verificationCode: string;
-		isValid: boolean;
-		isEmailValid: boolean;
-		isBankValid: boolean;
-		companyNumber: string;
-		isCompanyNumberVerified: boolean;
-		bank: {
-			accountNumber: string;
-			sortCode: string;
-			accountHolderName: string;
-			bankName: string;
-		};
-	};
+  success: boolean;
+  accessToken: string;
+  refreshToken: string;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    image: string;
+    rating: number;
+    role: string;
+    category: string[];
+    currency: string;
+    verificationCode: string;
+    isValid: boolean;
+    isEmailValid: boolean;
+    isBankValid: boolean;
+    companyNumber: string;
+    isCompanyNumberVerified: boolean;
+    bank: {
+      accountNumber: string;
+      sortCode: string;
+      accountHolderName: string;
+      bankName: string;
+    };
+  };
 }
 
 interface CustomerLoginResponse {
-	success: boolean;
-	accessToken: string;
-	refreshToken: string;
-	user: {
-		id: string;
-		name: string;
-		email: string;
-		phone: string;
-		address: string;
-		image: string;
-		rating: number;
-		role: string;
-		currency: string;
-		verificationCode: string;
-		isValid: boolean;
-		isEmailValid: boolean;
-		isPaymentValid: boolean;
-		creditCard: {
-			number: string;
-			expiry: string;
-			cvv: string;
-			cardHolderName: string;
-		};
-	};
+  success: boolean;
+  accessToken: string;
+  refreshToken: string;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    image: string;
+    rating: number;
+    role: string;
+    currency: string;
+    verificationCode: string;
+    isValid: boolean;
+    isEmailValid: boolean;
+    isPaymentValid: boolean;
+    creditCard: {
+      number: string;
+      expiry: string;
+      cvv: string;
+      cardHolderName: string;
+    };
+  };
 }
 
 type LoginResponse = CustomerLoginResponse | BusinessLoginResponse;
