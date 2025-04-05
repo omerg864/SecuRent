@@ -43,16 +43,12 @@ const RestoreAccountScreen = () => {
         setLoading(false);
         return;
       }
-      AsyncStorage.setItem("Access_Token", response.accessToken);
-      AsyncStorage.setItem("Refresh_Token", response.refreshToken);
-      const expiration = new Date();
-      expiration.setHours(expiration.getHours() + 23);
-      AsyncStorage.setItem("Auth_Expiration", expiration.toISOString());
-      //send as parameter to the next screen
+      await AsyncStorage.setItem("UserID", response.userId);
       router.push({
         pathname: "./verify-email",
         params: {
           type: response.type,
+          userId: response.userId,
         },
       });
     } catch (error: any) {
