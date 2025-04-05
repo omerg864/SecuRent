@@ -65,11 +65,11 @@ const ColumnChart = () => {
 	const [state, setState] = useState({
 		series: [
 			{
-				name: 'Sales',
+				name: 'Closed',
 				data: [44, 55, 41, 67, 22, 43, 65],
 			},
 			{
-				name: 'Revenue',
+				name: 'Charged',
 				data: [13, 23, 20, 8, 13, 27, 15],
 			},
 		],
@@ -87,7 +87,7 @@ const ColumnChart = () => {
 			<div className="mb-4 justify-between gap-4 sm:flex">
 				<div>
 					<h4 className="text-xl font-semibold text-black dark:text-white">
-						Profit this week
+						Transactions
 					</h4>
 				</div>
 				<div>
@@ -97,10 +97,10 @@ const ColumnChart = () => {
 							id="#"
 							className="relative z-20 inline-flex appearance-none bg-transparent py-1 pl-3 pr-8 text-sm font-medium outline-none"
 						>
-							<option value="" className="dark:bg-boxdark">
+							<option value="this" className="dark:bg-boxdark">
 								This Week
 							</option>
-							<option value="" className="dark:bg-boxdark">
+							<option value="last" className="dark:bg-boxdark">
 								Last Week
 							</option>
 						</select>
