@@ -252,6 +252,9 @@ const updateCustomerPassword = asyncHandler(async (req, res) => {
   const { newPassword } = req.body;
   const customer = await Customer.findById(req.customer._id);
 
+  console.log("Customer ID:", req.customer._id);
+  console.log("Customer:", customer);
+
   if (!customer) {
     res.status(404);
     throw new Error("Customer not found");
@@ -411,8 +414,8 @@ const updateCustomerCreditCard = asyncHandler(async (req, res) => {
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {
-  const { code } = req.body;
-  const customer = await Customer.findById(req.customer._id);
+  const { code , userId } = req.body;
+  const customer = await Customer.findById(userId);
 
   if (!customer) {
     res.status(404);
@@ -430,17 +433,28 @@ const verifyEmail = asyncHandler(async (req, res) => {
     customer.isValid = true;
   }
 
+  const accessToken = generateCustomerAccessToken(customer._id);
+  const { refreshToken, unique } = generateCustomerRefreshToken(customer._id);
+  customer.refreshTokens.push({
+	token: refreshToken,
+	unique,
+  });
+
+
   await customer.save();
 
   res.status(200).json({
     success: true,
     valid: customer.isValid,
     message: "Email verified successfully",
+	accessToken,
+	refreshToken,
   });
 });
 
 const resendVerificationCode = asyncHandler(async (req, res) => {
-  const customer = await Customer.findById(req.customer._id);
+	const { userId } = req.body;
+	const customer = await Customer.findById(userId);
 
   if (!customer) {
     res.status(404);
