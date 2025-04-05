@@ -2,6 +2,8 @@ import { View, Text, Image, StatusBar, SafeAreaView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Button from "@/components/ui/HapticButton";
 import { router } from "expo-router";
+import HapticButton from "@/components/ui/HapticButton";
+import StarRating from "@/components/StarRating";
 
 export default function ApproveTransaction() {
   const handleApproveDeposit = () => {
@@ -15,12 +17,12 @@ export default function ApproveTransaction() {
 
       {/* Header */}
       <View className="px-4 pt-4 flex-row items-center">
-        <Button
+        <HapticButton
           onPress={() => router.back()}
-          className="p-2 border rounded-full bg-indigo-800 border-white"
+          className="p-2 rounded-full bg-indigo-700"
         >
           <Ionicons name="chevron-back" size={24} color="white" />
-        </Button>
+        </HapticButton>
         <View className="px-6 pt-2">
           <Text className="text-white text-2xl font-semibold">Hello John</Text>
           <Text className="text-white/70 text-md">New deposit</Text>
@@ -37,23 +39,12 @@ export default function ApproveTransaction() {
           />
           <View className="ml-3">
             <Text className="text-white/90 text-lg font-medium">VIP User</Text>
-            <View className="flex-row mt-1">
-              {[1, 2, 3, 4, 5].map((_, index) => (
-                <Ionicons
-                  key={index}
-                  name="star"
-                  size={24}
-                  color="#FFD700"
-                  className="mr-1"
-                />
-              ))}
-            </View>
+            <StarRating rating={4} />
           </View>
         </View>
 
         {/* Payment Details */}
         <View className="mb-4 mt-4">
-          //center the text
           <Text className="text-white/70 text-lg mb-2 font-semibold text-center">
             The deposit fee is:
           </Text>
