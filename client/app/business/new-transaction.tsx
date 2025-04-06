@@ -75,7 +75,7 @@ export default () => {
 				setShow({ date: false, time: false });
 				setEditAmount(false);
 				router.push({
-					pathname: 'QRCodeScreen',
+					pathname: '/business/QRCodeScreen',
 					params: {
 						id: response.item._id,
 					},
