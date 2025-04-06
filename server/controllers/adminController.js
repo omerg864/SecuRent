@@ -13,6 +13,7 @@ import bcrypt from 'bcrypt';
 import { OAuth2Client } from 'google-auth-library';
 import Business from '../models/businessModel.js';
 import Customer from '../models/customerModel.js';
+import Transaction from '../models/transactionModel.js';
 import { sendEmail } from '../utils/functions.js';
 import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -408,6 +409,157 @@ const identifyUser = asyncHandler(async (req, res) => {
 	}
 });
 
+const adminAnalytics = asyncHandler(async (req, res) => {
+	const numCustomers = await Customer.countDocuments();
+	const numBusinesses = await Business.countDocuments();
+	const numTransactions = await Transaction.countDocuments();
+	const numActiveTransactions = await Transaction.countDocuments({
+		status: 'open',
+	});
+	const now = new Date();
+	const oneYearAgo = new Date(now);
+	oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+	const months = Array.from({ length: 12 }, (_, i) => i + 1); // Array of months [1, 2, ..., 12]
+	const transactionsByMonth = await Transaction.aggregate([
+		{
+			$match: {
+				createdAt: { $gte: oneYearAgo },
+			},
+		},
+		{
+			$group: {
+				_id: {
+					year: { $year: '$createdAt' },
+					month: { $month: '$createdAt' },
+				},
+				totalTransactions: { $sum: '$amount' },
+				chargedTransactions: {
+					$sum: {
+						$cond: [{ $eq: ['$status', 'charged'] }, '$amount', 0],
+					},
+				},
+			},
+		},
+		{
+			$sort: { '_id.year': 1, '_id.month': 1 },
+		},
+	]);
+
+	// Fill in missing months with 0 values
+	const filledTransactionsByMonth = [];
+	const currentYear = now.getFullYear();
+	const startYear = oneYearAgo.getFullYear();
+
+	for (let year = startYear; year <= currentYear; year++) {
+		for (const month of months) {
+			if (year === startYear && month < oneYearAgo.getMonth() + 1)
+				continue;
+			if (year === currentYear && month > now.getMonth() + 1) break;
+
+			const existingRecord = transactionsByMonth.find(
+				(record) =>
+					record._id.year === year && record._id.month === month
+			);
+
+			filledTransactionsByMonth.push(
+				existingRecord || {
+					_id: { year, month },
+					totalTransactions: 0,
+					chargedTransactions: 0,
+				}
+			);
+		}
+	}
+
+	const startOfWeek = (date) => {
+		const day = date.getDay();
+		const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday
+		return new Date(date.setDate(diff));
+	};
+
+	const endOfWeek = (date) => {
+		const start = startOfWeek(new Date(date));
+		return new Date(start.setDate(start.getDate() + 6));
+	};
+	const startOfThisWeek = startOfWeek(new Date(now));
+	const endOfThisWeek = endOfWeek(new Date(now));
+
+	const startOfLastWeek = new Date(startOfThisWeek);
+	startOfLastWeek.setDate(startOfThisWeek.getDate() - 7);
+	const endOfLastWeek = new Date(endOfThisWeek);
+	endOfLastWeek.setDate(endOfThisWeek.getDate() - 7);
+
+	const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+	const transactionsThisWeekRaw = await Transaction.aggregate([
+		{
+			$match: {
+				createdAt: { $gte: startOfThisWeek, $lte: endOfThisWeek },
+			},
+		},
+		{
+			$group: {
+				_id: { $dayOfWeek: '$createdAt' },
+				numClosedTransactions: {
+					$sum: { $cond: [{ $eq: ['$status', 'closed'] }, 1, 0] },
+				},
+				numChargedTransactions: {
+					$sum: { $cond: [{ $eq: ['$status', 'charged'] }, 1, 0] },
+				},
+			},
+		},
+	]);
+
+	const transactionsLastWeekRaw = await Transaction.aggregate([
+		{
+			$match: {
+				createdAt: { $gte: startOfLastWeek, $lte: endOfLastWeek },
+			},
+		},
+		{
+			$group: {
+				_id: { $dayOfWeek: '$createdAt' },
+				numClosedTransactions: {
+					$sum: { $cond: [{ $eq: ['$status', 'closed'] }, 1, 0] },
+				},
+				numChargedTransactions: {
+					$sum: { $cond: [{ $eq: ['$status', 'charged'] }, 1, 0] },
+				},
+			},
+		},
+	]);
+
+	const fillDaysOfWeek = (rawData) => {
+		return daysOfWeek.map((day, index) => {
+			const dayData = rawData.find((data) => data._id === index + 1);
+			return {
+				day,
+				numClosedTransactions: dayData ? dayData.numClosedTransactions : 0,
+				numChargedTransactions: dayData ? dayData.numChargedTransactions : 0,
+			};
+		});
+	};
+
+	const transactionsThisWeek = fillDaysOfWeek(transactionsThisWeekRaw);
+	const transactionsLastWeek = fillDaysOfWeek(transactionsLastWeekRaw);
+
+	res.status(200).json({
+		success: true,
+		analytics: {
+			numCustomers,
+			numBusinesses,
+			numTransactions,
+			numActiveTransactions,
+			transactionsByMonth : filledTransactionsByMonth,
+			oneYearAgo,
+			now,
+			transactionsThisWeek,
+			transactionsLastWeek,
+		},
+	});
+});
+
 export {
 	login,
 	register,
@@ -417,4 +569,5 @@ export {
 	verifyAdmin,
 	loginClient,
 	identifyUser,
+	adminAnalytics,
 };
