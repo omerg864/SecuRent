@@ -19,7 +19,7 @@ const format = {
   currency: (n: number) => n.toLocaleString() + "₪",
 };
 
-export default () => {
+const NewTransaction = () => {
   const [desc, setDesc] = useState("");
   const [amount, setAmount] = useState(0);
   const [date, setDate] = useState(new Date());
@@ -53,7 +53,9 @@ export default () => {
   return (
     <View className="flex-1 p-6 bg-white">
       <Text className="text-xl font-bold mb-2">New Transaction</Text>
-      <Text className="text-xl mb-8">Create new transaction for a customer</Text>
+      <Text className="text-xl mb-8">
+        Create new transaction for a customer
+      </Text>
       <Text className="text-lg font-semibold mb-2">Description</Text>
       <TextInput
         className="border border-gray-300 rounded-lg p-3 text-lg bg-gray-100 mb-6"
@@ -105,29 +107,43 @@ export default () => {
       <View className="mb-8">
         <Text className="text-lg font-semibold mb-3">Set Amount</Text>
         <View className="flex-row items-center mb-4">
-          <AmountBtn onPress={() => setAmount(Math.max(0, amount - 50))}>
-            -
-          </AmountBtn>
-          <TouchableOpacity
-            className="flex-1 items-center"
-            onPress={() => setEditAmount(true)}
-          >
-            {editAmount ? (
-              <TextInput
-                className="text-2xl font-medium text-center"
-                keyboardType="numeric"
-                value={amount.toString()}
-                onChangeText={(t) => setAmount(parseInt(t) || 0)}
-                onBlur={() => setEditAmount(false)}
-                autoFocus
-              />
-            ) : (
-              <Text className="text-2xl font-medium">
-                {format.currency(amount)}
-              </Text>
-            )}
-          </TouchableOpacity>
-          <AmountBtn onPress={() => setAmount(amount + 50)}>+</AmountBtn>
+          <View className="flex-row items-center mb-4">
+            <HapticButton
+              onPress={() =>
+                amount >= 50 ? setAmount(amount - 50) : setAmount(0)
+              }
+              className="border-2 border-gray-300 rounded-lg w-12 h-12 items-center justify-center"
+            >
+              <Text className="text-2xl">-</Text>
+            </HapticButton>
+
+            <TouchableOpacity
+              className="flex-1 items-center"
+              onPress={() => setEditAmount(true)}
+            >
+              {editAmount ? (
+                <TextInput
+                  className="text-2xl font-medium text-center"
+                  keyboardType="numeric"
+                  value={amount.toString()}
+                  onChangeText={(t) => setAmount(parseInt(t) || 0)}
+                  onBlur={() => setEditAmount(false)}
+                  autoFocus
+                />
+              ) : (
+                <Text className="text-2xl font-medium">
+                  {format.currency(amount)}
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            <HapticButton
+              onPress={() => setAmount(amount + 50)}
+              className="border-2 border-gray-300 rounded-lg w-12 h-12 items-center justify-center"
+            >
+              <Text className="text-2xl">+</Text>
+            </HapticButton>
+          </View>
         </View>
 
         <View className="flex-row justify-between">
@@ -166,15 +182,6 @@ export default () => {
   );
 };
 
-const AmountBtn = ({ onPress, children }: any) => (
-  <TouchableOpacity
-    className="border-2 border-gray-300 rounded-lg w-12 h-12 items-center justify-center"
-    onPress={onPress}
-  >
-    <Text className="text-2xl">{children}</Text>
-  </TouchableOpacity>
-);
-
 const styles = StyleSheet.create({
   row: { flexDirection: "row", justifyContent: "space-between", gap: 10 },
   input: {
@@ -186,3 +193,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#f3f4f6",
   },
 });
+
+export default NewTransaction;

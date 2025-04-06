@@ -44,7 +44,6 @@ interface BusinessLoginResponse {
   };
 }
 
-
 interface CustomerLoginResponse {
   success: boolean;
   accessToken: string;
@@ -87,6 +86,38 @@ interface BankDetails {
   accountHolderName: string;
   bankName: string;
 }
+interface Transaction {
+  _id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  business: string;
+  customer?: string;
+  transaction_id: string;
+  closed_at?: Date;
+  return_date?: Date;
+  charged?: number;
+  charged_description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface ChargeDepositParams {
+  id: string;
+  charged_description: string;
+  amount: number;
+}
+
+interface ChargeDepositResponse extends AuthResponse {
+  transaction?: Transaction;
+}
+
+interface TransactionResponse {
+  success: boolean;
+  transaction?: Transaction;
+  transactions?: Transaction[];
+  message?: string;
+}
 
 export type {
   AuthData,
@@ -97,4 +128,8 @@ export type {
   CreditCardData,
   LoginResponse,
   BankDetails,
+  Transaction,
+  ChargeDepositParams,
+  ChargeDepositResponse,
+  TransactionResponse,
 };
