@@ -420,21 +420,61 @@ const adminAnalytics = asyncHandler(async (req, res) => {
 	const numActiveTransactions = await Transaction.countDocuments({
 		status: 'open',
 	});
-	const numChargedTransactions = await Transaction.countDocuments({
-		status: 'charged',
-	});
 	const now = new Date();
 	const oneYearAgo = new Date(now);
 	oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
-	const numChargedTransactionsLastYear = await Transaction.countDocuments({
-		createdAt: { $gte: oneYearAgo },
-		status: 'charged',
-	});
+	const months = Array.from({ length: 12 }, (_, i) => i + 1); // Array of months [1, 2, ..., 12]
+	const transactionsByMonth = await Transaction.aggregate([
+		{
+			$match: {
+				createdAt: { $gte: oneYearAgo },
+			},
+		},
+		{
+			$group: {
+				_id: {
+					year: { $year: '$createdAt' },
+					month: { $month: '$createdAt' },
+				},
+				totalTransactions: { $sum: '$amount' },
+				chargedTransactions: {
+					$sum: {
+						$cond: [{ $eq: ['$status', 'charged'] }, '$amount', 0],
+					},
+				},
+			},
+		},
+		{
+			$sort: { '_id.year': 1, '_id.month': 1 },
+		},
+	]);
 
-	const numTransactionsLastYear = await Transaction.countDocuments({
-		createdAt: { $gte: oneYearAgo },
-	});
+	// Fill in missing months with 0 values
+	const filledTransactionsByMonth = [];
+	const currentYear = now.getFullYear();
+	const startYear = oneYearAgo.getFullYear();
+
+	for (let year = startYear; year <= currentYear; year++) {
+		for (const month of months) {
+			if (year === startYear && month < oneYearAgo.getMonth() + 1)
+				continue;
+			if (year === currentYear && month > now.getMonth() + 1) break;
+
+			const existingRecord = transactionsByMonth.find(
+				(record) =>
+					record._id.year === year && record._id.month === month
+			);
+
+			filledTransactionsByMonth.push(
+				existingRecord || {
+					_id: { year, month },
+					totalTransactions: 0,
+					chargedTransactions: 0,
+				}
+			);
+		}
+	}
 
 	const startOfWeek = (date) => {
 		const day = date.getDay();
@@ -454,25 +494,59 @@ const adminAnalytics = asyncHandler(async (req, res) => {
 	const endOfLastWeek = new Date(endOfThisWeek);
 	endOfLastWeek.setDate(endOfThisWeek.getDate() - 7);
 
-	const numClosedTransactionsThisWeek = await Transaction.countDocuments({
-		createdAt: { $gte: startOfThisWeek, $lte: endOfThisWeek },
-		status: 'closed',
-	});
+	const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-	const numClosedTransactionsLastWeek = await Transaction.countDocuments({
-		createdAt: { $gte: startOfLastWeek, $lte: endOfLastWeek },
-		status: 'closed',
-	});
+	const transactionsThisWeekRaw = await Transaction.aggregate([
+		{
+			$match: {
+				createdAt: { $gte: startOfThisWeek, $lte: endOfThisWeek },
+			},
+		},
+		{
+			$group: {
+				_id: { $dayOfWeek: '$createdAt' },
+				numClosedTransactions: {
+					$sum: { $cond: [{ $eq: ['$status', 'closed'] }, 1, 0] },
+				},
+				numChargedTransactions: {
+					$sum: { $cond: [{ $eq: ['$status', 'charged'] }, 1, 0] },
+				},
+			},
+		},
+	]);
 
-	const numChargedTransactionsThisWeek = await Transaction.countDocuments({
-		createdAt: { $gte: startOfThisWeek, $lte: endOfThisWeek },
-		status: 'charged',
-	});
+	const transactionsLastWeekRaw = await Transaction.aggregate([
+		{
+			$match: {
+				createdAt: { $gte: startOfLastWeek, $lte: endOfLastWeek },
+			},
+		},
+		{
+			$group: {
+				_id: { $dayOfWeek: '$createdAt' },
+				numClosedTransactions: {
+					$sum: { $cond: [{ $eq: ['$status', 'closed'] }, 1, 0] },
+				},
+				numChargedTransactions: {
+					$sum: { $cond: [{ $eq: ['$status', 'charged'] }, 1, 0] },
+				},
+			},
+		},
+	]);
 
-	const numChargedTransactionsLastWeek = await Transaction.countDocuments({
-		createdAt: { $gte: startOfLastWeek, $lte: endOfLastWeek },
-		status: 'charged',
-	});
+	const fillDaysOfWeek = (rawData) => {
+		return daysOfWeek.map((day, index) => {
+			const dayData = rawData.find((data) => data._id === index + 1);
+			return {
+				day,
+				numClosedTransactions: dayData ? dayData.numClosedTransactions : 0,
+				numChargedTransactions: dayData ? dayData.numChargedTransactions : 0,
+			};
+		});
+	};
+
+	const transactionsThisWeek = fillDaysOfWeek(transactionsThisWeekRaw);
+	const transactionsLastWeek = fillDaysOfWeek(transactionsLastWeekRaw);
 
 	res.status(200).json({
 		success: true,
@@ -481,15 +555,11 @@ const adminAnalytics = asyncHandler(async (req, res) => {
 			numBusinesses,
 			numTransactions,
 			numActiveTransactions,
-			numChargedTransactions,
-			numTransactionsLastYear,
-			numChargedTransactionsLastYear,
+			transactionsByMonth : filledTransactionsByMonth,
 			oneYearAgo,
 			now,
-			numClosedTransactionsThisWeek,
-			numClosedTransactionsLastWeek,
-			numChargedTransactionsThisWeek,
-			numChargedTransactionsLastWeek,
+			transactionsThisWeek,
+			transactionsLastWeek,
 		},
 	});
 });
@@ -503,5 +573,5 @@ export {
 	verifyAdmin,
 	loginClient,
 	identifyUser,
-	adminAnalytics
+	adminAnalytics,
 };

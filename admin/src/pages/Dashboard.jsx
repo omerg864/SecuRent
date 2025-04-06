@@ -14,18 +14,14 @@ const ECommerce = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [analyticsData, setAnalyticsData] = useState({
 		numCustomers: 0,
-		numBusinesses : 0,
+		numBusinesses: 0,
 		numTransactions: 0,
 		numActiveTransactions: 0,
-		numChargedTransactions: 0,
-		numTransactionsLastYear: 0,
-		numChargedTransactionsLastYear: 0,
+		transactionsByMonth: [],
 		oneYearAgo: new Date(),
 		now: new Date(),
-		numClosedTransactionsThisWeek: 0,
-		numClosedTransactionsLastWeek: 0,
-		numChargedTransactionsThisWeek: 0,
-		numChargedTransactionsLastWeek: 0,
+		transactionsThisWeek: [],
+		transactionsLastWeek: [],
 	});
 
 	const getAnalytics = async () => {
@@ -57,33 +53,41 @@ const ECommerce = () => {
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
 				<CardDataStats
 					title="Total Customers"
-					total={approx(analyticsData.numCustomers, { capital: true })}
+					total={approx(analyticsData.numCustomers, {
+						capital: true,
+					})}
 				>
 					<GrGroup className="text-primary dark:text-white" />
 				</CardDataStats>
 				<CardDataStats
 					title="Total Businesses"
-					total={approx(analyticsData.numBusinesses, { capital: true })}
+					total={approx(analyticsData.numBusinesses, {
+						capital: true,
+					})}
 				>
 					<IoBusinessOutline className="text-primary dark:text-white" />
 				</CardDataStats>
 				<CardDataStats
 					title="Total transactions"
-					total={approx(analyticsData.numTransactions, { capital: true })}
+					total={approx(analyticsData.numTransactions, {
+						capital: true,
+					})}
 				>
 					<FaExchangeAlt className="text-primary dark:text-white" />
 				</CardDataStats>
 				<CardDataStats
 					title="Active Transactions"
-					total={approx(analyticsData.numActiveTransactions, { capital: true })}
+					total={approx(analyticsData.numActiveTransactions, {
+						capital: true,
+					})}
 				>
 					<GrSync className="text-primary dark:text-white" />
 				</CardDataStats>
 			</div>
 
 			<div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
-				<GraphChart analyticsData={analyticsData}/>
-				<ColumnChart analyticsData={analyticsData}/>
+				<GraphChart analyticsData={analyticsData} />
+				<ColumnChart analyticsData={analyticsData} />
 				{/* Maybe add later: <PieChart />*/}
 			</div>
 		</>

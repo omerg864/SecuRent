@@ -1,131 +1,128 @@
 import { useState } from 'react';
-import approx from 'approximate-number';
 import ReactApexChart from 'react-apexcharts';
+import { getShortMonthName } from '../../utils/functions';
 
-const options = {
-	legend: {
-		show: false,
-		position: 'top',
-		horizontalAlign: 'left',
-	},
-	colors: ['#3C50E0', '#80CAEE'],
-	chart: {
-		fontFamily: 'Satoshi, sans-serif',
-		height: 335,
-		type: 'area',
-		dropShadow: {
-			enabled: true,
-			color: '#623CEA14',
-			top: 10,
-			blur: 4,
-			left: 0,
-			opacity: 0.1,
-		},
-
-		toolbar: {
+const GraphChart = ({ analyticsData }) => {
+	const options = {
+		legend: {
 			show: false,
+			position: 'top',
+			horizontalAlign: 'left',
 		},
-	},
-	responsive: [
-		{
-			breakpoint: 1024,
-			options: {
-				chart: {
-					height: 300,
+		colors: ['#3C50E0', '#80CAEE'],
+		chart: {
+			fontFamily: 'Satoshi, sans-serif',
+			height: 335,
+			type: 'area',
+			dropShadow: {
+				enabled: true,
+				color: '#623CEA14',
+				top: 10,
+				blur: 4,
+				left: 0,
+				opacity: 0.1,
+			},
+
+			toolbar: {
+				show: false,
+			},
+		},
+		responsive: [
+			{
+				breakpoint: 1024,
+				options: {
+					chart: {
+						height: 300,
+					},
+				},
+			},
+			{
+				breakpoint: 1366,
+				options: {
+					chart: {
+						height: 350,
+					},
+				},
+			},
+		],
+		stroke: {
+			width: [2, 2],
+			curve: 'straight',
+		},
+		// labels: {
+		//   show: false,
+		//   position: "top",
+		// },
+		grid: {
+			xaxis: {
+				lines: {
+					show: true,
+				},
+			},
+			yaxis: {
+				lines: {
+					show: true,
 				},
 			},
 		},
-		{
-			breakpoint: 1366,
-			options: {
-				chart: {
-					height: 350,
-				},
+		dataLabels: {
+			enabled: false,
+		},
+		markers: {
+			size: 4,
+			colors: '#fff',
+			strokeColors: ['#3056D3', '#80CAEE'],
+			strokeWidth: 3,
+			strokeOpacity: 0.9,
+			strokeDashArray: 0,
+			fillOpacity: 1,
+			discrete: [],
+			hover: {
+				size: undefined,
+				sizeOffset: 5,
 			},
 		},
-	],
-	stroke: {
-		width: [2, 2],
-		curve: 'straight',
-	},
-	// labels: {
-	//   show: false,
-	//   position: "top",
-	// },
-	grid: {
 		xaxis: {
-			lines: {
-				show: true,
+			type: 'category',
+			categories: analyticsData.transactionsByMonth.map((item) =>
+				getShortMonthName(item._id.month)
+			),
+			axisBorder: {
+				show: false,
+			},
+			axisTicks: {
+				show: false,
 			},
 		},
 		yaxis: {
-			lines: {
-				show: true,
+			title: {
+				style: {
+					fontSize: '0px',
+				},
 			},
+			min: 0,
+			max: Math.max(
+				...analyticsData.transactionsByMonth.map(
+					(item) => item.totalTransactions
+				)
+			),
 		},
-	},
-	dataLabels: {
-		enabled: false,
-	},
-	markers: {
-		size: 4,
-		colors: '#fff',
-		strokeColors: ['#3056D3', '#80CAEE'],
-		strokeWidth: 3,
-		strokeOpacity: 0.9,
-		strokeDashArray: 0,
-		fillOpacity: 1,
-		discrete: [],
-		hover: {
-			size: undefined,
-			sizeOffset: 5,
-		},
-	},
-	xaxis: {
-		type: 'category',
-		categories: [
-			'Sep',
-			'Oct',
-			'Nov',
-			'Dec',
-			'Jan',
-			'Feb',
-			'Mar',
-			'Apr',
-			'May',
-			'Jun',
-			'Jul',
-			'Aug',
-		],
-		axisBorder: {
-			show: false,
-		},
-		axisTicks: {
-			show: false,
-		},
-	},
-	yaxis: {
-		title: {
-			style: {
-				fontSize: '0px',
-			},
-		},
-		min: 0,
-		max: 100,
-	},
-};
+	};
 
-const GraphChart = () => {
 	const [state, setState] = useState({
 		series: [
 			{
 				name: 'Charged',
-				data: [approx(23), 11, 22, 27, 13, 22, 37, 21, 44, 22, 30, 45],
+				data: analyticsData.transactionsByMonth.map(
+					(item) => item.chargedTransactions
+				),
 			},
 
 			{
 				name: 'Total',
-				data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39, 51],
+				data: analyticsData.transactionsByMonth.map(
+					(item) => item.totalTransactions
+				),
 			},
 		],
 	});
@@ -136,6 +133,10 @@ const GraphChart = () => {
 		}));
 	};
 	handleReset;
+
+	if (analyticsData.transactionsByMonth.length === 0) {
+		return <div></div>;
+	}
 
 	return (
 		<div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
@@ -150,7 +151,7 @@ const GraphChart = () => {
 								Total Charges $
 							</p>
 							<p className="text-sm font-medium">
-								12.04.2022 - 12.05.2022
+								{`${new Date(analyticsData.oneYearAgo).toLocaleDateString('en-GB')} - ${new Date(analyticsData.now).toLocaleDateString('en-GB')}`}
 							</p>
 						</div>
 					</div>
@@ -163,7 +164,7 @@ const GraphChart = () => {
 								Total Transactions $
 							</p>
 							<p className="text-sm font-medium">
-								12.04.2022 - 12.05.2022
+								{`${new Date(analyticsData.oneYearAgo).toLocaleDateString('en-GB')} - ${new Date(analyticsData.now).toLocaleDateString('en-GB')}`}
 							</p>
 						</div>
 					</div>
