@@ -449,6 +449,31 @@ const updateBusinessPassword = asyncHandler(async (req, res) => {
 	});
 });
 
+
+const getAllBusinesses = asyncHandler(async (req, res) => {
+	
+	const page = parseInt(req.query.page) || 1;
+	const limit = 10;
+	const skip = (page - 1) * limit;
+
+	const totalBusinesses = await Business.countDocuments();
+	const totalPages = Math.ceil(totalBusinesses / limit);
+
+	const businesses = await Business.find()
+		.skip(skip)
+		.limit(limit)
+		.select('-password -refreshTokens -verificationCode'); // הסתרת שדות רגישים
+
+	res.status(200).json({
+		success: true,
+		page,
+		totalPages,
+		totalBusinesses,
+		businesses,
+	});
+});
+
+
 const resendVerificationCode = asyncHandler(async (req, res) => {
 	const business = await Business.findById(req.business._id);
 
@@ -496,5 +521,6 @@ export {
 	verifyEmail,
 	verifyBank,
 	updateBusinessPassword,
+	getAllBusinesses,
 	resendVerificationCode,
 };

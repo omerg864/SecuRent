@@ -37,5 +37,6 @@ router.delete('/delete', authBusiness, deleteBusiness);
 router.get('/:id', authBusiness, getBusinessById);
 router.put('/update-password', authBusiness, updateBusinessPassword);
 router.post('/resend-code', authBusiness, resendVerificationCode);
+router.get('/businesses',authBusiness, getAllBusinesses);
 
 export default router;
