@@ -72,14 +72,12 @@ export default function QRScannerScreen() {
 				setScanned(false);
 				return;
 			}
-
-			// TODO: navigate to the approve transaction screen with the id
 			Toast.show({
 				type: 'success',
 				text1: 'QR Code',
 			});
 			router.push({
-				pathname: 'approve-transaction',
+				pathname: '/customer/approve-transaction',
 				params: { id },
 			});
 		}
