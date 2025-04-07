@@ -5,7 +5,8 @@ const createItem = async (
 	description: string,
 	date: Date,
 	price: number,
-	temporary: boolean
+	temporary: boolean,
+	duration: string
 ) => {
 	try {
 		const accessToken = await checkToken();
@@ -16,6 +17,7 @@ const createItem = async (
 				description,
 				date,
 				price,
+				duration,
 			},
 			{
 				headers: { Authorization: `Bearer ${accessToken}` },
@@ -27,4 +29,20 @@ const createItem = async (
 	}
 };
 
-export { createItem };
+const getItemById = async (itemId: string) => {
+	try {
+		const accessToken = await checkToken();
+		const response = await client.get<{item: Item, success: boolean}>(
+			`item/${itemId}`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		console.log(response.data.item);
+		return response.data;
+	} catch (error) {
+		throw error || 'Item retrieval failed.';
+	}
+};
+
+export { createItem , getItemById };

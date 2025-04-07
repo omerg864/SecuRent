@@ -2,11 +2,12 @@ import mongoose from 'mongoose';
 
 const transactionScheme = mongoose.Schema(
 	{
-		transaction_id: {
-			type: String,
-		},
 		amount: {
 			type: Number,
+			required: true,
+		},
+		description: {
+			type: String,
 			required: true,
 		},
 		currency: {
@@ -25,6 +26,10 @@ const transactionScheme = mongoose.Schema(
 		customer: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Customer',
+		},
+		opened_at: {
+			type: Date,
+			default: Date.now,
 		},
 		closed_at: {
 			type: Date,

@@ -22,6 +22,14 @@ const ItemSchema = mongoose.Schema(
         image:{
             type: String,
         },
+        return_date:{
+            type: Date,
+            default: null,
+        },
+        duration:{
+            type: String,
+            default: null,
+        },
         temporary:{
             type: Boolean,
             default: false,
