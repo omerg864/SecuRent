@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 
 const transactionScheme = mongoose.Schema(
 	{
+		transaction_id: {
+			type: String,
+		},
 		amount: {
 			type: Number,
 			required: true,

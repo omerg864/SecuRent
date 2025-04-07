@@ -27,7 +27,7 @@ const ItemSchema = mongoose.Schema(
             default: null,
         },
         duration:{
-            type: String,
+            type: Number,
             default: null,
         },
         temporary:{

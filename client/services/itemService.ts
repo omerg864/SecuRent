@@ -6,7 +6,7 @@ const createItem = async (
 	date: Date,
 	price: number,
 	temporary: boolean,
-	duration: string
+	duration: Number
 ) => {
 	try {
 		const accessToken = await checkToken();

@@ -84,7 +84,9 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 	
 
 	// TODO: use paypal for create transaction
+	const transaction_id = Math.random().toString(36).substring(7);
 	const transaction = new Transaction({
+		transaction_id,
 		amount: item.price,
 		currency: item.currency,
 		status: 'open',
