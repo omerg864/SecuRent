@@ -13,6 +13,7 @@ import customerRoutes from './routes/customerRoutes.js';
 import businessRoutes from './routes/businessRoutes.js';
 import itemRoutes from './routes/itemRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import locationRoutes from './routes/locationRoutes.js';
 import cors from 'cors';
 import http from 'http';
 import { setUpWebSocket } from './config/websocket.js';
@@ -57,6 +58,7 @@ app.use('/api/customer', customerRoutes);
 app.use('/api/business', businessRoutes);
 app.use('/api/item', itemRoutes);
 app.use('/api/review', reviewRoutes);
+app.use('/api/location', locationRoutes);
 
 // Error handler middleware should be last
 app.use(errorHandler);

@@ -44,7 +44,8 @@
 		},
 		"extra": {
 			"apiUrl": "https://securent.onrender.com/api/",
-			"webSocketUrl": "wss://securent.onrender.com"
+			"webSocketUrl": "wss://securent.onrender.com",
+			"OpenCageApiKey": "b28a461ec35543fe99615a45981efe8d"
 		}
 	}
 }
