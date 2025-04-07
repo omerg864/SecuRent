@@ -1,17 +1,18 @@
+import { chargeDeposit } from "@/services/transactionService";
 interface AuthData {
-	name?: string;
-	email?: string;
-	password?: string;
+  name?: string;
+  email?: string;
+  password?: string;
 }
 
 interface LoginCredentials {
-	email: string;
-	password: string;
+  email: string;
+  password: string;
 }
 
 interface AuthResponse {
-	success: boolean;
-	message: string;
+  success: boolean;
+  message: string;
 }
 
 interface BusinessLoginResponse {
@@ -74,40 +75,66 @@ interface CustomerLoginResponse {
 type LoginResponse = CustomerLoginResponse | BusinessLoginResponse;
 
 interface CreditCardData {
-	number: string;
-	expiry: string;
-	cvv: string;
-	cardHolderName: string;
+  number: string;
+  expiry: string;
+  cvv: string;
+  cardHolderName: string;
 }
 
 interface BankDetails {
-	accountNumber: string;
-	sortCode: string;
-	accountHolderName: string;
-	bankName: string;
+  accountNumber: string;
+  sortCode: string;
+  accountHolderName: string;
+  bankName: string;
 }
 
 interface Item {
-	_id: string;
-	description: string;
-	date: Date;
-	price: number;
-	temporary: boolean;
-	business: string;
-	currency: string;
-	createdAt: Date;
-	updatedAt: Date;
-	image: string;
+  _id: string;
+  description: string;
+  date: Date;
+  price: number;
+  temporary: boolean;
+  business: string;
+  currency: string;
+  createdAt: Date;
+  updatedAt: Date;
+  image: string;
+}
+
+interface ChargeDepositPayload {
+  amount: number;
+  charged_description: string;
+}
+
+interface TransactionResponse {
+  success: boolean;
+  transaction: {
+    _id: string;
+    transaction_id: string;
+    amount: number;
+    currency: string;
+    status: string;
+    business: string;
+    customer?: string;
+    closed_at?: string;
+    return_date?: string;
+    charged?: number;
+    charged_description?: string;
+    createdAt: string;
+    updatedAt: string;
+  };
 }
 
 export type {
-	AuthData,
-	LoginCredentials,
-	AuthResponse,
-	BusinessLoginResponse,
-	CustomerLoginResponse,
-	CreditCardData,
-	LoginResponse,
-	BankDetails,
-	Item,
+  AuthData,
+  LoginCredentials,
+  AuthResponse,
+  BusinessLoginResponse,
+  CustomerLoginResponse,
+  CreditCardData,
+  LoginResponse,
+  BankDetails,
+  Item,
+  ChargeDepositPayload,
+  TransactionResponse,
 };
