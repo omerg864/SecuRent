@@ -103,7 +103,7 @@ const registerBusiness = asyncHandler(async (req, res) => {
 	const sent = await sendEmail(email, subject, text, html);
 
 	business.verificationCode = verificationCode;
-  business.rating = 5;
+	business.rating = 5;
 	await business.save();
 
 	res.status(201).json({
@@ -114,7 +114,7 @@ const registerBusiness = asyncHandler(async (req, res) => {
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {
-	const { code , userId } = req.body;
+	const { code, userId } = req.body;
 	const business = await Business.findById(userId);
 
 	if (!business) {
@@ -132,20 +132,19 @@ const verifyEmail = asyncHandler(async (req, res) => {
 		business.isValid = true;
 	}
 
-  const accessToken = generateBusinessAccessToken(business._id);
-  console.log('accessToken', accessToken);
-  const { refreshToken, unique } = generateBusinessRefreshToken(business._id);
-  if (!business.refreshTokens) business.refreshTokens = [];
-  business.refreshTokens.push({ token: refreshToken, unique: true });
-  await business.save();
-
+	const accessToken = generateBusinessAccessToken(business._id);
+	console.log('accessToken', accessToken);
+	const { refreshToken, unique } = generateBusinessRefreshToken(business._id);
+	if (!business.refreshTokens) business.refreshTokens = [];
+	business.refreshTokens.push({ token: refreshToken, unique: true });
+	await business.save();
 
 	res.status(200).json({
 		success: true,
 		valid: business.isValid,
 		message: 'Email verified successfully',
-    accessToken,
-    refreshToken,
+		accessToken,
+		refreshToken,
 	});
 });
 
@@ -355,12 +354,18 @@ const getBusinessById = asyncHandler(async (req, res) => {
 	res.status(200).json({ success: true, business });
 });
 
-const verifyAndUpdateCompanyNumber = asyncHandler(async (req, res) => {
-	const { companyNumber } = req.body;
+const updateBusinessDetails = asyncHandler(async (req, res) => {
+	const { companyNumber, address, location, phone, currency, category } =
+		req.body;
 
-	if (!companyNumber) {
+	if (!companyNumber || !address || !location || !phone || !currency) {
 		res.status(400);
-		throw new Error('Company number is required');
+		throw new Error('All fields are required');
+	}
+
+	if (location.lat === undefined || location.lng === undefined) {
+		res.status(401);
+		throw new Error('Location invalid');
 	}
 
 	const isBusiness = await Business.findOne({ companyNumber });
@@ -379,12 +384,26 @@ const verifyAndUpdateCompanyNumber = asyncHandler(async (req, res) => {
 	}
 
 	const business = await Business.findById(req.business._id);
-	if (!business) {
-		res.status(403);
-		throw new Error('Business not found');
-	}
 
+	let imageUrl = '';
+	if (req.file) {
+		if (business.image) {
+			await deleteImage(business.image, true);
+		}
+		const imageID = uuidv4();
+		imageUrl = await uploadToCloudinary(
+			req.file.buffer,
+			`${process.env.CLOUDINARY_BASE_FOLDER}/businesses`,
+			imageID
+		);
+		business.image = imageUrl;
+	}
 	business.companyNumber = companyNumber;
+	business.address = address;
+	business.location = location;
+	business.phone = phone;
+	business.currency = currency;
+	business.category = category || [];
 	business.isCompanyNumberVerified = true;
 	if (business.isEmailValid && business.isBankValid) {
 		business.isValid = true;
@@ -460,7 +479,7 @@ const updateBusinessPassword = asyncHandler(async (req, res) => {
 });
 
 const resendVerificationCode = asyncHandler(async (req, res) => {
-  const { userId } = req.body;
+	const { userId } = req.body;
 	const business = await Business.findById(userId);
 
 	if (!business) {
@@ -503,7 +522,7 @@ export {
 	updateBusiness,
 	deleteBusiness,
 	getBusinessById,
-	verifyAndUpdateCompanyNumber,
+	updateBusinessDetails,
 	verifyEmail,
 	verifyBank,
 	updateBusinessPassword,

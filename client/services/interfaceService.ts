@@ -14,6 +14,12 @@ interface AuthResponse {
 	message: string;
 }
 
+interface StepResponse {
+	success: boolean;
+	message: string;
+	valid: boolean;
+}
+
 interface BusinessLoginResponse {
 	success: boolean;
 	accessToken: string;
@@ -41,6 +47,34 @@ interface BusinessLoginResponse {
 			accountHolderName: string;
 			bankName: string;
 		};
+	};
+}
+
+interface Business {
+	_id: string;
+	name: string;
+	email: string;
+	phone: string;
+	address: string;
+	location: { lat: number; lng: number };
+	createdAt: Date;
+	updatedAt: Date;
+	image: string;
+	rating: number;
+	role: string;
+	category: string[];
+	currency: string;
+	verificationCode: string;
+	isValid: boolean;
+	isEmailValid: boolean;
+	isBankValid: boolean;
+	companyNumber: string;
+	isCompanyNumberVerified: boolean;
+	bank: {
+		accountNumber: string;
+		sortCode: string;
+		accountHolderName: string;
+		bankName: string;
 	};
 }
 
@@ -122,4 +156,6 @@ export type {
 	Item,
 	LocationPrediction,
 	LocationDetails,
+	Business,
+	StepResponse
 };

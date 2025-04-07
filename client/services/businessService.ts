@@ -1,5 +1,5 @@
 import { checkToken, client } from './httpClient';
-import { AuthData, AuthResponse } from './interfaceService';
+import { AuthData, AuthResponse, Business, StepResponse } from './interfaceService';
 import { BankDetails } from './interfaceService';
 
 const registerBusiness = async (businessData: AuthData) => {
@@ -14,24 +14,24 @@ const registerBusiness = async (businessData: AuthData) => {
 	}
 };
 
-const verifyCompanyNumber = async (companyNumber: string) => {
+const updateBusinessDetails = async (businessData: Partial<Business>) => {
 	try {
 		const accessToken = await checkToken();
 		if (!accessToken) {
 			throw new Error('Access token is missing or invalid.');
 		}
-		const response = await client.post<AuthResponse>(
-			'business/verify-company-number',
-			{ companyNumber },
+		const response = await client.put<StepResponse>(
+			'business/',
+			businessData,
 			{
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
 		);
-		return response;
-	} catch (error: any) {
-		throw error || 'Company number verification failed.';
+		return response.data;
+	} catch (error) {
+		throw error || 'Business details update failed.';
 	}
-};
+}
 
 const verifyEmailBusiness = async (code: string, userId: string) => {
   try {
@@ -92,9 +92,9 @@ const resendBusinessVerificationCode = async (userId: string) => {
 
 export {
 	registerBusiness,
-	verifyCompanyNumber,
 	verifyEmailBusiness,
 	updateBankDetails,
 	updateBusinessPassword,
-	resendBusinessVerificationCode
+	resendBusinessVerificationCode,
+	updateBusinessDetails
 };

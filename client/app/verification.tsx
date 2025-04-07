@@ -16,13 +16,13 @@ import { ThemedTextInput } from '@/components/ui/ThemedTextInput';
 import HapticButton from '@/components/ui/HapticButton';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { verifyCompanyNumber } from '@/services/businessService';
+import { updateBusinessDetails } from '@/services/businessService';
 import Toast from 'react-native-toast-message';
-import Constants from 'expo-constants';
 import axios from 'axios';
 import { useEffect } from 'react';
 import { debounce } from 'lodash';
 import AddressAutocompleteInput from '@/components/AddressAutocompleteInput';
+import { StepResponse } from '@/services/interfaceService';
 
 export default function VerifyBusinessNumberScreen() {
 	const router = useRouter();
@@ -42,9 +42,17 @@ export default function VerifyBusinessNumberScreen() {
 		if (/^\d{9}$/.test(businessNumber.trim())) {
 			setLoading(true);
 			try {
-				const response: any = await verifyCompanyNumber(businessNumber);
+				const response: StepResponse = await updateBusinessDetails({
+					companyNumber: businessNumber.trim(),
+					phone: phoneNumber.trim(),
+					address: selectedLocation?.address,
+					location: {
+						lat: selectedLocation?.lat || 0,
+						lng: selectedLocation?.lng || 0,
+					},
+				});
 
-				if (!response.data.success) {
+				if (!response.success) {
 					setLoading(false);
 					Toast.show({
 						type: 'error',
@@ -141,7 +149,7 @@ export default function VerifyBusinessNumberScreen() {
 					/>
 
 					<AddressAutocompleteInput
-            label="Business Address"
+						label="Business Address"
 						onSelect={(
 							address: string,
 							placeId: any,
