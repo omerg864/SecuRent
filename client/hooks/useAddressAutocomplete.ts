@@ -32,17 +32,17 @@ export const useAddressAutocomplete = () => {
 	const fetchPlaceDetails = async (placeId: string) => {
 		try {
 			const details = await getLocationDetails(placeId);
-            if (details) {
-                return {
-                    address: details.address,
-                    placeId: placeId,
-                    location: {
-                        lat: details.location.lat,
-                        lng: details.location.lng,
-                    },
-                };
-            }
-            return null;
+			if (details) {
+				return {
+					address: details.address,
+					placeId: placeId,
+					location: {
+						lat: details.location.lat,
+						lng: details.location.lng,
+					},
+				};
+			}
+			return null;
 		} catch (error) {
 			console.error('Error fetching place details:', error);
 			return null;
