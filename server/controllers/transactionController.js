@@ -58,14 +58,13 @@ const getTransactionByBusiness = asyncHandler(async (req, res) => {
 const createTransaction = asyncHandler(async (req, res) => {
 	const { amount, currency, business } = req.body;
 	// TODO: use paypal for create transaction
-	const transaction_id = Math.random().toString(36).substring(7);
 	const transaction = new Transaction({
 		amount,
 		currency,
 		status: 'open',
 		business,
 		customer: req.customer._id,
-		transaction_id,
+		description: 'Deposit',
 	});
 	await transaction.save();
 	res.status(201).json({
@@ -77,26 +76,30 @@ const createTransaction = asyncHandler(async (req, res) => {
 const createTransactionFromItem = asyncHandler(async (req, res) => {
 	const { id } = req.params;
 
-	const item = Item.findById(id);
+	const item = await Item.findById(id);
 	if (!item) {
 		res.status(404);
 		throw new Error('Transaction details not found');
 	}
+	
 
 	// TODO: use paypal for create transaction
 	const transaction_id = Math.random().toString(36).substring(7);
 	const transaction = new Transaction({
+		transaction_id,
 		amount: item.price,
 		currency: item.currency,
 		status: 'open',
 		business: item.business,
 		customer: req.customer._id,
-		transaction_id,
+		description: item.description,
+		return_date: item.return_date,
+		opened_at: Date.now(),
 	});
 	await transaction.save();
 
 	if (item.temporary) {
-		Item.findByIdAndDelete(id);
+		await Item.findByIdAndDelete(id);
 	}
 
 	const businessAssociated = businesses.filter(
