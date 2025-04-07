@@ -141,13 +141,17 @@ export default function VerifyBusinessNumberScreen() {
 					/>
 
 					<AddressAutocompleteInput
-						onSelect={(address: string, placeId: any, location: any) => {
+            label="Business Address"
+						onSelect={(
+							address: string,
+							placeId: any,
+							location: { lat: number; lng: number }
+						) => {
 							setSelectedLocation({
 								address,
 								lat: location.lat,
 								lng: location.lng,
 							});
-							console.log('Selected:', address, location);
 						}}
 					/>
 

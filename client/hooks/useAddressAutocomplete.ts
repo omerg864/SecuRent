@@ -4,10 +4,11 @@ import {
 	getLocationDetails,
 	getLocationPredictions,
 } from '@/services/locationService';
+import { LocationPrediction } from '@/services/interfaceService';
 
 export const useAddressAutocomplete = () => {
 	const [query, setQuery] = useState('');
-	const [suggestions, setSuggestions] = useState<any[]>([]);
+	const [suggestions, setSuggestions] = useState<LocationPrediction[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [selected, setSelected] = useState<{
 		address: string;
@@ -32,17 +33,17 @@ export const useAddressAutocomplete = () => {
 	const fetchPlaceDetails = async (placeId: string) => {
 		try {
 			const details = await getLocationDetails(placeId);
-            if (details) {
-                return {
-                    address: details.address,
-                    placeId: placeId,
-                    location: {
-                        lat: details.location.lat,
-                        lng: details.location.lng,
-                    },
-                };
-            }
-            return null;
+			if (details) {
+				return {
+					address: details.address,
+					placeId: placeId,
+					location: {
+						lat: details.location.lat,
+						lng: details.location.lng,
+					},
+				};
+			}
+			return null;
 		} catch (error) {
 			console.error('Error fetching place details:', error);
 			return null;
@@ -56,15 +57,15 @@ export const useAddressAutocomplete = () => {
 		debouncedFetch(text);
 	};
 
-	const handleSelect = async (item: any) => {
+	const handleSelect = async (item: LocationPrediction) => {
 		setQuery(item.description);
 		setSuggestions([]);
 
-		const details = await fetchPlaceDetails(item.place_id);
+		const details = await fetchPlaceDetails(item.id);
 		if (details) {
 			const selectedData = {
 				address: details.address,
-				placeId: item.place_id,
+				placeId: item.id,
 				location: details.location,
 			};
 			setSelected(selectedData);

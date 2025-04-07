@@ -9,20 +9,28 @@ import {
 } from 'react-native';
 import { useAddressAutocomplete } from '../hooks/useAddressAutocomplete';
 import Toast from 'react-native-toast-message';
+import { LocationPrediction } from '@/services/interfaceService';
+import { ThemedTextInput } from './ui/ThemedTextInput';
+import { ThemedText } from './ui/ThemedText';
 
 export default function AddressAutocompleteInput({
 	onSelect,
+    labelClassName = '',
+    label = 'Address',
 }: {
 	onSelect: (
 		address: string,
 		placeId: string,
 		location: { lat: number; lng: number }
 	) => void;
+    labelClassName?: string;
+    label?: string;
 }) {
 	const { query, suggestions, handleChange, handleSelect } =
 		useAddressAutocomplete();
 
-	const onItemPress = async (item: any) => {
+	const onItemPress = async (item: LocationPrediction) => {
+		console.log('Selected item:', item);
 		const selected = await handleSelect(item);
 		if (selected) {
 			onSelect(
@@ -39,52 +47,31 @@ export default function AddressAutocompleteInput({
 	};
 
 	return (
-		<View style={{ zIndex: 10 }}>
-			<TextInput
+		<View className="z-10 relative">
+			<ThemedText className={`text-sm font-medium ${labelClassName}`}>
+				{label}
+			</ThemedText>
+			<ThemedTextInput
 				value={query}
 				onChangeText={handleChange}
-				placeholder="Enter business address"
-				style={styles.input}
+				className="w-full h-12 px-4 border border-gray-300 rounded-md"
 			/>
 
 			{suggestions.length > 0 && (
-				<FlatList
-					data={suggestions}
-					keyExtractor={(item) => item.place_id}
-					renderItem={({ item }) => (
+				<View className="absolute top-20 left-0 w-full rounded-lg mt-1 bg-black text-white">
+					{suggestions.map((item) => (
 						<TouchableOpacity
-							style={styles.item}
+							key={item.id}
+							className="p-3 border-b border-gray-500"
 							onPress={() => onItemPress(item)}
 						>
-							<Text>{item.description}</Text>
+							<Text className="text-white">
+								{item.description}
+							</Text>
 						</TouchableOpacity>
-					)}
-					style={styles.dropdown}
-				/>
+					))}
+				</View>
 			)}
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	input: {
-		borderWidth: 1,
-		borderColor: '#ccc',
-		padding: 12,
-		borderRadius: 8,
-		backgroundColor: 'white',
-	},
-	dropdown: {
-		backgroundColor: '#fff',
-		borderWidth: 1,
-		borderColor: '#ccc',
-		borderRadius: 8,
-		marginTop: 4,
-		maxHeight: 200,
-	},
-	item: {
-		padding: 12,
-		borderBottomWidth: 1,
-		borderBottomColor: '#eee',
-	},
-});
