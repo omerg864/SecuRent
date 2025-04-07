@@ -84,6 +84,7 @@ const LoginScreen = () => {
       } else {
         AsyncStorage.setItem("Business_Data", JSON.stringify(response.user));
         if (!response.user.isValid) {
+          console.log("Id" + response.user._id);
           AsyncStorage.setItem("UserID", response.user._id);
           AsyncStorage.setItem("Account_setup", "true");
           AsyncStorage.setItem("current_account_type", "business");

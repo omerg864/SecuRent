@@ -40,6 +40,12 @@ const businessScheme = mongoose.Schema({
 	address: {
 		type: String,
 	},
+	location: {
+		type: {
+			lat: { type: Number },
+			lng: { type: Number }
+		},
+	},
 	image: {
 		type: String,
 	},

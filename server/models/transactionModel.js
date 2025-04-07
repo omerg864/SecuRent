@@ -9,6 +9,10 @@ const transactionScheme = mongoose.Schema(
 			type: Number,
 			required: true,
 		},
+		description: {
+			type: String,
+			required: true,
+		},
 		currency: {
 			type: String,
 			required: true,
@@ -25,6 +29,10 @@ const transactionScheme = mongoose.Schema(
 		customer: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Customer',
+		},
+		opened_at: {
+			type: Date,
+			default: Date.now,
 		},
 		closed_at: {
 			type: Date,
