@@ -42,14 +42,18 @@ export default function ApproveTransaction() {
               type: "error",
               text1: "Item not found",
             });
-            router.back();
+            router.replace({
+              pathname: "/customer",
+            });
           }
         } catch (error: any) {
           Toast.show({
             type: "error",
             text1: "Item not found",
           });
-          router.back();
+          router.replace({
+            pathname: "/customer",
+          });
         } finally {
           setLoading(false);
         }
@@ -69,7 +73,9 @@ export default function ApproveTransaction() {
           type: "success",
           text1: "Deposit approved successfully",
         });
-        router.back();
+        await router.replace({
+          pathname: "/customer",
+        });
       } else {
         Toast.show({
           type: "error",

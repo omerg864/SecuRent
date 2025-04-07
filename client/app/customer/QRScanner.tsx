@@ -77,7 +77,7 @@ export default function QRScannerScreen() {
 				text1: 'QR Code',
 			});
 			router.push({
-				pathname: '/customer/approve-transaction',
+				pathname: '/approve-transaction',
 				params: { id },
 			});
 		}
