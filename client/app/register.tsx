@@ -99,6 +99,7 @@ const RegisterScreen = () => {
           return;
         }
         console.log("Customer login response:", loginResponse);
+        AsyncStorage.setItem("UserID", loginResponse.user._id);
         AsyncStorage.setItem("Access_Token", loginResponse.accessToken);
         AsyncStorage.setItem("Refresh_Token", loginResponse.refreshToken);
         AsyncStorage.setItem(

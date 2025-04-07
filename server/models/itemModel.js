@@ -11,10 +11,6 @@ const ItemSchema = mongoose.Schema(
             type: String,
             required: true,
         },
-        amount:{
-            type: Number,
-            required: true,
-        },
         price:{
             type: Number,
             required: true,
@@ -25,6 +21,10 @@ const ItemSchema = mongoose.Schema(
         },
         image:{
             type: String,
+        },
+        temporary:{
+            type: Boolean,
+            default: false,
         },
     
     },

@@ -46,7 +46,8 @@ const ResetPasswordScreen = () => {
     }
     setLoading(true);
     try {
-      const type = await AsyncStorage.getItem("Type");
+      const rawType = await AsyncStorage.getItem("Type");
+      const type = rawType ? JSON.parse(rawType) : null;
       if (type === "customer") {
         const response: any = await updateCustomerPassword(newPassword);
         if (!response) {
@@ -76,11 +77,11 @@ const ResetPasswordScreen = () => {
       router.dismissAll();
       router.replace("/login");
     } catch (error: any) {
-        Toast.show({
-          type: "error",
-          text1: error.response.data.message,
-        });
-        setLoading(false);
+      Toast.show({
+        type: "error",
+        text1: error.response.data.message,
+      });
+      setLoading(false);
     } finally {
       setLoading(false);
     }

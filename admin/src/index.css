@@ -213,7 +213,3 @@ span.flatpickr-weekday,
 [x-cloak] {
 	display: none !important;
 }
-
-main {
-	min-height: 100dvh;
-}

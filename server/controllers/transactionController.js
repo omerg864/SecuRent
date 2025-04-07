@@ -1,5 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import Transaction from '../models/transactionModel.js';
+import Item from '../models/itemModel.js';
+import { businesses } from '../config/websocket.js';
 
 const getBusinessTransactions = asyncHandler(async (req, res) => {
 	const transactions = await Transaction.find({
@@ -66,6 +68,54 @@ const createTransaction = asyncHandler(async (req, res) => {
 		transaction_id,
 	});
 	await transaction.save();
+	res.status(201).json({
+		success: true,
+		transaction,
+	});
+});
+
+const createTransactionFromItem = asyncHandler(async (req, res) => {
+	const { id } = req.params;
+
+	const item = Item.findById(id);
+	if (!item) {
+		res.status(404);
+		throw new Error('Transaction details not found');
+	}
+
+	// TODO: use paypal for create transaction
+	const transaction_id = Math.random().toString(36).substring(7);
+	const transaction = new Transaction({
+		amount: item.price,
+		currency: item.currency,
+		status: 'open',
+		business: item.business,
+		customer: req.customer._id,
+		transaction_id,
+	});
+	await transaction.save();
+
+	if (item.temporary) {
+		Item.findByIdAndDelete(id);
+	}
+
+	const businessAssociated = businesses.filter(
+		(ws) => ws.id === item.business.toString()
+	);
+
+	if (businessAssociated.length > 0) {
+		for (const ws of businessAssociated) {
+			ws.send(
+				JSON.stringify({
+					type: 'newTransaction',
+					data: {
+						item
+					},
+				})
+			);
+		}
+	}
+
 	res.status(201).json({
 		success: true,
 		transaction,
@@ -165,4 +215,5 @@ export {
 	getTransactionAdmin,
 	getCustomerTransactionsAdmin,
 	getBusinessTransactionsAdmin,
+	createTransactionFromItem
 };

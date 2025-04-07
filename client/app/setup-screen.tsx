@@ -31,8 +31,8 @@ const BusinessSetupSteps = [
   },
   {
     id: "verification",
-    title: "Business Verification",
-    subTitle: "Complete verification to activate your business account",
+    title: "Business Details",
+    subTitle: "Complete business details to activate your business account",
     icon: <Entypo name="briefcase" size={42} color="white" />,
     route: "/verification",
   },
