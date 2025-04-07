@@ -1,5 +1,9 @@
 import { useState, useCallback } from 'react';
 import debounce from 'lodash/debounce';
+import {
+	getLocationDetails,
+	getLocationPredictions,
+} from '@/services/locationService';
 
 export const useAddressAutocomplete = () => {
 	const [query, setQuery] = useState('');
@@ -16,13 +20,8 @@ export const useAddressAutocomplete = () => {
 
 		try {
 			setLoading(true);
-			const response = await fetch(
-				`https://securent.onrender.com/api/location?query=${encodeURIComponent(
-					text
-				)}`
-			);
-			const data = await response.json();
-			setSuggestions(data.predictions);
+			const data = await getLocationPredictions(text);
+			setSuggestions(data);
 		} catch (error) {
 			console.error('Error fetching suggestions:', error);
 		} finally {
@@ -32,14 +31,18 @@ export const useAddressAutocomplete = () => {
 
 	const fetchPlaceDetails = async (placeId: string) => {
 		try {
-			const response = await fetch(
-				`https://securent.onrender.com/api/location/details?id=${placeId}`
-			);
-			const data = await response.json();
-			return {
-				address: data.address,
-				location: data.location, // { lat, lng }
-			};
+			const details = await getLocationDetails(placeId);
+            if (details) {
+                return {
+                    address: details.address,
+                    placeId: placeId,
+                    location: {
+                        lat: details.location.lat,
+                        lng: details.location.lng,
+                    },
+                };
+            }
+            return null;
 		} catch (error) {
 			console.error('Error fetching place details:', error);
 			return null;
@@ -65,9 +68,9 @@ export const useAddressAutocomplete = () => {
 				location: details.location,
 			};
 			setSelected(selectedData);
-            return selectedData;
+			return selectedData;
 		}
-        return null;
+		return null;
 	};
 
 	return {
