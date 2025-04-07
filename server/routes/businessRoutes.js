@@ -13,7 +13,7 @@ import {
 	updateBusinessPassword,
 	resendVerificationCode,
 } from '../controllers/businessController.js';
-import { authBusiness } from '../middleware/authMiddleware.js';
+import { authAdmin, authBusiness } from '../middleware/authMiddleware.js';
 import { upload } from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
@@ -37,6 +37,6 @@ router.delete('/delete', authBusiness, deleteBusiness);
 router.get('/:id', authBusiness, getBusinessById);
 router.put('/update-password', authBusiness, updateBusinessPassword);
 router.post('/resend-code', authBusiness, resendVerificationCode);
-router.get('/businesses',authBusiness, getAllBusinesses);
+router.get('/businesses',authAdmin, getAllBusinesses);
 
 export default router;
