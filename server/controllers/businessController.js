@@ -103,6 +103,7 @@ const registerBusiness = asyncHandler(async (req, res) => {
 	const sent = await sendEmail(email, subject, text, html);
 
 	business.verificationCode = verificationCode;
+  business.rating = 5;
 	await business.save();
 
 	res.status(201).json({

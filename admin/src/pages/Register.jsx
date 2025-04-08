@@ -78,7 +78,7 @@ const Register = () => {
 		);
 	}
 	return (
-		<main className="w-full p-8 shadow-default flex items-center justify-center dark:bg-boxdark-2">
+		<main className="w-full p-8 shadow-default flex items-center justify-center dark:bg-boxdark-2" style={{ minHeight: '100dvh' }}>
 			<div className="max-w-2xl flex-1 w-full rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
 				<ul className="flex p-2 justify-end">
 					{/* <!-- Dark Mode Toggler --> */}

@@ -38,6 +38,7 @@ export default function VerifyEmailScreen() {
       setLoading(true);
       try {
         const userId = await AsyncStorage.getItem("UserID");
+        console.log("User ID:", userId);
         let response: any;
         if (accountType === "business") {
           response = await verifyEmailBusiness(code, userId as string);

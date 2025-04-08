@@ -4,7 +4,7 @@ import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
 import { v4 as uuidv4 } from 'uuid';
 
 const createItem = asyncHandler(async (req, res) => {
-	const { description, price, temporary } = req.body;
+	const { description, price, temporary, date, duration} = req.body;
 
 	if (!description || !price) {
 		res.status(400);
@@ -29,6 +29,8 @@ const createItem = asyncHandler(async (req, res) => {
 		currency: req.business.currency || 'USD',
 		image: imageUrl,
 		temporary,
+		return_date: date,
+		duration,
 	});
 
 	res.status(201).json({
