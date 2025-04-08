@@ -60,7 +60,7 @@ export default () => {
 			// create temporary item
 			setIsLoading(true);
 			try {
-				const response = await createItem(desc, date, price, true);
+				const response = await createItem(desc, date, price, true, 0);
 				if (!response) {
 					setIsLoading(false);
 					Toast.show({
