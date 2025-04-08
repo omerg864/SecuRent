@@ -71,6 +71,13 @@ export default function Layout() {
 							title: 'New Transaction',
 						}}
 					/>
+					<Drawer.Screen
+						name="transaction-details"
+						options={{
+							drawerLabel: 'details Transaction',
+							title: 'details Transaction',
+						}}
+					/>
 				</Drawer>
 			</GestureHandlerRootView>
 		</WebSocketProvider>
