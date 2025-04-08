@@ -1,14 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import {
-	View,
-	StyleSheet,
-	ActivityIndicator,
-	TextInput,
-	Button,
-	Text,
-} from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Button } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import { ThemedText } from '@/components/ui/ThemedText';
@@ -18,17 +11,16 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { updateBusinessDetails } from '@/services/businessService';
 import Toast from 'react-native-toast-message';
-import axios from 'axios';
-import { useEffect } from 'react';
-import { debounce } from 'lodash';
 import AddressAutocompleteInput from '@/components/AddressAutocompleteInput';
 import { StepResponse } from '@/services/interfaceService';
+import ProfileImageInput from '@/components/ProfileImageInput';
 
 export default function VerifyBusinessNumberScreen() {
 	const router = useRouter();
 	const [businessNumber, setBusinessNumber] = useState('');
 	const [phoneNumber, setPhoneNumber] = useState('');
 	const [loading, setLoading] = useState(false);
+	const [file, setFile] = useState<File | null>(null);
 
 	const [selectedLocation, setSelectedLocation] = useState<{
 		address: string;
@@ -42,6 +34,7 @@ export default function VerifyBusinessNumberScreen() {
 		if (/^\d{9}$/.test(businessNumber.trim())) {
 			setLoading(true);
 			try {
+
 				const response: StepResponse = await updateBusinessDetails({
 					companyNumber: businessNumber.trim(),
 					phone: phoneNumber.trim(),
@@ -50,7 +43,7 @@ export default function VerifyBusinessNumberScreen() {
 						lat: selectedLocation?.lat || 0,
 						lng: selectedLocation?.lng || 0,
 					},
-				});
+				}, file);
 
 				if (!response.success) {
 					setLoading(false);
@@ -101,22 +94,6 @@ export default function VerifyBusinessNumberScreen() {
 		}
 	};
 
-	const debouncedSearch = debounce(
-		async (query: string, setResults: any, OPENCAGE_API_KEY: string) => {
-			try {
-				const response = await axios.get(
-					`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
-						query
-					)}&key=${OPENCAGE_API_KEY}`
-				);
-				setResults(response.data.results);
-			} catch (error) {
-				console.error('Geocoding failed:', error);
-			}
-		},
-		500
-	);
-
 	return (
 		<ParallaxScrollView
 			headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -130,7 +107,7 @@ export default function VerifyBusinessNumberScreen() {
 				/>
 			}
 		>
-			<View className="px-6 pt-8">
+			<View className="px-6 pt-8 flex flex-col gap-2">
 				<ThemedText className="text-3xl font-bold text-white">
 					Enter Business Details
 				</ThemedText>
@@ -138,54 +115,54 @@ export default function VerifyBusinessNumberScreen() {
 					Enter your business details to verify your account
 				</ThemedText>
 
-				<View className="space-y-4 mt-8 flex-col gap-4">
-					<ThemedTextInput
-						keyboardType="phone-pad"
-						value={phoneNumber}
-						onChangeText={setPhoneNumber}
-						className="w-full h-12 px-4 border border-gray-300 rounded-md"
-						label="Phone Number"
-						editable={!loading}
-					/>
+				<ProfileImageInput label='Business Image' setFile={setFile} />
 
-					<AddressAutocompleteInput
-						label="Business Address"
-						onSelect={(
-							address: string,
-							placeId: any,
-							location: { lat: number; lng: number }
-						) => {
-							setSelectedLocation({
-								address,
-								lat: location.lat,
-								lng: location.lng,
-							});
-						}}
-					/>
+				<ThemedTextInput
+					keyboardType="phone-pad"
+					value={phoneNumber}
+					onChangeText={setPhoneNumber}
+					className="w-full h-12 px-4 border border-gray-300 rounded-md"
+					label="Phone Number"
+					editable={!loading}
+				/>
 
-					<ThemedTextInput
-						keyboardType="numeric"
-						value={businessNumber}
-						onChangeText={setBusinessNumber}
-						className="w-full h-12 px-4 border border-gray-300 rounded-md"
-						label="Business Number"
-						editable={!loading}
-					/>
+				<AddressAutocompleteInput
+					label="Business Address"
+					onSelect={(
+						address: string,
+						placeId: any,
+						location: { lat: number; lng: number }
+					) => {
+						setSelectedLocation({
+							address,
+							lat: location.lat,
+							lng: location.lng,
+						});
+					}}
+				/>
 
-					<HapticButton
-						onPress={handleVerify}
-						className="bg-indigo-600/30 py-3 mt-2 rounded-xl"
-						disabled={loading}
-					>
-						{loading ? (
-							<ActivityIndicator size="small" color="#FFFFFF" />
-						) : (
-							<ThemedText className="text-white text-center text-lg font-semibold">
-								Update Business Details
-							</ThemedText>
-						)}
-					</HapticButton>
-				</View>
+				<ThemedTextInput
+					keyboardType="numeric"
+					value={businessNumber}
+					onChangeText={setBusinessNumber}
+					className="w-full h-12 px-4 border border-gray-300 rounded-md"
+					label="Business Number"
+					editable={!loading}
+				/>
+
+				<HapticButton
+					onPress={handleVerify}
+					className="bg-indigo-600/30 py-3 mt-2 rounded-xl"
+					disabled={loading}
+				>
+					{loading ? (
+						<ActivityIndicator size="small" color="#FFFFFF" />
+					) : (
+						<ThemedText className="text-white text-center text-lg font-semibold">
+							Update Business Details
+						</ThemedText>
+					)}
+				</HapticButton>
 			</View>
 		</ParallaxScrollView>
 	);
