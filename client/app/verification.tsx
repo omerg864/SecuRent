@@ -20,7 +20,6 @@ export default function VerifyBusinessNumberScreen() {
 	const [businessNumber, setBusinessNumber] = useState('');
 	const [phoneNumber, setPhoneNumber] = useState('');
 	const [loading, setLoading] = useState(false);
-	const [file, setFile] = useState<File | null>(null);
 
 	const [selectedLocation, setSelectedLocation] = useState<{
 		address: string;
@@ -34,16 +33,18 @@ export default function VerifyBusinessNumberScreen() {
 		if (/^\d{9}$/.test(businessNumber.trim())) {
 			setLoading(true);
 			try {
-
-				const response: StepResponse = await updateBusinessDetails({
-					companyNumber: businessNumber.trim(),
-					phone: phoneNumber.trim(),
-					address: selectedLocation?.address,
-					location: {
-						lat: selectedLocation?.lat || 0,
-						lng: selectedLocation?.lng || 0,
+				const response: StepResponse = await updateBusinessDetails(
+					{
+						companyNumber: businessNumber.trim(),
+						phone: phoneNumber.trim(),
+						address: selectedLocation?.address,
+						location: {
+							lat: selectedLocation?.lat || 0,
+							lng: selectedLocation?.lng || 0,
+						},
 					},
-				}, file);
+					null
+				);
 
 				if (!response.success) {
 					setLoading(false);
@@ -114,8 +115,6 @@ export default function VerifyBusinessNumberScreen() {
 				<ThemedText className="text-lg text-indigo-200 mt-1">
 					Enter your business details to verify your account
 				</ThemedText>
-
-				<ProfileImageInput label='Business Image' setFile={setFile} />
 
 				<ThemedTextInput
 					keyboardType="phone-pad"

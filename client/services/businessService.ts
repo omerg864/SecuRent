@@ -1,3 +1,4 @@
+import { buildFormData } from '@/utils/functions';
 import { checkToken, client } from './httpClient';
 import {
 	AuthData,
@@ -7,11 +8,17 @@ import {
 } from './interfaceService';
 import { BankDetails } from './interfaceService';
 
-const registerBusiness = async (businessData: AuthData) => {
+const registerBusiness = async (businessData: AuthData, file: File | null) => {
 	try {
+		const formData = buildFormData(businessData, file);
 		const response = await client.post<AuthResponse>(
 			'business/register',
-			businessData
+			formData,
+			{
+				headers: {
+					'Content-Type': 'multipart/form-data',
+				},
+			}
 		);
 		return response.data.success;
 	} catch (error) {
@@ -28,25 +35,13 @@ const updateBusinessDetails = async (
 		if (!accessToken) {
 			throw new Error('Access token is missing or invalid.');
 		}
-		const formData = new FormData();
-		for (const key in businessData) {
-			if (businessData[key as keyof Business] !== undefined && businessData[key as keyof Business] !== null) {
-				formData.append(key, businessData[key as keyof Business] as string | Blob);
-			}
-		}
-		if (file) {
-			formData.append('image', file);
-		}
-		const response = await client.put<StepResponse>(
-			'business/',
-			formData,
-			{
-				headers: { 
-					Authorization: `Bearer ${accessToken}`,
-					'Content-Type': 'multipart/form-data',
-				},
-			}
-		);
+		const formData = buildFormData(businessData, file);
+		const response = await client.put<StepResponse>('business/', formData, {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+				'Content-Type': 'multipart/form-data',
+			},
+		});
 		return response.data;
 	} catch (error) {
 		throw error || 'Business details update failed.';

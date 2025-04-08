@@ -17,6 +17,7 @@ import { LoginUser } from "@/services/adminService";
 import { AuthData } from "@/services/interfaceService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ActivityIndicator } from "react-native";
+import ProfileImageInput from "@/components/ProfileImageInput";
 
 const RegisterScreen = () => {
   const [name, setName] = useState("");
@@ -28,6 +29,7 @@ const RegisterScreen = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { accountType } = useLocalSearchParams();
+  const [file, setFile] = useState<File | null>(null);
 
   const goBack = () => {
     router.back();
@@ -70,7 +72,7 @@ const RegisterScreen = () => {
         password,
       };
       if (accountType === "business") {
-        const response = await registerBusiness(Data);
+        const response = await registerBusiness(Data, file);
         if (!response) {
           setLoading(false);
           return;
@@ -88,7 +90,7 @@ const RegisterScreen = () => {
           JSON.stringify(loginResponse.user)
         );
       } else {
-        const response = await registerCustomer(Data);
+        const response = await registerCustomer(Data, file);
         if (!response) {
           setLoading(false);
           return;
@@ -151,11 +153,14 @@ const RegisterScreen = () => {
         <ThemedText className="text-2xl font-bold mb-2">
           Welcome, create your {accountType} Account
         </ThemedText>
-        <ThemedText className="text-sm mb-8">
+        <ThemedText className="text-sm">
           Hey there! Let's get you started
         </ThemedText>
 
         <View className="space-y-6">
+
+          <ProfileImageInput label='Business Image' setFile={setFile} />
+
           <ThemedTextInput
             className="w-full h-12 px-4 border border-gray-300 rounded-md"
             value={name}

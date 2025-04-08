@@ -21,7 +21,7 @@ export default function ProfileImageInput({
 		let result = await ImagePicker.launchImageLibraryAsync({
 			mediaTypes: ImagePicker.MediaTypeOptions.Images,
 			allowsEditing: true,
-			aspect: [1, 1], // Ensures the image is cropped to a square aspect ratio
+			aspect: [1, 1],
 			quality: 1,
 		});
 
@@ -29,8 +29,6 @@ export default function ProfileImageInput({
 			const temp_uri = result.assets[0].uri;
 			setUri(temp_uri);
 			setFile(result.assets[0].file!);
-			console.log('Picked image URI:', temp_uri);
-			// You can now upload this URI or display it as a rounded image
 		}
 	};
 
@@ -42,48 +40,24 @@ export default function ProfileImageInput({
 				</ThemedText>
 				<HapticButton
 					onPress={pickImage}
-					style={{
-						width: 100,
-						height: 100,
-						borderRadius: 50,
-						backgroundColor: '#E0E0E0',
-						justifyContent: 'center',
-						alignItems: 'center',
-						marginTop: 10,
-						overflow: 'hidden',
-					}}
+					className="w-24 h-24 rounded-full bg-gray-300 justify-center items-center mt-2 overflow-hidden"
 				>
 					{uri ? (
-						// Display the selected image
-						<Image
-							source={{ uri }}
-							style={{ width: '100%', height: '100%' }}
-						/>
+						<Image source={{ uri }} className="w-full h-full" />
 					) : (
-						// Display the "Upload" text when no image is selected
-						<Text onPress={pickImage} style={{ color: '#888' }}>
+						<Text onPress={pickImage} className="text-gray-500">
 							Upload
 						</Text>
 					)}
 				</HapticButton>
 				{uri && (
-					// Display "Update" and "Delete" options when an image is selected
-					<View
-						style={{
-							marginTop: 10,
-							flexDirection: 'column',
-							gap: 10,
-						}}
-					>
+					<View className="mt-2 flex-col gap-2">
 						<Text
 							onPress={() => {
 								setUri(null);
 								setFile(null);
 							}}
-							style={{
-								color: '#FF0000',
-								textDecorationLine: 'underline',
-							}}
+							className="text-red-500 underline"
 						>
 							Delete Image
 						</Text>
