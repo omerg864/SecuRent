@@ -1,5 +1,9 @@
 import { checkToken, client } from "./httpClient";
-import { ChargeDepositPayload, TransactionResponse } from "./interfaceService";
+import {
+  ChargeDepositPayload,
+  TransactionResponse,
+  Transaction,
+} from "./interfaceService";
 const chargeDeposit = async (
   transactionId: string,
   payload: ChargeDepositPayload
@@ -38,4 +42,38 @@ const createTransactionFromItem = async (itemId: string) => {
   }
 };
 
-export { chargeDeposit, createTransactionFromItem };
+const getBusinessTransactions = async () => {
+  try {
+    const accessToken = await checkToken();
+    const response = await client.get<{
+      success: boolean;
+      transactions: Transaction[];
+    }>(`transaction/business`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    return response.data;
+  } catch (error) {
+    throw error || "Fetching business transactions failed";
+  }
+};
+
+const getCustomerTransactions = async () => {
+  try {
+    const accessToken = await checkToken();
+    const response = await client.get<{
+      success: boolean;
+      transaction: Transaction[];
+    }>(`transaction/customer`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    return response.data;
+  } catch (error) {
+    throw error || "Fetching customer transaction failed";
+  }
+};
+export {
+  chargeDeposit,
+  createTransactionFromItem,
+  getBusinessTransactions,
+  getCustomerTransactions,
+};
