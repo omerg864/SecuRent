@@ -28,15 +28,14 @@ const registerBusiness = async (businessData: AuthData, file: File | null) => {
 
 const updateBusinessDetails = async (
 	businessData: Partial<Business>,
-	file: File | null
 ) => {
 	try {
 		const accessToken = await checkToken();
 		if (!accessToken) {
 			throw new Error('Access token is missing or invalid.');
 		}
-		const formData = buildFormData(businessData, file);
-		const response = await client.put<StepResponse>('business/', formData, {
+		console.log('Business data:', businessData);
+		const response = await client.put<StepResponse>('business/', businessData, {
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
 				'Content-Type': 'multipart/form-data',

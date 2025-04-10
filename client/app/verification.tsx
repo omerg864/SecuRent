@@ -67,20 +67,17 @@ export default function VerifyBusinessNumberScreen() {
 		}
 		setLoading(true);
 		try {
-			const response: StepResponse = await updateBusinessDetails(
-				{
-					companyNumber: businessNumber.trim(),
-					phone: phoneNumber.trim(),
-					address: selectedLocation?.address,
-					location: {
-						lat: selectedLocation?.lat || 0,
-						lng: selectedLocation?.lng || 0,
-					},
-          currency: currency,
-					category: categories,
+			const response: StepResponse = await updateBusinessDetails({
+				companyNumber: businessNumber.trim(),
+				phone: phoneNumber.trim(),
+				address: selectedLocation?.address,
+				location: {
+					lat: selectedLocation?.lat || 0,
+					lng: selectedLocation?.lng || 0,
 				},
-				null
-			);
+				currency: currency,
+				category: categories,
+			});
 
 			if (!response.success) {
 				setLoading(false);
@@ -115,6 +112,7 @@ export default function VerifyBusinessNumberScreen() {
 				},
 			});
 		} catch (error: any) {
+			console.error('Error updating business details:', error);
 			Toast.show({
 				type: 'error',
 				text1: error.response.data.message,
