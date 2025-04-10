@@ -13,13 +13,19 @@ import { updateBusinessDetails } from '@/services/businessService';
 import Toast from 'react-native-toast-message';
 import AddressAutocompleteInput from '@/components/AddressAutocompleteInput';
 import { StepResponse } from '@/services/interfaceService';
-import ProfileImageInput from '@/components/ProfileImageInput';
+import { TouchableOpacity } from '@/components/ui/touchable-opacity';
+import ModalList from '@/components/ModalList';
+import { businessTypes, currencies, Currency } from '@/utils/constants';
+import MultiSelectInput from '@/components/ui/MultiSelectInput';
 
 export default function VerifyBusinessNumberScreen() {
 	const router = useRouter();
 	const [businessNumber, setBusinessNumber] = useState('');
 	const [phoneNumber, setPhoneNumber] = useState('');
 	const [loading, setLoading] = useState(false);
+	const [currency, setCurrency] = useState('ILS');
+	const [modalVisible, setModalVisible] = useState(false);
+	const [categories, setCategories] = useState<string[]>([]);
 
 	const [selectedLocation, setSelectedLocation] = useState<{
 		address: string;
@@ -95,6 +101,24 @@ export default function VerifyBusinessNumberScreen() {
 		}
 	};
 
+	const renderCurrencyItem = (item: Currency) => (
+		<TouchableOpacity
+			style={{
+				padding: 15,
+				borderBottomWidth: 1,
+				borderBottomColor: '#D0D0D0',
+			}}
+			onPress={() => {
+				setCurrency(item.code);
+				setModalVisible(false);
+			}}
+		>
+			<ThemedText style={{ fontSize: 16, color: '#333' }}>
+				{item.name} ({item.code})
+			</ThemedText>
+		</TouchableOpacity>
+	);
+
 	return (
 		<ParallaxScrollView
 			headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -149,6 +173,30 @@ export default function VerifyBusinessNumberScreen() {
 					editable={!loading}
 				/>
 
+				<View className="mb-4">
+					<ThemedText className="text-white text-lg">
+						Currency
+					</ThemedText>
+					<TouchableOpacity
+						className="h-12 w-full border border-gray-300 rounded-xl justify-center items-center"
+						onPress={() => setModalVisible(true)}
+						disabled={loading}
+					>
+						<ThemedText className="text-lg text-gray-900">
+							{currency || 'Select Currency'}
+						</ThemedText>
+					</TouchableOpacity>
+				</View>
+
+				<MultiSelectInput
+					label="Business Categories"
+					nameSingle="Category"
+					namePlural="Categories"
+					selected={categories}
+					setSelected={setCategories}
+					options={businessTypes}
+				/>
+
 				<HapticButton
 					onPress={handleVerify}
 					className="bg-indigo-600/30 py-3 mt-2 rounded-xl"
@@ -163,6 +211,13 @@ export default function VerifyBusinessNumberScreen() {
 					)}
 				</HapticButton>
 			</View>
+			<ModalList<Currency>
+				data={currencies}
+				renderFunction={renderCurrencyItem}
+				modalVisible={modalVisible}
+				setModalVisible={setModalVisible}
+				uniqueKey="code"
+			/>
 		</ParallaxScrollView>
 	);
 }
