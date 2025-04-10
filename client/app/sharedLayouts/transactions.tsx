@@ -175,7 +175,6 @@ const TransactionsPage = () => {
             onPress={() => {
               setStatusFilter(status);
               setPage(1);
-              setTimeout(applyFilters, 0);
             }}
             className={`px-3 py-1 rounded-full text-sm ${
               statusFilter === status
