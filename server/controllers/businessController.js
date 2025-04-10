@@ -3,7 +3,7 @@ import Business from '../models/businessModel.js';
 import Customer from '../models/customerModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { email_regex, password_regex } from '../utils/regex.js';
+import { email_regex, password_regex, phone_regex } from '../utils/regex.js';
 import {
 	generateBusinessAccessToken,
 	generateBusinessRefreshToken,

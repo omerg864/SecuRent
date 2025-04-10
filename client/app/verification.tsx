@@ -65,7 +65,6 @@ export default function VerifyBusinessNumberScreen() {
 			});
 			return;
 		}
-    console.log('pass');
 		setLoading(true);
 		try {
 			const response: StepResponse = await updateBusinessDetails(
@@ -77,6 +76,7 @@ export default function VerifyBusinessNumberScreen() {
 						lat: selectedLocation?.lat || 0,
 						lng: selectedLocation?.lng || 0,
 					},
+          currency: currency,
 					category: categories,
 				},
 				null
