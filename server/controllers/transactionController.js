@@ -208,6 +208,7 @@ const getBusinessTransactionsAdmin = asyncHandler(async (req, res) => {
 });
 
 const getTransactionById = asyncHandler(async (req, res) => {
+	console.log("Checking transaction by id");
 	const transaction = await Transaction.findById(req.params.id);
 	if (!transaction) {
 		res.status(404);
@@ -218,6 +219,27 @@ const getTransactionById = asyncHandler(async (req, res) => {
 		transaction,
 	});
 });
+
+
+const closeTransactionById = asyncHandler(async (req, res) => {
+	const transaction = await Transaction.findById(req.params.id);
+  
+	if (!transaction) {
+	  res.status(404);
+	  throw new Error('Transaction not found');
+	}
+  
+	transaction.status = 'closed';
+	transaction.closed_at = new Date(); 
+	await transaction.save();
+  
+	res.status(200).json({
+	  success: true,
+	  transaction,
+	});
+  });
+  
+  
 
 export {
 	getBusinessTransactions,
@@ -232,4 +254,5 @@ export {
 	getBusinessTransactionsAdmin,
 	createTransactionFromItem,
 	getTransactionById,
+	closeTransactionById,
 };

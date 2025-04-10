@@ -12,11 +12,13 @@ import {
 	getBusinessTransactionsAdmin,
 	createTransactionFromItem,
 	getTransactionById,
+	closeTransactionById,
 } from '../controllers/transactionController.js';
 import {
 	authAdmin,
 	authBusiness,
 	authCustomer,
+	authAny,
 } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -26,7 +28,6 @@ router.get('/business', authBusiness, getBusinessTransactions);
 router.get('/business/:id', authBusiness, getTransactionByBusiness);
 router.put('/release/:id', authBusiness, releaseDeposit);
 router.put('/charge/:id', authBusiness, chargeDeposit);
-router.get('/transaction/:id', authBusiness, getTransactionById);
 
 
 // TODO: add middleware customer to protect routes
@@ -34,13 +35,15 @@ router.get('/customer', authCustomer, getCustomerTransactions);
 router.get('/customer/:id', authCustomer, getTransactionByCustomer);
 router.post('/', authCustomer, createTransaction);
 router.post('/:id', authCustomer, createTransactionFromItem);
-router.post('/transaction/:id', authCustomer, getTransactionById);
 
 //! Admin routes
 router.get('/admin/:id', authAdmin, getTransactionAdmin);
 router.get('/admin/customer/:id', authAdmin, getCustomerTransactionsAdmin);
 router.get('/admin/business/:id', authAdmin, getBusinessTransactionsAdmin);
-router.post('/transaction/:id', authAdmin, getTransactionById);
+
+
+router.get('/transaction/:id', authAny, getTransactionById);
+router.put('/close/:id', authAny, closeTransactionById);
 
 
 export default router;
