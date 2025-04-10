@@ -78,7 +78,7 @@ const getTransactionById = async (id: string): Promise<Transaction> => {
   if (!accessToken) throw new Error("No access token available");
 
   const response = await client.get<{ success: boolean; transaction: Transaction }>(
-    `http://10.100.102.37:3000/api/transaction/transaction/${id}`,
+    `transaction/transaction/${id}`,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
     }
@@ -92,7 +92,7 @@ const closeTransaction = async (id: string): Promise<Transaction> => {
   if (!accessToken) throw new Error("No access token available");
 
   const response = await client.put<{ success: boolean; transaction: Transaction }>(
-    `http://10.100.102.37:3000/api/transaction/close/${id}`,
+    `transaction/close/${id}`,
     {}, // אין צורך בגוף לבקשה
     {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -101,6 +101,7 @@ const closeTransaction = async (id: string): Promise<Transaction> => {
 
   return response.data.transaction;
 };
+
 
 export {
   chargeDeposit,
