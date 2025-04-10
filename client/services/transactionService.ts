@@ -71,9 +71,43 @@ const getCustomerTransactions = async () => {
     throw error || "Fetching customer transaction failed";
   }
 };
+
+const getTransactionById = async (id: string): Promise<Transaction> => {
+  console.log("🚀 getTransactionById called with:", id); // לוודא שהפונקציה ניגשת
+  const accessToken = await checkToken();
+  if (!accessToken) throw new Error("No access token available");
+
+  const response = await client.get<{ success: boolean; transaction: Transaction }>(
+    `transaction/transaction/${id}`,
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }
+  );
+  console.log("📦 Transaction response:", response.data);
+  return response.data.transaction;
+};
+
+const closeTransaction = async (id: string): Promise<Transaction> => {
+  const accessToken = await checkToken();
+  if (!accessToken) throw new Error("No access token available");
+
+  const response = await client.put<{ success: boolean; transaction: Transaction }>(
+    `transaction/close/${id}`,
+    {}, // אין צורך בגוף לבקשה
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }
+  );
+
+  return response.data.transaction;
+};
+
+
 export {
   chargeDeposit,
   createTransactionFromItem,
   getBusinessTransactions,
   getCustomerTransactions,
+  getTransactionById,
+  closeTransaction,
 };
