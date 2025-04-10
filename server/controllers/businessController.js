@@ -3,7 +3,7 @@ import Business from '../models/businessModel.js';
 import Customer from '../models/customerModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { email_regex } from '../utils/regex.js';
+import { email_regex, password_regex } from '../utils/regex.js';
 import {
 	generateBusinessAccessToken,
 	generateBusinessRefreshToken,
@@ -13,9 +13,6 @@ import { sendEmail } from '../utils/functions.js';
 import { verifyCompanyNumber } from '../utils/externalFunctions.js';
 import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
 import { v4 as uuidv4 } from 'uuid';
-
-export const password_regex =
-	/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 //Reusable login success function
 const successFullLogin = async (res, business) => {
@@ -361,6 +358,11 @@ const updateBusinessDetails = asyncHandler(async (req, res) => {
 	if (!companyNumber || !address || !location || !phone || !currency) {
 		res.status(400);
 		throw new Error('All fields are required');
+	}
+
+	if (!phone_regex.test(phone)) {
+		res.status(401);
+		throw new Error('Invalid phone number format');
 	}
 
 	if (location.lat === undefined || location.lng === undefined) {

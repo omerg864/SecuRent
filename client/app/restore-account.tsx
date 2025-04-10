@@ -11,6 +11,7 @@ import { identifyUser } from "@/services/adminService";
 import { ActivityIndicator } from "react-native";
 import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { emailRegex } from "@/utils/regex";
 
 const RestoreAccountScreen = () => {
   const [email, setEmail] = useState("");
@@ -24,7 +25,6 @@ const RestoreAccountScreen = () => {
       });
       return;
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       Toast.show({
         type: "info",

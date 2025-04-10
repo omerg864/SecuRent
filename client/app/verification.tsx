@@ -17,6 +17,7 @@ import { TouchableOpacity } from '@/components/ui/touchable-opacity';
 import ModalList from '@/components/ModalList';
 import { businessTypes, currencies, Currency } from '@/utils/constants';
 import MultiSelectInput from '@/components/ui/MultiSelectInput';
+import { phone_regex } from '@/utils/regex';
 
 export default function VerifyBusinessNumberScreen() {
 	const router = useRouter();
@@ -36,69 +37,90 @@ export default function VerifyBusinessNumberScreen() {
 	const accountType = (params.accountType as string) || 'business';
 
 	const handleVerify = async () => {
-		if (/^\d{9}$/.test(businessNumber.trim())) {
-			setLoading(true);
-			try {
-				const response: StepResponse = await updateBusinessDetails(
-					{
-						companyNumber: businessNumber.trim(),
-						phone: phoneNumber.trim(),
-						address: selectedLocation?.address,
-						location: {
-							lat: selectedLocation?.lat || 0,
-							lng: selectedLocation?.lng || 0,
-						},
-						category: categories,
-					},
-					null
-				);
-
-				if (!response.success) {
-					setLoading(false);
-					Toast.show({
-						type: 'error',
-						text1: 'Internal Server Error',
-					});
-					return;
-				}
-
-				const storageKey = `completedSteps_${accountType}`;
-				const savedSteps = await AsyncStorage.getItem(storageKey);
-				const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
-
-				if (!completedSteps.includes('verification')) {
-					completedSteps.push('verification');
-					await AsyncStorage.setItem(
-						storageKey,
-						JSON.stringify(completedSteps)
-					);
-				}
-
-				await AsyncStorage.setItem('current_account_type', accountType);
-				Toast.show({
-					type: 'success',
-					text1: 'Business verified successfully',
-				});
-				router.replace({
-					pathname: './setup-screen',
-					params: {
-						accountType: accountType,
-					},
-				});
-			} catch (error: any) {
-				Toast.show({
-					type: 'error',
-					text1: error.response.data.message,
-				});
-				setLoading(false);
-			} finally {
-				setLoading(false);
-			}
-		} else {
+		if (!businessNumber || !phoneNumber || !selectedLocation || !currency) {
+			Toast.show({
+				type: 'info',
+				text1: 'Please fill in all fields',
+			});
+			return;
+		}
+		if (!selectedLocation.address) {
+			Toast.show({
+				type: 'info',
+				text1: 'Please select a valid address',
+			});
+			return;
+		}
+		if (!phone_regex.test(phoneNumber.trim())) {
+			Toast.show({
+				type: 'info',
+				text1: 'Please enter a valid phone number',
+			});
+			return;
+		}
+		if (!/^\d{9}$/.test(businessNumber.trim())) {
 			Toast.show({
 				type: 'info',
 				text1: 'Please enter a valid 9-digit business number',
 			});
+			return;
+		}
+    console.log('pass');
+		setLoading(true);
+		try {
+			const response: StepResponse = await updateBusinessDetails(
+				{
+					companyNumber: businessNumber.trim(),
+					phone: phoneNumber.trim(),
+					address: selectedLocation?.address,
+					location: {
+						lat: selectedLocation?.lat || 0,
+						lng: selectedLocation?.lng || 0,
+					},
+					category: categories,
+				},
+				null
+			);
+
+			if (!response.success) {
+				setLoading(false);
+				Toast.show({
+					type: 'error',
+					text1: 'Internal Server Error',
+				});
+				return;
+			}
+
+			const storageKey = `completedSteps_${accountType}`;
+			const savedSteps = await AsyncStorage.getItem(storageKey);
+			const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
+
+			if (!completedSteps.includes('verification')) {
+				completedSteps.push('verification');
+				await AsyncStorage.setItem(
+					storageKey,
+					JSON.stringify(completedSteps)
+				);
+			}
+
+			await AsyncStorage.setItem('current_account_type', accountType);
+			Toast.show({
+				type: 'success',
+				text1: 'Business verified successfully',
+			});
+			router.replace({
+				pathname: './setup-screen',
+				params: {
+					accountType: accountType,
+				},
+			});
+		} catch (error: any) {
+			Toast.show({
+				type: 'error',
+				text1: error.response.data.message,
+			});
+		} finally {
+			setLoading(false);
 		}
 	};
 

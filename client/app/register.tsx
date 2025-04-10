@@ -18,6 +18,7 @@ import { AuthData } from '@/services/interfaceService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator } from 'react-native';
 import ProfileImageInput from '@/components/ProfileImageInput';
+import { emailRegex, passwordRegex } from '@/utils/regex';
 
 const RegisterScreen = () => {
 	const [name, setName] = useState('');
@@ -50,7 +51,6 @@ const RegisterScreen = () => {
 			});
 			return;
 		}
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(email)) {
 			Toast.show({
 				type: 'info',
@@ -59,12 +59,11 @@ const RegisterScreen = () => {
 			return;
 		}
 		//Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.
-		const passwordRegex =
-			/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
 		if (!passwordRegex.test(password)) {
-			alert(
-				'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.'
-			);
+			Toast.show({
+				type: 'info',
+				text1: 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.',
+			});
 			return;
 		}
 		setLoading(true);
