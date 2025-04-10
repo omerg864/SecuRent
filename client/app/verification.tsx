@@ -48,6 +48,7 @@ export default function VerifyBusinessNumberScreen() {
 							lat: selectedLocation?.lat || 0,
 							lng: selectedLocation?.lng || 0,
 						},
+						category: categories,
 					},
 					null
 				);
