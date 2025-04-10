@@ -125,6 +125,32 @@ interface TransactionResponse {
   };
 }
 
+interface Transaction {
+  _id: string;
+  transaction_id?: string;
+  amount: number;
+  description: string;
+  currency: string;
+  status: string;
+  business?: {
+    name?: string;
+    image?: string;
+  };
+  customer?: {
+    _id: string;
+    name: string;
+    image?: string;
+    phone?: string;
+  };
+  opened_at?: Date;
+  closed_at?: Date;
+  return_date?: Date;
+  charged?: number;
+  charged_description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type {
   AuthData,
   LoginCredentials,
@@ -137,4 +163,5 @@ export type {
   Item,
   ChargeDepositPayload,
   TransactionResponse,
+  Transaction,
 };
