@@ -35,12 +35,6 @@ const PricePicker = ({
 	amounts = amounts || defaultAmounts;
 
 	const format = {
-		date: (d: Date) => d.toLocaleDateString('en-GB'),
-		time: (d: Date) =>
-			d.toLocaleTimeString('en-US', {
-				hour: '2-digit',
-				minute: '2-digit',
-			}),
 		currency: (n: number) =>
 			n.toLocaleString() +
 			currencies.find((c) => c.code === currency)?.symbol,
