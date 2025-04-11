@@ -1,3 +1,5 @@
+import { FileObject } from "@/types/business";
+
 export const getDistance = (
 	lat1: number,
 	lon1: number,
@@ -17,4 +19,17 @@ export const getDistance = (
 
 	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 	return R * c; // Distance in Km
+};
+
+export const buildFormData = (data: any, file: FileObject | null): FormData => {
+	const formData = new FormData();
+	for (const key in data) {
+		if (data[key] !== undefined && data[key] !== null) {
+			formData.append(key, data[key] as string | Blob);
+		}
+	}
+	if (file) {
+		formData.append('image', file as any);
+	}
+	return formData;
 };
