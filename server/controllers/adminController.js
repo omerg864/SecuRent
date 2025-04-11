@@ -367,7 +367,7 @@ const identifyUser = asyncHandler(async (req, res) => {
 		res.status(200).json({
 			success: true,
 			type: 'business',
-      userId: business._id,
+			userId: business._id,
 		});
 	} else {
 		const customer = await Customer.findOne({
@@ -404,7 +404,7 @@ const identifyUser = asyncHandler(async (req, res) => {
 		res.status(200).json({
 			success: true,
 			type: 'customer',
-      userId : customer._id,
+			userId: customer._id,
 		});
 	}
 });
@@ -490,7 +490,15 @@ const adminAnalytics = asyncHandler(async (req, res) => {
 	const endOfLastWeek = new Date(endOfThisWeek);
 	endOfLastWeek.setDate(endOfThisWeek.getDate() - 7);
 
-	const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+	const daysOfWeek = [
+		'Sunday',
+		'Monday',
+		'Tuesday',
+		'Wednesday',
+		'Thursday',
+		'Friday',
+		'Saturday',
+	];
 
 	const transactionsThisWeekRaw = await Transaction.aggregate([
 		{
@@ -535,8 +543,12 @@ const adminAnalytics = asyncHandler(async (req, res) => {
 			const dayData = rawData.find((data) => data._id === index + 1);
 			return {
 				day,
-				numClosedTransactions: dayData ? dayData.numClosedTransactions : 0,
-				numChargedTransactions: dayData ? dayData.numChargedTransactions : 0,
+				numClosedTransactions: dayData
+					? dayData.numClosedTransactions
+					: 0,
+				numChargedTransactions: dayData
+					? dayData.numChargedTransactions
+					: 0,
 			};
 		});
 	};
@@ -551,7 +563,7 @@ const adminAnalytics = asyncHandler(async (req, res) => {
 			numBusinesses,
 			numTransactions,
 			numActiveTransactions,
-			transactionsByMonth : filledTransactionsByMonth,
+			transactionsByMonth: filledTransactionsByMonth,
 			oneYearAgo,
 			now,
 			transactionsThisWeek,
