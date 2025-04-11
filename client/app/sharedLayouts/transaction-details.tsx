@@ -22,7 +22,7 @@ import {
 } from "@/services/transactionService";
 import { Transaction } from "@/services/interfaceService";
 
-const HARDCODED_ID = "67f3e5eb23ca213ee0de136f";
+const HARDCODED_ID = "67f40843054de8f7d8f7b6b5";
 
 export default function TransactionDetails() {
   const router = useRouter();
