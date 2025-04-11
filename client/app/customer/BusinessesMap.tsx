@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { ThemedView } from '@/components/ui/ThemedView';
 import HapticButton from '@/components/ui/HapticButton';
 import { Feather } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 
 // Sample Business Locations
 const businessLocations = [
@@ -51,7 +52,11 @@ const MapScreen: React.FC = () => {
         (async () => {
             const { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
-                Alert.alert("Permission Denied", "Location access is required to show your position.");
+                Toast.show({
+                    type: 'error',
+                    text1: 'Permission Denied',
+                    text2: 'Location access is required to show your position.',
+                });
                 setLoading(false);
                 return;
             }

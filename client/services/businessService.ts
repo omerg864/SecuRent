@@ -1,12 +1,25 @@
+import { buildFormData } from '@/utils/functions';
 import { checkToken, client } from './httpClient';
-import { AuthData, AuthResponse } from './interfaceService';
+import {
+	AuthData,
+	AuthResponse,
+	Business,
+	StepResponse,
+} from './interfaceService';
 import { BankDetails } from './interfaceService';
+import { FileObject } from '@/types/business';
 
-const registerBusiness = async (businessData: AuthData) => {
+const registerBusiness = async (businessData: AuthData, file: FileObject | null) => {
 	try {
+		const formData = buildFormData(businessData, file);
 		const response = await client.post<AuthResponse>(
 			'business/register',
-			businessData
+			formData,
+			{
+				headers: {
+					'Content-Type': 'multipart/form-data',
+				},
+			}
 		);
 		return response.data.success;
 	} catch (error) {
@@ -14,35 +27,38 @@ const registerBusiness = async (businessData: AuthData) => {
 	}
 };
 
-const verifyCompanyNumber = async (companyNumber: string) => {
+const updateBusinessDetails = async (businessData: Partial<Business>) => {
 	try {
 		const accessToken = await checkToken();
 		if (!accessToken) {
 			throw new Error('Access token is missing or invalid.');
 		}
-		const response = await client.post<AuthResponse>(
-			'business/verify-company-number',
-			{ companyNumber },
+		console.log('Business data:', businessData);
+		const response = await client.put<StepResponse>(
+			'business/',
+			businessData,
 			{
-				headers: { Authorization: `Bearer ${accessToken}` },
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
 			}
 		);
-		return response;
-	} catch (error: any) {
-		throw error || 'Company number verification failed.';
+		return response.data;
+	} catch (error) {
+		throw error || 'Business details update failed.';
 	}
 };
 
 const verifyEmailBusiness = async (code: string, userId: string) => {
-  try {
-    const response = await client.post<AuthResponse>(
-      "business/verify-email",
-      { code , userId }
-    );
-    return response.data;
-  } catch (error) {
-    throw error || "Email verification failed.";
-  }
+	try {
+		const response = await client.post<AuthResponse>(
+			'business/verify-email',
+			{ code, userId }
+		);
+		return response.data;
+	} catch (error) {
+		throw error || 'Email verification failed.';
+	}
 };
 
 const updateBankDetails = async (bankDetails: BankDetails) => {
@@ -79,22 +95,22 @@ const updateBusinessPassword = async (newPassword: string) => {
 };
 
 const resendBusinessVerificationCode = async (userId: string) => {
-  try {
-    const response = await client.post<AuthResponse>(
-      "business/resend-code",
-      { userId }
-    );
-    return response.data.success;
-  } catch (error) {
-    throw error || "Resend verification code failed.";
-  }
-}
+	try {
+		const response = await client.post<AuthResponse>(
+			'business/resend-code',
+			{ userId }
+		);
+		return response.data.success;
+	} catch (error) {
+		throw error || 'Resend verification code failed.';
+	}
+};
 
 export {
 	registerBusiness,
-	verifyCompanyNumber,
 	verifyEmailBusiness,
 	updateBankDetails,
 	updateBusinessPassword,
-	resendBusinessVerificationCode
+	resendBusinessVerificationCode,
+	updateBusinessDetails,
 };

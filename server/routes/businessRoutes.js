@@ -7,7 +7,7 @@ import {
 	deleteBusiness,
 	refreshTokens,
 	getBusinessById,
-	verifyAndUpdateCompanyNumber,
+	updateBusinessDetails,
 	verifyBank,
 	verifyEmail,
 	updateBusinessPassword,
@@ -23,12 +23,8 @@ router.post('/register', upload.single('image'), registerBusiness);
 router.post('/login', loginBusiness);
 router.post('/google-login', googleLoginBusiness);
 router.post('/refresh-token', refreshTokens);
-router.post(
-	'/verify-company-number',
-	authBusiness,
-	verifyAndUpdateCompanyNumber
-);
-router.post('/verify-bank', authBusiness, verifyBank);
+router.put('/', authBusiness, updateBusinessDetails);
+router.post('/verify-bank', authBusiness, upload.single('image'), verifyBank);
 router.post('/verify-email', verifyEmail);
 router.post('/resend-code', resendVerificationCode);
 

@@ -14,6 +14,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import '../global.css';
 import Toast from 'react-native-toast-message';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -89,6 +90,7 @@ export default function RootLayout() {
 
 	return (
 		<AuthProvider>
+			<GestureHandlerRootView>
 				<ThemeProvider
 					value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
 				>
@@ -116,6 +118,7 @@ export default function RootLayout() {
 					/>
 					<Toast />
 				</ThemeProvider>
+			</GestureHandlerRootView>
 		</AuthProvider>
 	);
 }

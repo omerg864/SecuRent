@@ -22,6 +22,7 @@ import * as Location from 'expo-location';
 import { getDistance } from '@/utils/functions';
 import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
+import Toast from 'react-native-toast-message';
 
 const businesses_obj: Business[] = [
 	{
@@ -96,7 +97,6 @@ const CustomerHome: React.FC = () => {
 	const [maxDistance, setMaxDistance] = useState(10);
 	const [minRating, setMinRating] = useState(0);
 
-
 	const onBarcodeClick = () => {
 		router.push('/customer/QRScanner');
 	};
@@ -122,10 +122,11 @@ const CustomerHome: React.FC = () => {
 			const { status } =
 				await Location.requestForegroundPermissionsAsync();
 			if (status !== 'granted') {
-				Alert.alert(
-					'Permission Denied',
-					'Location access is required to show your position.'
-				);
+				Toast.show({
+					type: 'error',
+					text1: 'Permission Denied',
+					text2: 'Location access is required to show your position.',
+				});
 				setLoading(false);
 				return;
 			}
