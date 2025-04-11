@@ -82,6 +82,10 @@ export default function TransactionDetails() {
   };
 
   const handleChargeDeposit = () => {
+    router.push({
+      pathname: "/business/charge-deposit",
+      params: { transactionId: id },
+    });
     Toast.show({
       type: "info",
       text1: "Charging deposit...",
@@ -112,7 +116,7 @@ export default function TransactionDetails() {
         <StatusBar barStyle="dark-content" />
 
         {/* Floating Back Button + Title */}
-        <View className="absolute top-10 left-4 z-10">
+        <View className="absolute top-20 left-5 z-10">
           <HapticButton
             onPress={() => router.back()}
             className="bg-white p-2 rounded-full shadow-md"

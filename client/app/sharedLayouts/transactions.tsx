@@ -28,16 +28,14 @@ const statusColors: { [key: string]: string } = {
 };
 
 const TransactionsPage = () => {
+  const router = useRouter();
   const [accountType, setAccountType] = useState<string | null>("");
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
-  const [displayedTransactions, setDisplayedTransactions] = useState<
-    Transaction[]
-  >([]);
+  const [displayedTransactions, setDisplayedTransactions] = useState<Transaction[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     const fetchTransactionsData = async () => {
@@ -52,8 +50,7 @@ const TransactionsPage = () => {
         const sorted = fetchedTransactions.success
           ? fetchedTransactions.transactions.sort(
               (a: Transaction, b: Transaction) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime()
+                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             )
           : [];
         setAllTransactions(sorted);
@@ -160,21 +157,66 @@ const TransactionsPage = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* rest of your JSX including search and filters */}
-      <FlatList
-        className="px-5"
-        data={displayedTransactions}
-        renderItem={renderItem}
-        keyExtractor={(_, index) => index.toString()}
-        onEndReached={loadMore}
-        onEndReachedThreshold={0.5}
-        initialNumToRender={PAGE_SIZE}
-      />
+    <SafeAreaView
+      className="flex-1 bg-gray-50"
+      edges={["left", "right", "bottom"]}
+    >
+      <View className="px-5" style={{ marginTop: 12, marginBottom: 12 }}>
+        <View className="flex-row items-center bg-white px-4 py-3 rounded-xl shadow-sm border border-gray-300">
+          <Feather
+            name="search"
+            size={18}
+            color="#3B82F6"
+            style={{ marginRight: 8 }}
+          />
+          <TextInput
+            placeholder="Search transactions"
+            placeholderTextColor="#6b7280"
+            value={search}
+            onChangeText={setSearch}
+            className="flex-1 text-sm text-gray-700"
+          />
+        </View>
+      </View>
+
+      <View className="px-5 mb-4 flex-row flex-wrap gap-2">
+        {["all", "charged", "open", "closed"].map((status) => (
+          <Text
+            key={status}
+            onPress={() => {
+              setStatusFilter(status);
+              setPage(1);
+            }}
+            className={`px-3 py-1 rounded-full text-sm ${
+              statusFilter === status
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700"
+            }`}
+          >
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </Text>
+        ))}
+      </View>
+
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#4B5563" className="mt-10" />
+      ) : displayedTransactions.length === 0 ? (
+        <Text className="text-center text-gray-500 mt-10">
+          No transactions found.
+        </Text>
+      ) : (
+        <FlatList
+          className="px-5"
+          data={displayedTransactions}
+          renderItem={renderItem}
+          keyExtractor={(_, index) => index.toString()}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
+          initialNumToRender={PAGE_SIZE}
+        />
+      )}
     </SafeAreaView>
   );
-
 };
-
 
 export default TransactionsPage;
