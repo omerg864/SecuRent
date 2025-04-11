@@ -107,7 +107,6 @@ const RegisterScreen = () => {
 					return;
 				}
 				console.log('Customer login response:', loginResponse);
-				console.log('Id:', loginResponse.user._id);
 				AsyncStorage.setItem('UserID', loginResponse.user._id);
 				AsyncStorage.setItem('Access_Token', loginResponse.accessToken);
 				AsyncStorage.setItem(
