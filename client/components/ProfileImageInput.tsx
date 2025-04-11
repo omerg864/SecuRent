@@ -3,9 +3,10 @@ import * as ImagePicker from 'expo-image-picker';
 import { Button, Image, Text, View } from 'react-native';
 import HapticButton from '@/components/ui/HapticButton';
 import { ThemedText } from './ui/ThemedText';
+import { FileObject } from '@/types/business';
 
 interface ProfileImageInputProps {
-	setFile: (file: File | null) => void;
+	setFile: (file: FileObject | null) => void;
 	label?: string;
 	labelClassName?: string;
 }
@@ -28,7 +29,13 @@ export default function ProfileImageInput({
 		if (!result.canceled) {
 			const temp_uri = result.assets[0].uri;
 			setUri(temp_uri);
-			setFile(result.assets[0].file!);
+			const file: FileObject = {
+				uri: temp_uri,
+				name: result.assets[0].fileName || 'image.jpg',
+				type: 'image/jpeg',
+			};
+			console.log('File:', file);
+			setFile(file);
 		}
 	};
 

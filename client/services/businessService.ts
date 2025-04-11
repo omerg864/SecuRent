@@ -7,8 +7,9 @@ import {
 	StepResponse,
 } from './interfaceService';
 import { BankDetails } from './interfaceService';
+import { FileObject } from '@/types/business';
 
-const registerBusiness = async (businessData: AuthData, file: File | null) => {
+const registerBusiness = async (businessData: AuthData, file: FileObject | null) => {
 	try {
 		const formData = buildFormData(businessData, file);
 		const response = await client.post<AuthResponse>(

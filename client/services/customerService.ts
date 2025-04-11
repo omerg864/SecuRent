@@ -2,10 +2,12 @@ import { client } from './httpClient';
 import { AuthData, AuthResponse, CreditCardData } from './interfaceService';
 import { checkToken } from './httpClient';
 import { buildFormData } from '@/utils/functions';
+import { FileObject } from '@/types/business';
 
-const registerCustomer = async (customerData: AuthData, file: File | null) => {
+const registerCustomer = async (customerData: AuthData, file: FileObject | null) => {
 	try {
 		const formData = buildFormData(customerData, file);
+		console.log('Form data:', formData);
 		const response = await client.post<AuthResponse>(
 			'customer/register',
 			formData,
