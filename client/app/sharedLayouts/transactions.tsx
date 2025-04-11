@@ -11,11 +11,13 @@ import {
   FlatList,
   Image,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Transaction } from "@/services/interfaceService";
 import userImage from "@/assets/images/user.png";
 import { Feather } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 const PAGE_SIZE = 8;
 
@@ -26,11 +28,10 @@ const statusColors: { [key: string]: string } = {
 };
 
 const TransactionsPage = () => {
+  const router = useRouter();
   const [accountType, setAccountType] = useState<string | null>("");
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
-  const [displayedTransactions, setDisplayedTransactions] = useState<
-    Transaction[]
-  >([]);
+  const [displayedTransactions, setDisplayedTransactions] = useState<Transaction[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
@@ -49,8 +50,7 @@ const TransactionsPage = () => {
         const sorted = fetchedTransactions.success
           ? fetchedTransactions.transactions.sort(
               (a: Transaction, b: Transaction) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime()
+                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             )
           : [];
         setAllTransactions(sorted);
@@ -109,7 +109,15 @@ const TransactionsPage = () => {
     const colorClass = statusColors[item.status] ?? "text-gray-700";
 
     return (
-      <View className="flex-row justify-between items-center bg-white rounded-xl mb-4 px-4 py-3 shadow-sm border border-gray-200">
+      <TouchableOpacity
+        onPress={() =>
+          router.push({
+            pathname: "/transaction-details",
+            params: { id: item._id },
+          })
+        }
+        className="flex-row justify-between items-center bg-white rounded-xl mb-4 px-4 py-3 shadow-sm border border-gray-200"
+      >
         <Image
           source={
             accountType === "business"
@@ -144,7 +152,7 @@ const TransactionsPage = () => {
             ? `${item.amount} ${item.currency}`
             : item.status}
         </Text>
-      </View>
+      </TouchableOpacity>
     );
   };
 
