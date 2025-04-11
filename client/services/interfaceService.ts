@@ -1,3 +1,4 @@
+import { chargeDeposit } from '@/services/transactionService';
 interface AuthData {
 	name?: string;
 	email?: string;
@@ -134,6 +135,56 @@ interface Item {
 	image: string;
 }
 
+interface ChargeDepositPayload {
+	amount: number;
+	charged_description: string;
+}
+
+interface TransactionResponse {
+	success: boolean;
+	transaction: {
+		_id: string;
+		transaction_id: string;
+		amount: number;
+		currency: string;
+		status: string;
+		business: string;
+		customer?: string;
+		closed_at?: string;
+		return_date?: string;
+		charged?: number;
+		charged_description?: string;
+		createdAt: string;
+		updatedAt: string;
+	};
+}
+
+interface Transaction {
+	_id: string;
+	transaction_id?: string;
+	amount: number;
+	description: string;
+	currency: string;
+	status: string;
+	business?: {
+		name?: string;
+		image?: string;
+	};
+	customer?: {
+		_id: string;
+		name: string;
+		image?: string;
+		phone?: string;
+	};
+	opened_at?: Date;
+	closed_at?: Date;
+	return_date?: Date;
+	charged?: number;
+	charged_description?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
 interface LocationPrediction {
 	id: string;
 	description: string;
@@ -154,8 +205,11 @@ export type {
 	LoginResponse,
 	BankDetails,
 	Item,
+	ChargeDepositPayload,
+	TransactionResponse,
+	Transaction,
 	LocationPrediction,
 	LocationDetails,
 	Business,
-	StepResponse
+	StepResponse,
 };

@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { getItemById } from "@/services/itemService";
-import { createTransactionFromItem } from "@/services/transactionServise";
+import { createTransactionFromItem } from "@/services/transactionService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ActivityIndicator } from "react-native";
 import Toast from "react-native-toast-message";
