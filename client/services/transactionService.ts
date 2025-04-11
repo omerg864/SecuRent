@@ -62,7 +62,7 @@ const getCustomerTransactions = async () => {
     const accessToken = await checkToken();
     const response = await client.get<{
       success: boolean;
-      transaction: Transaction[];
+      transactions: Transaction[];
     }>(`transaction/customer`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
@@ -73,7 +73,7 @@ const getCustomerTransactions = async () => {
 };
 
 const getTransactionById = async (id: string): Promise<Transaction> => {
-  console.log("🚀 getTransactionById called with:", id); // לוודא שהפונקציה ניגשת
+  console.log("🚀 getTransactionById called with:", id); 
   const accessToken = await checkToken();
   if (!accessToken) throw new Error("No access token available");
 
@@ -93,7 +93,7 @@ const closeTransaction = async (id: string): Promise<Transaction> => {
 
   const response = await client.put<{ success: boolean; transaction: Transaction }>(
     `transaction/close/${id}`,
-    {}, // אין צורך בגוף לבקשה
+    {}, 
     {
       headers: { Authorization: `Bearer ${accessToken}` },
     }
