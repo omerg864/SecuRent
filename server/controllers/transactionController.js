@@ -85,6 +85,20 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 
 	// TODO: use paypal for create transaction
 	const transaction_id = Math.random().toString(36).substring(7);
+
+	let return_date = item.return_date;
+
+	if (!item.temporary) {
+		if (item.timeUnit === 'days') {
+			return_date = new Date(Date.now() + item.duration * 24 * 60 * 60 * 1000);
+		} else if (item.timeUnit === 'hours') {
+			return_date = new Date(Date.now() + item.duration * 60 * 60 * 1000);
+		} else if (item.timeUnit === 'minutes') {
+			return_date = new Date(Date.now() + item.duration * 60 * 1000);
+		}
+	}
+
+
 	const transaction = new Transaction({
 		transaction_id,
 		amount: item.price,
@@ -93,7 +107,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 		business: item.business,
 		customer: req.customer._id,
 		description: item.description,
-		return_date: item.return_date,
+		return_date,
 		opened_at: Date.now(),
 	});
 	await transaction.save();

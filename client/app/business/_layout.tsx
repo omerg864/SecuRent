@@ -85,6 +85,13 @@ export default function Layout() {
 							headerShown: false,
 						}}
 					/>
+					<Drawer.Screen
+						name="new-item"
+						options={{
+							drawerLabel: 'New Item',
+							title: 'New Item',
+						}}
+					/>
 				</Drawer>
 			</GestureHandlerRootView>
 		</WebSocketProvider>

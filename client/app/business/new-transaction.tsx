@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
 	View,
 	Text,
@@ -7,15 +7,15 @@ import {
 	StyleSheet,
 	ActivityIndicator,
 } from 'react-native';
-import { ca, DatePickerModal, TimePickerModal } from 'react-native-paper-dates';
+import { DatePickerModal, TimePickerModal } from 'react-native-paper-dates';
 import HapticButton from '@/components/ui/HapticButton';
 import { ThemedText } from '@/components/ui/ThemedText';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
-import { createItem } from '@/services/itemService';
-import { Item } from '@/services/interfaceService';
+import { createTemporaryItem } from '@/services/itemService';
+import PricePicker from '@/components/PricePicker';
+import { getBusinessCurrencySymbol } from '@/utils/functions';
 
-const amounts = [100, 500, 1000];
 const format = {
 	date: (d: Date) => d.toLocaleDateString('en-GB'),
 	time: (d: Date) =>
@@ -30,8 +30,8 @@ export default () => {
 	const [price, setPrice] = useState(0);
 	const [date, setDate] = useState(new Date());
 	const [show, setShow] = useState({ date: false, time: false });
-	const [editAmount, setEditAmount] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
+	const [currency, setCurrency] = useState('ILS');
 
 	const updateDate = (d?: Date) => d && setDate(d);
 	const updateTime = (h: number, m: number) =>
@@ -60,7 +60,7 @@ export default () => {
 			// create temporary item
 			setIsLoading(true);
 			try {
-				const response = await createItem(desc, date, price, true, 0);
+				const response = await createTemporaryItem(desc, date, price);
 				if (!response) {
 					setIsLoading(false);
 					Toast.show({
@@ -73,7 +73,6 @@ export default () => {
 				setPrice(0);
 				setDate(new Date());
 				setShow({ date: false, time: false });
-				setEditAmount(false);
 				router.push({
 					pathname: '/business/QRCodeScreen',
 					params: {
@@ -90,6 +89,15 @@ export default () => {
 			setIsLoading(false);
 		}
 	};
+
+	useEffect(() => {
+		const getSymbol = async () => {
+			const symbol = await getBusinessCurrencySymbol();
+			setCurrency(symbol);
+		};
+
+		getSymbol();
+	}, []);
 
 	return (
 		<View className="flex-1 p-6 bg-white">
@@ -147,60 +155,13 @@ export default () => {
 				/>
 			</View>
 
-			<View className="mb-8">
-				<Text className="text-lg font-semibold mb-3">Set Price</Text>
-				<View className="flex-row items-center mb-4">
-					<AmountBtn
-						onPress={() => setPrice(Math.max(0, price - 50))}
-					>
-						-
-					</AmountBtn>
-					<TouchableOpacity
-						className="flex-1 items-center"
-						onPress={() => setEditAmount(true)}
-					>
-						{editAmount ? (
-							<TextInput
-								className="text-2xl font-medium text-center"
-								keyboardType="numeric"
-								value={price.toString()}
-								onChangeText={(t) => setPrice(parseInt(t) || 0)}
-								onBlur={() => setEditAmount(false)}
-								autoFocus
-							/>
-						) : (
-							<Text className="text-2xl font-medium">
-								{format.currency(price)}
-							</Text>
-						)}
-					</TouchableOpacity>
-					<AmountBtn onPress={() => setPrice(price + 50)}>
-						+
-					</AmountBtn>
-				</View>
-
-				<View className="flex-row justify-between">
-					{amounts.map((a) => (
-						<TouchableOpacity
-							key={a}
-							className={`border-2 rounded-lg py-4 flex-1 mx-1 items-center ${
-								price === a
-									? 'bg-indigo-600 border-indigo-600'
-									: 'border-gray-300 bg-white'
-							}`}
-							onPress={() => setPrice(a)}
-						>
-							<Text
-								className={`text-lg ${
-									price === a ? 'text-white' : 'text-gray-700'
-								}`}
-							>
-								{format.currency(a)}
-							</Text>
-						</TouchableOpacity>
-					))}
-				</View>
-			</View>
+			<PricePicker
+				currency={currency}
+				price={price}
+				setPrice={setPrice}
+				label="Set Price"
+				containerStyle="mb-8"
+			/>
 
 			<HapticButton
 				className="bg-white rounded-full py-4 items-center mb-5 shadow-lg mt-5"
