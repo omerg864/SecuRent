@@ -112,7 +112,7 @@ const TransactionsPage = () => {
       <TouchableOpacity
         onPress={() =>
           router.push({
-            pathname: "/sharedLayouts/transaction-details",
+            pathname: "/transaction-details",
             params: { id: item._id },
           })
         }
