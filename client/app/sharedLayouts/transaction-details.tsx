@@ -11,21 +11,17 @@ import {
   Text,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import HapticButton from "@/components/ui/HapticButton";
 import { ThemedText } from "@/components/ui/ThemedText";
-import Toast from "react-native-toast-message";
-
-import {
-  getTransactionById,
-  closeTransaction,
-} from "@/services/transactionService";
+import { getTransactionById } from "@/services/transactionService";
 import { Transaction } from "@/services/interfaceService";
-
-const HARDCODED_ID = "67f3e5eb23ca213ee0de136f";
+import Toast from "react-native-toast-message";
 
 export default function TransactionDetails() {
   const router = useRouter();
+  const { id } = useLocalSearchParams();
+
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [isOpen, setIsOpen] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -33,13 +29,11 @@ export default function TransactionDetails() {
   useEffect(() => {
     const fetchTransaction = async () => {
       try {
-        console.log("📦 Fetching transaction...");
-        const data = await getTransactionById(HARDCODED_ID);
-        console.log("🚀 Transaction data:", data);
+        if (!id || typeof id !== "string") return;
+        const data = await getTransactionById(id);
         setTransaction(data);
         setIsOpen(data.status === "open");
       } catch (error: any) {
-        console.error("❌ Error fetching transaction:", error);
         Toast.show({
           type: "error",
           text1: "Failed to load transaction",
@@ -51,24 +45,14 @@ export default function TransactionDetails() {
     };
 
     fetchTransaction();
-  }, []);
+  }, [id]);
 
-  const handleCloseTransaction = async () => {
-    try {
-      const updated = await closeTransaction(HARDCODED_ID);
-      setTransaction(updated);
-      setIsOpen(false);
-      Toast.show({
-        type: "success",
-        text1: "Transaction closed successfully",
-      });
-    } catch (error: any) {
-      Toast.show({
-        type: "error",
-        text1: "Failed to close transaction",
-        text2: error.message || "Try again",
-      });
-    }
+  const handleCloseTransaction = () => {
+    setIsOpen(false);
+  };
+
+  const handleChargeDeposit = () => {
+    console.log("Charging deposit...");
   };
 
   if (loading) {
@@ -93,6 +77,8 @@ export default function TransactionDetails() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" />
+
+      {/* Header */}
       <View className="px-4 pt-2 flex-row items-center justify-center relative h-14">
         <TouchableOpacity
           onPress={() => router.back()}
@@ -106,12 +92,11 @@ export default function TransactionDetails() {
       </View>
 
       <ScrollView className="flex-1 px-6">
+        {/* Customer or Business Info */}
         <View className="items-center mb-8 mt-4">
           <View className="w-16 h-16 rounded-full bg-blue-100 items-center justify-center mb-2">
             <ThemedText className="text-2xl font-bold text-blue-600">
-              {transaction.customer?.name?.[0] ||
-                transaction.business?.name?.[0] ||
-                "?"}
+              {transaction.customer?.name?.[0] || "?"}
             </ThemedText>
           </View>
           <ThemedText className="text-lg font-medium text-black">
@@ -119,52 +104,33 @@ export default function TransactionDetails() {
           </ThemedText>
         </View>
 
+        {/* Created Date / Time */}
         <View className="mb-6 bg-gray-50 rounded-lg py-4">
-          <Row
-            label="Start Date"
-            value={new Date(transaction.createdAt).toLocaleDateString()}
-          />
-          <Row
-            label="Start Time"
-            value={new Date(transaction.createdAt).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          />
+          <Row label="Start Date" value={new Date(transaction.createdAt).toLocaleDateString()} />
+          <Row label="Start Time" value={new Date(transaction.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} />
         </View>
 
+        {/* Return Date / Time (only if closed) */}
         {!isOpen && (
           <View className="mb-6 bg-gray-50 rounded-lg py-4">
             <Row
               label="End Date"
-              value={
-                transaction.return_date
-                  ? new Date(transaction.return_date).toLocaleDateString()
-                  : "-"
-              }
+              value={transaction.return_date ? new Date(transaction.return_date).toLocaleDateString() : "-"}
             />
             <Row
               label="End Time"
-              value={
-                transaction.return_date
-                  ? new Date(transaction.return_date).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                  : "-"
-              }
+              value={transaction.return_date ? new Date(transaction.return_date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "-"}
             />
           </View>
         )}
 
+        {/* Description & Amount */}
         <View className="mb-6 bg-gray-50 rounded-lg py-4">
           <Row label="Description" value={transaction.description || "-"} />
-          <Row
-            label="Amount"
-            value={`${transaction.amount} ${transaction.currency}`}
-          />
+          <Row label="Amount" value={`${transaction.amount} ${transaction.currency}`} />
         </View>
 
+        {/* Status */}
         <View className="flex-row bg-gray-50">
           <View className="flex-1 p-4">
             <ThemedText className="text-sm text-gray-600">Status</ThemedText>
@@ -180,21 +146,20 @@ export default function TransactionDetails() {
           </View>
         </View>
 
+        {/* Optional: Charged Description */}
         {transaction.charged_description && (
           <View className="mb-6 bg-gray-50 rounded-lg py-4 mt-4">
-            <Row
-              label="Charged Reason"
-              value={transaction.charged_description}
-            />
+            <Row label="Charged Reason" value={transaction.charged_description} />
           </View>
         )}
       </ScrollView>
 
+      {/* Action Buttons - if open */}
       {isOpen && (
         <View className="absolute bottom-4 left-0 right-0 px-6 pb-6 bg-white">
           <HapticButton
             className="bg-red-500 rounded-full py-4 items-center mb-3"
-            onPress={() => console.log("Charge Deposit")}
+            onPress={handleChargeDeposit}
           >
             <ThemedText className="text-white font-semibold text-lg">
               Charge Deposit
@@ -215,6 +180,7 @@ export default function TransactionDetails() {
   );
 }
 
+// 🔁 Row component
 const Row = ({ label, value }: { label: string; value: string }) => (
   <View className="flex-row">
     <View className="flex-1 p-4">
