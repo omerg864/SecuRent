@@ -1,15 +1,24 @@
 "use client";
-import { View, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 import HapticButton from "@/components/ui/HapticButton";
 import { ThemedText } from "@/components/ui/ThemedText";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
+import { Transaction } from "@/services/interfaceService";
+import { getBusinessTransactions } from "@/services/transactionService";
 
 const BusinessHomePage = () => {
+  const [openedTransactions, setOpenTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  
-  const handleNewTransaction = () => { 
+
+  const handleNewTransaction = () => {
     // Navigate to new transaction page
     router.push("/business/new-transaction");
   };
@@ -19,32 +28,24 @@ const BusinessHomePage = () => {
     router.push(`./bank-details`);
   };
 
-  const transactions = [
-    {
-      id: "1",
-      name: "John Griggs",
-      description: "Received on 12 Jul",
-      amount: "600$",
-    },
-    {
-      id: "2",
-      name: "The Place Restaurant",
-      description: "Received on 10 Jul",
-      amount: "301$",
-    },
-    {
-      id: "3",
-      name: "Transfer to Philip",
-      description: "Sent on 9 Jul",
-      amount: "1,010$",
-    },
-    {
-      id: "4",
-      name: "Habits Yogurt",
-      description: "Received on 5 Jul",
-      amount: "101$",
-    },
-  ];
+  useEffect(() => {
+    const getOpenedTransactions = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getBusinessTransactions();
+        const openTransactions = data.transactions.filter(
+          (t) => t.status === "open"
+        );
+        console.log("filtered: ", openTransactions);
+        setOpenTransactions(openTransactions);
+      } catch (error) {
+        console.log("Failed to fetch opened transactions because: ", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    getOpenedTransactions();
+  }, []);
 
   return (
     <View className="flex-1 bg-gray-100">
@@ -73,31 +74,35 @@ const BusinessHomePage = () => {
           </View>
 
           {/* Transaction List */}
-          {transactions.map((transaction) => (
-            <TouchableOpacity
-              key={transaction.id}
-              className="flex-row items-center py-3 px-4 border-b border-gray-200"
-              onPress={() => handleTransactionPress(transaction.id)}
-            >
-              <View className="flex-1">
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#4B5563" className="mt-20" />
+          ) : (
+            openedTransactions.map((transaction) => (
+              <TouchableOpacity
+                key={transaction._id}
+                className="flex-row items-center py-3 px-4 border-b border-gray-200"
+                onPress={() => handleTransactionPress(transaction._id)}
+              >
+                <View className="flex-1">
+                  <ThemedText
+                    style={{ color: "black" }}
+                    className="text-base font-medium mb-1"
+                  >
+                    {transaction.customer?.name}
+                  </ThemedText>
+                  <ThemedText style={{ color: "grey" }} className="text-sm">
+                    {transaction.description}
+                  </ThemedText>
+                </View>
                 <ThemedText
                   style={{ color: "black" }}
-                  className="text-base font-medium mb-1"
+                  className="text-base font-semibold"
                 >
-                  {transaction.name}
+                  {transaction.amount}
                 </ThemedText>
-                <ThemedText style={{ color: "grey" }} className="text-sm">
-                  {transaction.description}
-                </ThemedText>
-              </View>
-              <ThemedText
-                style={{ color: "black" }}
-                className="text-base font-semibold"
-              >
-                {transaction.amount}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            ))
+          )}
         </View>
       </ScrollView>
     </View>
