@@ -27,10 +27,6 @@ const BusinessHomePage = () => {
     router.push("/business/new-transaction");
   };
 
-  const handleTransactionPress = (id: string) => {
-    router.push(`./bank-details`);
-  };
-
   const loadTransaction = async (pageToLoad = 1) => {
     if (isLoading || !hasMore) return;
     setIsLoading(true);
@@ -66,7 +62,12 @@ const BusinessHomePage = () => {
   const renderTransaction: ListRenderItem<Transaction> = ({ item }) => (
     <TouchableOpacity
       className="flex-row items-center py-3 px-4 border-b border-gray-200"
-      onPress={() => handleTransactionPress(item._id)}
+      onPress={() =>
+        router.push({
+          pathname: "/transaction-details",
+          params: { id: item._id },
+        })
+      }
     >
       <View className="flex-1">
         <ThemedText
@@ -90,7 +91,6 @@ const BusinessHomePage = () => {
 
   return (
     <View className="flex-1 bg-gray-100 px-4">
-      {/* New Transaction Button */}
       <HapticButton
         className="bg-white rounded-full py-4 items-center mb-5 shadow-lg mt-5"
         style={{ backgroundColor: "#4338CA" }}
@@ -101,7 +101,6 @@ const BusinessHomePage = () => {
         </ThemedText>
       </HapticButton>
 
-      {/* Scrollable Box of Transactions */}
       <View
         className="bg-white rounded-xl shadow-lg p-2"
         style={{ height: 280 }} // fixed height ensures scrolling within this box
@@ -129,23 +128,14 @@ const BusinessHomePage = () => {
           scrollEnabled={true}
           showsVerticalScrollIndicator={true}
           contentContainerStyle={{ paddingBottom: 10, flexGrow: 1 }} // ensure content takes space even when empty
-          ListEmptyComponent={
-            !isLoading ? (
+          ListEmptyComponent={() =>
+            !isLoading && (
               <View className="flex-1 justify-center items-center mt-4">
                 <ThemedText className="text-gray-500 text-base text-center">
                   No active transactions
                 </ThemedText>
               </View>
-            ) : null
-          }
-          ListFooterComponent={
-            isLoading ? (
-              <ActivityIndicator
-                size="small"
-                color="#4B5563"
-                style={{ marginVertical: 8 }}
-              />
-            ) : null
+            )
           }
         />
       </View>
