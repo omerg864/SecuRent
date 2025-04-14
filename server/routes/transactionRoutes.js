@@ -5,7 +5,6 @@ import {
 	getTransactionByCustomer,
 	getTransactionByBusiness,
 	createTransaction,
-	releaseDeposit,
 	getTransactionAdmin,
 	getCustomerTransactionsAdmin,
 	getBusinessTransactionsAdmin,
@@ -26,7 +25,7 @@ const router = express.Router();
 // TODO: add middleware business to protect routes
 router.get('/business', authBusiness, getBusinessTransactions);
 router.get('/business/:id', authBusiness, getTransactionByBusiness);
-router.put('/release/:id', authBusiness, releaseDeposit);
+router.put('/release/:id', authBusiness, closeTransactionById);
 router.put('/charge/:id', authBusiness, captureDeposit);
 
 

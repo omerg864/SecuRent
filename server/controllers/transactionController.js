@@ -143,22 +143,35 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
   });
 });
 
-const releaseDeposit = asyncHandler(async (req, res) => {
+const closeTransactionById = asyncHandler(async (req, res) => {
   const { id } = req.params;
+
   const transaction = await Transaction.findById(id);
   if (!transaction) {
     res.status(404);
     throw new Error("Transaction not found");
   }
+
   if (transaction.business.toString() !== req.business._id.toString()) {
     res.status(401);
     throw new Error("Unauthorized");
   }
-  // TODO: use paypal for release deposit
-  transaction.status = "closed";
+
+  if (transaction.status !== "authorized") {
+    res.status(400);
+    throw new Error("Transaction is not in an authorized state");
+  }
+
+  await stripe.paymentIntents.cancel(transaction.stripe_payment_id);
+
+  transaction.status = "released";
+  transaction.closed_at = new Date();
+
   await transaction.save();
+
   res.status(200).json({
     success: true,
+    message: "Deposit released successfully. Customer was not charged.",
     transaction,
   });
 });
@@ -258,31 +271,12 @@ const getTransactionById = asyncHandler(async (req, res) => {
   });
 });
 
-const closeTransactionById = asyncHandler(async (req, res) => {
-  const transaction = await Transaction.findById(req.params.id);
-
-  if (!transaction) {
-    res.status(404);
-    throw new Error("Transaction not found");
-  }
-
-  transaction.status = "closed";
-  transaction.closed_at = new Date();
-  await transaction.save();
-
-  res.status(200).json({
-    success: true,
-    transaction,
-  });
-});
-
 export {
   getBusinessTransactions,
   getCustomerTransactions,
   getTransactionByCustomer,
   getTransactionByBusiness,
   createTransaction,
-  releaseDeposit,
   getTransactionAdmin,
   getCustomerTransactionsAdmin,
   getBusinessTransactionsAdmin,
