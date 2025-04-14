@@ -52,12 +52,12 @@ const ChargeDepositScreen = () => {
   };
 
   return (
-    <ScrollView className="flex-1 bg-[#F5F5F5] px-5 pt-8 pb-12">
+    <ScrollView className="flex-1 bg-white px-5 pt-8 pb-12">
       <Text className="text-3xl font-bold mb-8 text-center text-[#2D2A2E]">
         Charge Deposit
       </Text>
 
-      <View className="bg-white rounded-2xl p-6 flex-row items-center justify-between mb-6 shadow-md">
+      <View className="bg-gray-100 rounded-2xl p-6 flex-row items-center justify-between mb-6 shadow-md border-2 border-gray-300">
         <View className="flex-row items-center space-x-3">
           <Image source={userImage} className="w-10 h-10 rounded-full mr-2" />
           <Text className="text-base font-semibold text-[#2D2A2E]">
@@ -82,7 +82,7 @@ const ChargeDepositScreen = () => {
         <View className="flex-row items-center space-x-8">
           <HapticButton
             onPress={() => setAmount(Math.max(0, amount - 50))}
-            className="border-2 border-[#D1D5DB] rounded-lg w-12 h-12 items-center justify-center"
+            className="border-2 border-gray-300 rounded-lg w-12 h-12 items-center justify-center bg-white"
           >
             <Text className="text-2xl text-[#2D2A2E]">-</Text>
           </HapticButton>
@@ -109,7 +109,7 @@ const ChargeDepositScreen = () => {
 
           <HapticButton
             onPress={() => setAmount(Math.min(maxAmount, amount + 50))}
-            className="border-2 border-[#D1D5DB] rounded-lg w-12 h-12 items-center justify-center"
+            className="border-2 border-gray-300 rounded-lg w-12 h-12 items-center justify-center bg-white"
           >
             <Text className="text-2xl text-[#2D2A2E]">+</Text>
           </HapticButton>
@@ -122,12 +122,14 @@ const ChargeDepositScreen = () => {
             key={val}
             onPress={() => setAmount(val)}
             className={`flex-1 py-3 rounded-full border ${
-              amount === val ? "bg-[#6F48EB]" : "border-[#6F48EB]"
+              amount === val
+                ? "bg-indigo-600 border-indigo-600"
+                : "border-indigo-600 bg-white"
             }`}
           >
             <Text
               className={`text-center font-medium ${
-                amount === val ? "text-white" : "text-[#6F48EB]"
+                amount === val ? "text-white" : "text-indigo-600"
               }`}
             >
               {val}₪
@@ -139,7 +141,7 @@ const ChargeDepositScreen = () => {
       <View>
         <Text className="text-sm text-gray-500 mb-2">Charge Reason</Text>
         <TextInput
-          className="bg-white p-5 rounded-xl text-base text-[#2D2A2E] shadow-sm"
+          className="bg-gray-100 p-5 rounded-xl text-base text-[#2D2A2E] border border-gray-300"
           value={reason}
           onChangeText={setReason}
         />
@@ -148,7 +150,7 @@ const ChargeDepositScreen = () => {
       <HapticButton
         onPress={handleChargeDeposit}
         className="rounded-full py-5 items-center shadow-md mt-16"
-        style={{ backgroundColor: "#4338CA" }} // Purple from the screenshot
+        style={{ backgroundColor: "#4338CA" }} // Updated to indigo-600 equivalent
       >
         <ThemedText className="font-semibold text-lg text-white">
           Charge Deposit

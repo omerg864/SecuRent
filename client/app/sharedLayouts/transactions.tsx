@@ -31,7 +31,9 @@ const TransactionsPage = () => {
   const router = useRouter();
   const [accountType, setAccountType] = useState<string | null>("");
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
-  const [displayedTransactions, setDisplayedTransactions] = useState<Transaction[]>([]);
+  const [displayedTransactions, setDisplayedTransactions] = useState<
+    Transaction[]
+  >([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
@@ -50,7 +52,8 @@ const TransactionsPage = () => {
         const sorted = fetchedTransactions.success
           ? fetchedTransactions.transactions.sort(
               (a: Transaction, b: Transaction) =>
-                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
             )
           : [];
         setAllTransactions(sorted);
