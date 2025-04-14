@@ -5,6 +5,10 @@ const transactionScheme = mongoose.Schema(
 		transaction_id: {
 			type: String,
 		},
+		stripe_payment_id: {
+			type: String,
+			required: true,
+		  },		  
 		amount: {
 			type: Number,
 			required: true,
@@ -46,6 +50,9 @@ const transactionScheme = mongoose.Schema(
 		charged_description: {
 			type: String,
 		},
+		client_secret: {
+			type: String
+		  }
 	},
 	{ timestamps: true }
 );

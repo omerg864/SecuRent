@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler';
 import Transaction from '../models/transactionModel.js';
 import Item from '../models/itemModel.js';
 import { businesses } from '../config/websocket.js';
+import stripe from '../config/stripe.js';
 
 const getBusinessTransactions = asyncHandler(async (req, res) => {
 	const transactions = await Transaction.find({
@@ -57,19 +58,37 @@ const getTransactionByBusiness = asyncHandler(async (req, res) => {
 
 const createTransaction = asyncHandler(async (req, res) => {
 	const { amount, currency, business } = req.body;
-	// TODO: use paypal for create transaction
+
+	if (!amount || !currency || !business) {
+		res.status(400);
+		throw new Error('Missing required fields');
+	}
+
+	const paymentIntent = await stripe.paymentIntents.create({
+		amount: amount * 100, // Stripe expects amount in cents
+		currency,
+		payment_method_types: ['card'],
+		capture_method: 'manual', // Set to manual to authorize only (not capture, only deposit)
+	});
+
 	const transaction = new Transaction({
+		stripe_payment_id: paymentIntent.id,
+		client_secret: paymentIntent.client_secret, 
 		amount,
 		currency,
-		status: 'open',
+		status: 'authorized',
 		business,
 		customer: req.customer._id,
 		description: 'Deposit',
+		opened_at: new Date()
 	});
+
 	await transaction.save();
+
 	res.status(201).json({
 		success: true,
 		transaction,
+		clientSecret: paymentIntent.client_secret,
 	});
 });
 
