@@ -76,7 +76,7 @@ const createTransaction = asyncHandler(async (req, res) => {
     client_secret: paymentIntent.client_secret,
     amount,
     currency,
-    status: "authorized",
+    status: "open",
     business,
     customer: req.customer._id,
     description: "Deposit",
@@ -113,7 +113,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
     client_secret: paymentIntent.client_secret,
     amount: item.price,
     currency: item.currency,
-    status: "authorized",
+    status: "open",
     business: item.business,
     customer: req.customer._id,
     description: item.description,
@@ -165,14 +165,14 @@ const closeTransactionById = asyncHandler(async (req, res) => {
     throw new Error("Unauthorized");
   }
 
-  if (transaction.status !== "authorized") {
+  if (transaction.status !== "open") {
     res.status(400);
     throw new Error("Transaction is not in an authorized state");
   }
 
   await stripe.paymentIntents.cancel(transaction.stripe_payment_id);
 
-  transaction.status = "released";
+  transaction.status = "closed";
   transaction.closed_at = new Date();
 
   await transaction.save();
@@ -199,9 +199,9 @@ const captureDeposit = asyncHandler(async (req, res) => {
     throw new Error("Unauthorized");
   }
 
-  if (transaction.status !== "authorized") {
+  if (transaction.status !== "open") {
     res.status(400);
-    throw new Error("Transaction is not in an authorized state");
+    throw new Error("Transaction is not in open state");
   }
 
   const amountToCharge = amount ? amount * 100 : transaction.amount * 100;
@@ -212,7 +212,7 @@ const captureDeposit = asyncHandler(async (req, res) => {
 
   const chargedAmount = amount || transaction.amount; // charge full amount if not specified a partial amount
 
-  transaction.status = "captured";
+  transaction.status = "closed";
   transaction.closed_at = new Date();
   transaction.charged = chargedAmount;
   transaction.charged_description =
