@@ -101,19 +101,26 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
     throw new Error("Transaction details not found");
   }
 
-  // TODO: use paypal for create transaction
-  const transaction_id = Math.random().toString(36).substring(7);
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: item.price * 100, 
+    currency: item.currency,
+    payment_method_types: ["card"],
+    capture_method: "manual",
+  });
+
   const transaction = new Transaction({
-    transaction_id,
+    stripe_payment_id: paymentIntent.id,
+    client_secret: paymentIntent.client_secret,
     amount: item.price,
     currency: item.currency,
-    status: "open",
+    status: "authorized",
     business: item.business,
     customer: req.customer._id,
     description: item.description,
     return_date: item.return_date,
     opened_at: Date.now(),
   });
+
   await transaction.save();
 
   if (item.temporary) {
@@ -140,6 +147,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
   res.status(201).json({
     success: true,
     transaction,
+    clientSecret: paymentIntent.client_secret,
   });
 });
 
