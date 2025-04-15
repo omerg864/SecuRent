@@ -35,6 +35,8 @@ const ChargeDepositScreen = () => {
         const transactionDetails = await getTransactionById(transactionId);
         setTransaction(transactionDetails);
         setCustomer(transactionDetails.customer);
+        console.log(transactionDetails);
+        console.log(customer);
       } catch (error) {
         console.error("Error fetching details because:  ", error);
       }
@@ -108,8 +110,8 @@ const ChargeDepositScreen = () => {
       </View>
 
       <Text className="text-center text-gray-500 mb-2">
-        John has deposited {maxAmount}₪ so this is the maximum amount you can
-        charge.
+        {customer?.name} has deposited {maxAmount}₪ so this is the maximum
+        amount you can charge.
       </Text>
 
       <Text className="text-center text-xl text-[#2D2A2E] mb-6">
