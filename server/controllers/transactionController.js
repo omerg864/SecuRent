@@ -3,6 +3,7 @@ import Transaction from "../models/transactionModel.js";
 import Item from "../models/itemModel.js";
 import { businesses } from "../config/websocket.js";
 import stripe from "../config/stripe.js";
+import Customer from "../models/customerModel.js";
 
 const getBusinessTransactions = asyncHandler(async (req, res) => {
   const transactions = await Transaction.find({
@@ -99,8 +100,20 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 
   const item = await Item.findById(id);
   if (!item) {
-    res.status(404);
+    res.status(403);
     throw new Error("Transaction details not found");
+  }
+
+  const customer = await Customer.findById(req.customer._id);
+
+  if (!customer) {
+    res.status(404);
+    throw new Error("Customer not found");
+  }
+
+  if (!customer.stripe_customer_id) {
+    res.status(400);
+    throw new Error("Stripe customer not initialized");
   }
 
   const paymentIntent = await stripe.paymentIntents.create(
@@ -109,6 +122,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
       currency: item.currency,
       payment_method_types: ["card"],
       capture_method: "manual",
+      stripe_customer_id: customer.stripe_customer_id,
     },
     {
       stripeAccount: item.business.stripe_account_id,
@@ -309,11 +323,15 @@ const confirmTransactionPayment = asyncHandler(async (req, res) => {
     throw new Error("Payment not confirmed by frontend");
   }
 
-  const paymentIntent = await stripe.paymentIntents.retrieve(transaction.stripe_payment_id);
+  const paymentIntent = await stripe.paymentIntents.retrieve(
+    transaction.stripe_payment_id
+  );
 
   if (paymentIntent.status !== "requires_capture") {
     res.status(400);
-    throw new Error(`PaymentIntent not ready for capture. Status: ${paymentIntent.status}`);
+    throw new Error(
+      `PaymentIntent not ready for capture. Status: ${paymentIntent.status}`
+    );
   }
 
   transaction.status = "open";
@@ -353,9 +371,6 @@ const deleteIntentTransaction = asyncHandler(async (req, res) => {
   });
 });
 
-
-
-
 export {
   getBusinessTransactions,
   getCustomerTransactions,
@@ -370,5 +385,5 @@ export {
   closeTransactionById,
   captureDeposit,
   confirmTransactionPayment,
-  deleteIntentTransaction
+  deleteIntentTransaction,
 };
