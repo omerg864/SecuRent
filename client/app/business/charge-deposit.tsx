@@ -36,8 +36,6 @@ const ChargeDepositScreen = () => {
         setTransaction(transactionDetails);
         setCustomer(transactionDetails.customer);
         setAmount(0);
-        console.log(transactionDetails);
-        console.log(customer);
       } catch (error) {
         console.error("Error fetching details because:  ", error);
       } finally {
