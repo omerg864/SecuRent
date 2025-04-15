@@ -11,7 +11,8 @@ import {
 	createTransactionFromItem,
 	getTransactionById,
 	closeTransactionById,
-	captureDeposit
+	captureDeposit,
+	confirmTransactionPayment
 } from '../controllers/transactionController.js';
 import {
 	authAdmin,
@@ -34,6 +35,7 @@ router.get('/customer', authCustomer, getCustomerTransactions);
 router.get('/customer/:id', authCustomer, getTransactionByCustomer);
 router.post('/', authCustomer, createTransaction);
 router.post('/:id', authCustomer, createTransactionFromItem);
+router.post('/confirm/:id', authCustomer, confirmTransactionPayment);
 
 //! Admin routes
 router.get('/admin/:id', authAdmin, getTransactionAdmin);

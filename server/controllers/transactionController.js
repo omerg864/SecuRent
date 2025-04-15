@@ -289,6 +289,44 @@ const getTransactionById = asyncHandler(async (req, res) => {
   });
 });
 
+const confirmTransactionPayment = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { isPaymentConfirmed } = req.body;
+
+  const transaction = await Transaction.findById(id);
+  if (!transaction) {
+    res.status(404);
+    throw new Error("Transaction not found");
+  }
+
+  if (transaction.status !== "intent") {
+    res.status(400);
+    throw new Error("Transaction is not in an 'intent' state");
+  }
+
+  if (!isPaymentConfirmed) {
+    res.status(400);
+    throw new Error("Payment not confirmed by frontend");
+  }
+
+  const paymentIntent = await stripe.paymentIntents.retrieve(transaction.stripe_payment_id);
+
+  if (paymentIntent.status !== "requires_capture") {
+    res.status(400);
+    throw new Error(`PaymentIntent not ready for capture. Status: ${paymentIntent.status}`);
+  }
+
+  transaction.status = "open";
+  await transaction.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Transaction confirmed and marked as open.",
+    transaction,
+  });
+});
+
+
 export {
   getBusinessTransactions,
   getCustomerTransactions,
@@ -302,4 +340,5 @@ export {
   getTransactionById,
   closeTransactionById,
   captureDeposit,
+  confirmTransactionPayment
 };
