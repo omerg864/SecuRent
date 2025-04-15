@@ -210,7 +210,7 @@ const getTransactionById = asyncHandler(async (req, res) => {
   console.log("Checking transaction by id");
   const transaction = await Transaction.findById(req.params.id).populate(
     "customer",
-    "name image email "
+    "name image email"
   );
 
   if (!transaction) {
