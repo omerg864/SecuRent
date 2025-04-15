@@ -13,7 +13,7 @@ import {
   closeTransactionById,
   captureDeposit,
   confirmTransactionPayment,
-  deleteTransactionById,
+  deleteIntentTransaction,
 } from "../controllers/transactionController.js";
 import {
   authAdmin,
@@ -36,12 +36,12 @@ router.get("/customer/:id", authCustomer, getTransactionByCustomer);
 router.post("/", authCustomer, createTransaction);
 router.post("/:id", authCustomer, createTransactionFromItem);
 router.post("/confirm/:id", authCustomer, confirmTransactionPayment);
+router.delete("/customer/delete/:id", authCustomer, deleteIntentTransaction);
 
 //! Admin routes
 router.get("/admin/:id", authAdmin, getTransactionAdmin);
 router.get("/admin/customer/:id", authAdmin, getCustomerTransactionsAdmin);
 router.get("/admin/business/:id", authAdmin, getBusinessTransactionsAdmin);
-router.delete("/admin/delete/:id", authAdmin, deleteTransactionById);
 
 router.get("/transaction/:id", authAny, getTransactionById);
 router.put("/close/:id", authAny, closeTransactionById);

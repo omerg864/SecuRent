@@ -326,7 +326,7 @@ const confirmTransactionPayment = asyncHandler(async (req, res) => {
   });
 });
 
-const deleteTransactionById = asyncHandler(async (req, res) => {
+const deleteIntentTransaction = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const transaction = await Transaction.findById(id);
@@ -335,9 +335,14 @@ const deleteTransactionById = asyncHandler(async (req, res) => {
     throw new Error("Transaction not found");
   }
 
-  if (transaction.status === "open") {
+  if (transaction.customer.toString() !== req.customer._id.toString()) {
+    res.status(403);
+    throw new Error("Not authorized to delete this transaction");
+  }
+
+  if (transaction.status !== "intent") {
     res.status(400);
-    throw new Error("Cannot delete transaction in 'open' state");
+    throw new Error("Only transactions in 'intent' status can be deleted");
   }
 
   await transaction.deleteOne();
@@ -347,6 +352,7 @@ const deleteTransactionById = asyncHandler(async (req, res) => {
     message: "Transaction deleted successfully",
   });
 });
+
 
 
 
@@ -364,5 +370,5 @@ export {
   closeTransactionById,
   captureDeposit,
   confirmTransactionPayment,
-  deleteTransactionById
+  deleteIntentTransaction
 };
