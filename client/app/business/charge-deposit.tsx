@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, Image } from "react-native";
+import { View, Text, TextInput, Image, ActivityIndicator } from "react-native";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import HapticButton from "../../components/ui/HapticButton";
 import { ThemedText } from "@/components/ui/ThemedText";
@@ -14,17 +14,17 @@ import { Transaction } from "@/services/interfaceService";
 
 const ChargeDepositScreen = () => {
   const { transactionId } = useLocalSearchParams();
-
+  const [loading, setLoading] = useState(false);
   const [transaction, setTransaction] = useState<Transaction>();
   const [customer, setCustomer] = useState<Transaction["customer"]>();
-  const [amount, setAmount] = useState<number>(transaction?.amount as number);
-  const [reason, setReason] = useState(transaction?.description);
-  const [editAmount, setEditAmount] = useState(false);
+  const [amount, setAmount] = useState(0);
+  const [reason, setReason] = useState("");
   const maxAmount = transaction?.amount as number;
 
   useEffect(() => {
     const getTransactionDetails = async () => {
       try {
+        setLoading(true);
         if (!transactionId || typeof transactionId !== "string") {
           Toast.show({
             type: "error",
@@ -35,10 +35,13 @@ const ChargeDepositScreen = () => {
         const transactionDetails = await getTransactionById(transactionId);
         setTransaction(transactionDetails);
         setCustomer(transactionDetails.customer);
+        setAmount(0);
         console.log(transactionDetails);
         console.log(customer);
       } catch (error) {
         console.error("Error fetching details because:  ", error);
+      } finally {
+        setLoading(false);
       }
     };
     getTransactionDetails();
@@ -47,12 +50,6 @@ const ChargeDepositScreen = () => {
   const handleChargeDeposit = async () => {
     try {
       if (amount && maxAmount && customer) {
-        if (!amount || !maxAmount) {
-          Toast.show({
-            type: "error",
-            text1: "error with transaction details.",
-          });
-        }
         if (amount <= 0) {
           Toast.show({ type: "error", text1: "Invalid amount" });
           return;
@@ -110,8 +107,7 @@ const ChargeDepositScreen = () => {
       </View>
 
       <Text className="text-center text-gray-500 mb-2">
-        {customer?.name} has deposited {maxAmount}₪ so this is the maximum
-        amount you can charge.
+        max amount being able to charge is {maxAmount};
       </Text>
 
       <Text className="text-center text-xl text-[#2D2A2E] mb-6">
@@ -127,18 +123,12 @@ const ChargeDepositScreen = () => {
             <Text className="text-2xl text-[#2D2A2E]">-</Text>
           </HapticButton>
 
-          <TouchableOpacity
-            className="items-center justify-center"
-            onPress={() => setEditAmount(true)}
-          >
-            {editAmount ? (
-              <TextInput
-                className="text-2xl font-medium text-center w-24 text-[#2D2A2E]"
-                keyboardType="numeric"
-                value={amount.toString()}
-                onChangeText={(t) => setAmount(parseInt(t) || 0)}
-                onBlur={() => setEditAmount(false)}
-                autoFocus
+          <TouchableOpacity className="items-center justify-center">
+            {loading ? (
+              <ActivityIndicator
+                size="small"
+                color="#4B5563"
+                className="mr-4 ml-4"
               />
             ) : (
               <Text className="text-2xl font-medium w-24 text-center text-[#2D2A2E]">
