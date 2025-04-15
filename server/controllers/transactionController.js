@@ -7,6 +7,7 @@ import stripe from "../config/stripe.js";
 const getBusinessTransactions = asyncHandler(async (req, res) => {
   const transactions = await Transaction.find({
     business: req.business._id,
+    status: { $ne: "intent" },
   }).populate("customer", "name image phone");
   res.status(200).json({
     success: true,
@@ -17,6 +18,7 @@ const getBusinessTransactions = asyncHandler(async (req, res) => {
 const getCustomerTransactions = asyncHandler(async (req, res) => {
   const transactions = await Transaction.find({
     customer: req.customer._id,
+    status: { $ne: "intent" },
   }).populate("business", "name image rating category");
   res.status(200).json({
     success: true,
@@ -101,19 +103,24 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
     throw new Error("Transaction details not found");
   }
 
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: item.price * 100, 
-    currency: item.currency,
-    payment_method_types: ["card"],
-    capture_method: "manual",
-  });
+  const paymentIntent = await stripe.paymentIntents.create(
+    {
+      amount: item.price * 100,
+      currency: item.currency,
+      payment_method_types: ["card"],
+      capture_method: "manual",
+    },
+    {
+      stripeAccount: item.business.stripe_account_id,
+    }
+  );
 
   const transaction = new Transaction({
     stripe_payment_id: paymentIntent.id,
     client_secret: paymentIntent.client_secret,
     amount: item.price,
     currency: item.currency,
-    status: "open",
+    status: "intent",
     business: item.business,
     customer: req.customer._id,
     description: item.description,
@@ -229,7 +236,10 @@ const captureDeposit = asyncHandler(async (req, res) => {
 
 const getTransactionAdmin = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const transaction = await Transaction.findById(id)
+  const transaction = await Transaction.findById({
+    id,
+    status: { $ne: "intent" },
+  })
     .populate("business", "name image rating category")
     .populate("customer", "name image phone");
   if (!transaction) {
@@ -244,10 +254,10 @@ const getTransactionAdmin = asyncHandler(async (req, res) => {
 
 const getCustomerTransactionsAdmin = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const transactions = await Transaction.find({ customer: id }).populate(
-    "business",
-    "name image rating category"
-  );
+  const transactions = await Transaction.find({
+    customer: id,
+    status: { $ne: "intent" },
+  }).populate("business", "name image rating category");
   res.status(200).json({
     success: true,
     transactions,
@@ -256,10 +266,10 @@ const getCustomerTransactionsAdmin = asyncHandler(async (req, res) => {
 
 const getBusinessTransactionsAdmin = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const transactions = await Transaction.find({ business: id }).populate(
-    "customer",
-    "name image phone"
-  );
+  const transactions = await Transaction.find({
+    business: id,
+    status: { $ne: "intent" },
+  }).populate("customer", "name image phone");
   res.status(200).json({
     success: true,
     transactions,
