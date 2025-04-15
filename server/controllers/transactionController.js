@@ -326,6 +326,29 @@ const confirmTransactionPayment = asyncHandler(async (req, res) => {
   });
 });
 
+const deleteTransactionById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const transaction = await Transaction.findById(id);
+  if (!transaction) {
+    res.status(404);
+    throw new Error("Transaction not found");
+  }
+
+  if (transaction.status === "open") {
+    res.status(400);
+    throw new Error("Cannot delete transaction in 'open' state");
+  }
+
+  await transaction.deleteOne();
+
+  res.status(200).json({
+    success: true,
+    message: "Transaction deleted successfully",
+  });
+});
+
+
 
 export {
   getBusinessTransactions,
@@ -340,5 +363,6 @@ export {
   getTransactionById,
   closeTransactionById,
   captureDeposit,
-  confirmTransactionPayment
+  confirmTransactionPayment,
+  deleteTransactionById
 };
