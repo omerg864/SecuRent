@@ -44,6 +44,5 @@ router.get("/admin/customer/:id", authAdmin, getCustomerTransactionsAdmin);
 router.get("/admin/business/:id", authAdmin, getBusinessTransactionsAdmin);
 
 router.get("/transaction/:id", authAny, getTransactionById);
-router.put("/close/:id", authAny, closeTransactionById);
 
 export default router;

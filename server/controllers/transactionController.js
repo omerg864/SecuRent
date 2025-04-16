@@ -37,6 +37,10 @@ const getTransactionByCustomer = asyncHandler(async (req, res) => {
     res.status(401);
     throw new Error("Unauthorized");
   }
+  if (transaction.status === "intent") {
+    res.status(400);
+    throw new Error("Transaction is in 'intent' state");
+  }
   res.status(200).json({
     success: true,
     transaction,
@@ -52,6 +56,10 @@ const getTransactionByBusiness = asyncHandler(async (req, res) => {
   if (transaction.business.toString() !== req.business._id.toString()) {
     res.status(401);
     throw new Error("Unauthorized");
+  }
+  if (transaction.status === "intent") {
+    res.status(400);
+    throw new Error("Transaction is in 'intent' state");
   }
   res.status(200).json({
     success: true,
@@ -75,11 +83,10 @@ const createTransaction = asyncHandler(async (req, res) => {
   });
 
   const transaction = new Transaction({
-    stripe_payment_id: paymentIntent.id,
-    client_secret: paymentIntent.client_secret,
+    stripe_payment_intent_id: paymentIntent.id,
     amount,
     currency,
-    status: "open",
+    status: "intent",
     business,
     customer: req.customer._id,
     description: "Deposit",
@@ -91,7 +98,6 @@ const createTransaction = asyncHandler(async (req, res) => {
   res.status(201).json({
     success: true,
     transaction,
-    clientSecret: paymentIntent.client_secret,
   });
 });
 
@@ -101,7 +107,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
   const item = await Item.findById(id);
   if (!item) {
     res.status(403);
-    throw new Error("Transaction details not found");
+    throw new Error("Item details not found");
   }
 
   const customer = await Customer.findById(req.customer._id);
@@ -122,7 +128,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
       currency: item.currency,
       payment_method_types: ["card"],
       capture_method: "manual",
-      stripe_customer_id: customer.stripe_customer_id,
+      customer: customer.stripe_customer_id,
     },
     {
       stripeAccount: item.business.stripe_account_id,
@@ -130,8 +136,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
   );
 
   const transaction = new Transaction({
-    stripe_payment_id: paymentIntent.id,
-    client_secret: paymentIntent.client_secret,
+    stripe_payment_intent_id: paymentIntent.id,
     amount: item.price,
     currency: item.currency,
     status: "intent",
@@ -168,7 +173,6 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
   res.status(201).json({
     success: true,
     transaction,
-    clientSecret: paymentIntent.client_secret,
   });
 });
 
@@ -296,6 +300,10 @@ const getTransactionById = asyncHandler(async (req, res) => {
   if (!transaction) {
     res.status(404);
     throw new Error("Transaction not found");
+  }
+  if (transaction.status === "intent") {
+    res.status(400);
+    throw new Error("Transaction is in 'intent' state");
   }
   res.status(200).json({
     success: true,
