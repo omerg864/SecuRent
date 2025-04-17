@@ -12,6 +12,7 @@ import {
 	verifyEmail,
 	updateBusinessPassword,
 	resendVerificationCode,
+	getStripeOnboardingLink
 } from '../controllers/businessController.js';
 import { authBusiness } from '../middleware/authMiddleware.js';
 import { upload } from '../middleware/uploadMiddleware.js';
@@ -31,7 +32,8 @@ router.post('/resend-code', resendVerificationCode);
 // Protected Routes (Requires Authentication)
 router.put('/update', authBusiness, upload.single('image'), updateBusiness);
 router.delete('/delete', authBusiness, deleteBusiness);
-router.get('/:id', authBusiness, getBusinessById);
 router.put('/update-password', authBusiness, updateBusinessPassword);
+router.get('/stripe-onboarding', authBusiness, getStripeOnboardingLink);
+router.get('/:id', authBusiness, getBusinessById);
 
 export default router;
