@@ -137,6 +137,16 @@ const BusinessHomePage = () => {
               </View>
             )
           }
+          ListFooterComponent={() =>
+            isLoading && (
+              <View
+                className="py-4 justify-center items-center align-middle"
+                style={{ height: 200 }}
+              >
+                <ActivityIndicator size="large" color="#4338CA" />
+              </View>
+            )
+          }
         />
       </View>
     </View>

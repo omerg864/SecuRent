@@ -73,17 +73,17 @@ const getCustomerTransactions = async () => {
 };
 
 const getTransactionById = async (id: string): Promise<Transaction> => {
-  console.log("🚀 getTransactionById called with:", id); 
+  // console.log("🚀 getTransactionById called with:", id);
   const accessToken = await checkToken();
   if (!accessToken) throw new Error("No access token available");
 
-  const response = await client.get<{ success: boolean; transaction: Transaction }>(
-    `transaction/transaction/${id}`,
-    {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    }
-  );
-  console.log("📦 Transaction response:", response.data);
+  const response = await client.get<{
+    success: boolean;
+    transaction: Transaction;
+  }>(`transaction/transaction/${id}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  // console.log("📦 Transaction response:", response.data);
   return response.data.transaction;
 };
 
@@ -91,9 +91,12 @@ const closeTransaction = async (id: string): Promise<Transaction> => {
   const accessToken = await checkToken();
   if (!accessToken) throw new Error("No access token available");
 
-  const response = await client.put<{ success: boolean; transaction: Transaction }>(
+  const response = await client.put<{
+    success: boolean;
+    transaction: Transaction;
+  }>(
     `transaction/close/${id}`,
-    {}, 
+    {},
     {
       headers: { Authorization: `Bearer ${accessToken}` },
     }
@@ -101,7 +104,6 @@ const closeTransaction = async (id: string): Promise<Transaction> => {
 
   return response.data.transaction;
 };
-
 
 export {
   chargeDeposit,

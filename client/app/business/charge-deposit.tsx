@@ -1,47 +1,84 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, Image } from "react-native";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import HapticButton from "../../components/ui/HapticButton";
 import { ThemedText } from "@/components/ui/ThemedText";
 import userImage from "@/assets/images/user.png";
-import { chargeDeposit } from "@/services/transactionService";
+import {
+  chargeDeposit,
+  getTransactionById,
+} from "@/services/transactionService";
 import Toast from "react-native-toast-message";
+import { useLocalSearchParams } from "expo-router";
+import { Transaction } from "@/services/interfaceService";
 
 const ChargeDepositScreen = () => {
-  //! The reason, and maxAmmount will be passed as props once the
+  const { transactionId } = useLocalSearchParams();
 
-  const [amount, setAmount] = useState(0);
-  const [reason, setReason] = useState("broken tire");
+  const [transaction, setTransaction] = useState<Transaction>();
+  const [customer, setCustomer] = useState<Transaction["customer"]>();
+  const [amount, setAmount] = useState<number>(transaction?.amount as number);
+  const [reason, setReason] = useState(transaction?.description);
   const [editAmount, setEditAmount] = useState(false);
-  const maxAmount = 600;
-  const customerId = "someCustomerId";
+  const maxAmount = transaction?.amount as number;
 
-  const presetAmounts = [maxAmount * 0.1, maxAmount * 0.5, maxAmount];
+  useEffect(() => {
+    const getTransactionDetails = async () => {
+      try {
+        if (!transactionId || typeof transactionId !== "string") {
+          Toast.show({
+            type: "error",
+            text1: "Missing transaction ID",
+          });
+          return;
+        }
+        const transactionDetails = await getTransactionById(transactionId);
+        setTransaction(transactionDetails);
+        setCustomer(transactionDetails.customer);
+        console.log(transactionDetails);
+        console.log(customer);
+      } catch (error) {
+        console.error("Error fetching details because:  ", error);
+      }
+    };
+    getTransactionDetails();
+  }, []);
 
   const handleChargeDeposit = async () => {
-    if (amount <= 0) {
-      Toast.show({ type: "error", text1: "Invalid amount" });
-      return;
-    }
-
-    if (amount > maxAmount) {
-      Toast.show({ type: "error", text1: "Amount exceeds maximum deposit" });
-      return;
-    }
-
     try {
-      await chargeDeposit(customerId, {
-        amount,
-        charged_description: reason,
-      });
+      if (amount && maxAmount && customer) {
+        if (!amount || !maxAmount) {
+          Toast.show({
+            type: "error",
+            text1: "error with transaction details.",
+          });
+        }
+        if (amount <= 0) {
+          Toast.show({ type: "error", text1: "Invalid amount" });
+          return;
+        }
 
-      Toast.show({
-        type: "success",
-        text1: "Deposit charged successfully",
-        text2: `Amount: ${amount}₪`,
-      });
-      setAmount(0);
-      setReason("broken tire");
+        if (amount > maxAmount) {
+          Toast.show({
+            type: "error",
+            text1: "Amount exceeds maximum deposit",
+          });
+          return;
+        }
+
+        await chargeDeposit(customer?._id, {
+          amount: amount,
+          charged_description: reason as string,
+        });
+
+        Toast.show({
+          type: "success",
+          text1: "Deposit charged successfully",
+          text2: `Amount: ${amount}₪`,
+        });
+        setAmount(0);
+        setReason("");
+      }
     } catch (error: any) {
       Toast.show({
         type: "error",
@@ -59,19 +96,22 @@ const ChargeDepositScreen = () => {
 
       <View className="bg-gray-100 rounded-2xl p-6 flex-row items-center justify-between mb-6 shadow-md border-2 border-gray-300">
         <View className="flex-row items-center space-x-3">
-          <Image source={userImage} className="w-10 h-10 rounded-full mr-2" />
+          <Image
+            source={customer?.image ? customer?.image : userImage}
+            className="w-10 h-10 rounded-full mr-2"
+          />
           <Text className="text-base font-semibold text-[#2D2A2E]">
-            John Doe
+            {customer?.name}
           </Text>
         </View>
         <Text className="text-base font-semibold text-[#2D2A2E]">
-          {maxAmount}₪
+          {transaction?.amount}₪
         </Text>
       </View>
 
       <Text className="text-center text-gray-500 mb-2">
-        John has deposited {maxAmount}₪ so this is the maximum amount you can
-        charge.
+        {customer?.name} has deposited {maxAmount}₪ so this is the maximum
+        amount you can charge.
       </Text>
 
       <Text className="text-center text-xl text-[#2D2A2E] mb-6">
@@ -114,28 +154,6 @@ const ChargeDepositScreen = () => {
             <Text className="text-2xl text-[#2D2A2E]">+</Text>
           </HapticButton>
         </View>
-      </View>
-
-      <View className="flex-row justify-between mb-10 space-x-2">
-        {presetAmounts.map((val) => (
-          <HapticButton
-            key={val}
-            onPress={() => setAmount(val)}
-            className={`flex-1 py-3 rounded-full border ${
-              amount === val
-                ? "bg-indigo-600 border-indigo-600"
-                : "border-indigo-600 bg-white"
-            }`}
-          >
-            <Text
-              className={`text-center font-medium ${
-                amount === val ? "text-white" : "text-indigo-600"
-              }`}
-            >
-              {val}₪
-            </Text>
-          </HapticButton>
-        ))}
       </View>
 
       <View>
