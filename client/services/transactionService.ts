@@ -83,7 +83,7 @@ const getTransactionById = async (id: string): Promise<Transaction> => {
   }>(`transaction/transaction/${id}`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
-  // console.log("📦 Transaction response:", response.data);
+  console.log(JSON.stringify(response.data.transaction, null, 2));
   return response.data.transaction;
 };
 
