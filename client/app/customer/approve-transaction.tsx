@@ -85,7 +85,7 @@ export default function ApproveTransaction() {
 		});
 
 		if (initError) {
-			console.error('Init error:', initError);
+			console.log('Init error:', initError);
 			return;
 		}
 
@@ -93,7 +93,7 @@ export default function ApproveTransaction() {
 			await presentPaymentSheet();
 
 		if (sheetError) {
-			console.error('Payment sheet error:', sheetError);
+			console.log('Payment sheet error:', sheetError);
 			Toast.show({
 				type: 'error',
 				text1: sheetError.code,
@@ -120,7 +120,7 @@ export default function ApproveTransaction() {
 				pathname: '/customer',
 			});
 		} catch (error: any) {
-			console.error(
+			console.log(
 				'Error confirming payment:',
 				error.response.data.message
 			);
