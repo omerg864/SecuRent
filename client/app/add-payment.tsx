@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ThemedTextInput } from '@/components/ui/ThemedTextInput';
@@ -14,20 +14,18 @@ import {
 	updateCreditCard,
 } from '@/services/customerService';
 import Toast from 'react-native-toast-message';
-import { CardField, useStripe } from '@stripe/stripe-react-native';
+import { useStripe } from '@stripe/stripe-react-native';
 
 const AddPaymentScreen = () => {
 	const router = useRouter();
-	const { confirmSetupIntent } = useStripe();
-	const [clientSecret, setClientSecret] = useState<string | null>(null);
+	const { initCustomerSheet, presentCustomerSheet } = useStripe();
 	const [loading, setLoading] = useState(false);
 	const params = useLocalSearchParams();
-	const [cardDetails, setCardDetails] = useState<any>(null);
 	const accountType = (params.accountType as string) || 'personal';
 
 	const fetchSetupIntent = async () => {
 		try {
-			const response: any = await customerCardIntent();
+			const response = await customerCardIntent();
 			if (!response.data.success) {
 				Toast.show({
 					type: 'error',
@@ -35,10 +33,9 @@ const AddPaymentScreen = () => {
 				});
 				return;
 			}
-			const { clientSecret } = response.data;
-			setClientSecret(clientSecret);
-			return clientSecret;
+			return response.data!;
 		} catch (error: any) {
+      console.error('Error fetching setup intent:', error.response);
 			Toast.show({
 				type: 'error',
 				text1: error.response.data.message,
@@ -88,32 +85,46 @@ const AddPaymentScreen = () => {
 	};
 
 	const handleAddCard = async () => {
-		console.log('Card details:', cardDetails);
-		if (!cardDetails?.complete) {
-			Toast.show({
-				type: 'error',
-				text1: 'Please enter complete card details',
-			});
+		setLoading(true);
+		const data = await fetchSetupIntent();
+    console.log('Setup Intent Data:', data);
+		if (!data) {
+      Toast.show({
+        type: 'error',
+        text1: 'Internal Server Error',
+      });
+			setLoading(false);
+			return;
+		}
+		const { clientSecret, customer_stripe_id, ephemeralKey } = data;
+
+		const { error: initError } = await initCustomerSheet({
+			merchantDisplayName: 'Expo, Inc.',
+
+			customerId: customer_stripe_id,
+			customerEphemeralKeySecret: ephemeralKey,
+			setupIntentClientSecret: clientSecret,
+		});
+
+		if (initError) {
+			console.error('Init error:', initError);
+			setLoading(false);
 			return;
 		}
 
-		setLoading(true);
-		const secret = clientSecret || (await fetchSetupIntent());
+		const { error: sheetError } = await presentCustomerSheet();
 
-		const { error, setupIntent } = await confirmSetupIntent(secret, {
-			paymentMethodType: 'Card',
-		});
-
-		console.log('Setup Intent:', setupIntent);
-		console.log('Error:', error);
-
-		if (error) {
-			Toast.show({ type: 'error', text1: error.message });
-		} else if (setupIntent) {
-			handleSavePayment();
+		if (sheetError) {
+			console.error('Sheet error:', sheetError);
+		} else {
+			console.log('Customer added a new payment method!');
 		}
 		setLoading(false);
 	};
+
+	useEffect(() => {
+		handleAddCard();
+	}, []);
 
 	return (
 		<ParallaxScrollView
@@ -137,17 +148,7 @@ const AddPaymentScreen = () => {
 						Enter your payment details
 					</ThemedText>
 
-					<View className="mt-5">
-						<CardField
-							postalCodeEnabled={true}
-							onCardChange={(details) => {
-								console.log('onCardChange fired:', details);
-								setCardDetails(details);
-							}}
-							placeholders={{ number: '4242 4242 4242 4242' }}
-							style={{ height: 50, marginVertical: 30 }}
-						/>
-					</View>
+					<View className="mt-5"></View>
 
 					{/* Save Button */}
 					<View className="flex-row justify-center mt-4">

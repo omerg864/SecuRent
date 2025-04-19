@@ -23,6 +23,7 @@
     "@react-navigation/drawer": "^7.1.1",
     "@react-navigation/native": "^7.1.5",
     "@react-navigation/native-stack": "^7.2.0",
+    "@stripe/stripe-react-native": "^0.44.0",
     "axios": "^1.8.4",
     "expo": "~52.0.24",
     "expo-auth-session": "^6.0.3",
@@ -31,6 +32,7 @@
     "expo-constants": "~17.0.3",
     "expo-font": "~13.0.2",
     "expo-haptics": "~14.0.0",
+    "expo-image-picker": "~16.0.6",
     "expo-linking": "~7.0.3",
     "expo-location": "~18.0.8",
     "expo-router": "^4.0.16",
@@ -60,9 +62,7 @@
     "react-native-use-websocket": "^0.2.6",
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.5",
-    "tailwindcss": "^3.4.17",
-    "expo-image-picker": "~16.0.6",
-    "@stripe/stripe-react-native": "0.38.6"
+    "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

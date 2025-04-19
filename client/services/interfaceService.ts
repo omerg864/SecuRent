@@ -15,9 +15,11 @@ interface AuthResponse {
 	message: string;
 }
 
-interface ClientSecretResponse {
+interface ClientStripeParamsResponse {
 	clientSecret: string;
 	success: boolean;
+	customer_stripe_id: string;
+	ephemeralKey: string;
 }
 
 interface StepResponse {
@@ -217,5 +219,5 @@ export type {
 	LocationDetails,
 	Business,
 	StepResponse,
-	ClientSecretResponse,
+	ClientStripeParamsResponse,
 };
