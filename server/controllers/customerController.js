@@ -402,7 +402,7 @@ const setUpCustomerCard = asyncHandler(async (req, res) => {
 			customer: req.customer.stripe_customer_id,
 		},
 		{
-			apiVersion: '2025-03-31',
+			apiVersion: '2023-10-16',
 		}
 	);
 

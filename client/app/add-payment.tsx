@@ -35,7 +35,7 @@ const AddPaymentScreen = () => {
 			}
 			return response.data!;
 		} catch (error: any) {
-      console.error('Error fetching setup intent:', error.response);
+      console.error('Error fetching setup intent:', error.response.data);
 			Toast.show({
 				type: 'error',
 				text1: error.response.data.message,
