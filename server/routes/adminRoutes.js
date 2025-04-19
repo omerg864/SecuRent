@@ -8,7 +8,8 @@ import {
   verifyAdmin,
   loginClient,
   identifyUser,
-  adminAnalytics
+  adminAnalytics,
+  refreshTokens
 } from "../controllers/adminController.js";
 import { authAdmin } from "../middleware/authMiddleware.js";
 import { upload } from "../middleware/uploadMiddleware.js";
@@ -19,6 +20,7 @@ router.post("/login", login);
 router.post("/register", upload.single("image"), register);
 router.post("/google", googleLogin);
 router.post("/login/client", loginClient);
+router.post("/refresh-token", refreshTokens);
 //! security vulnerability: this route should be protected
 router.get("/identify-user", identifyUser);
 
