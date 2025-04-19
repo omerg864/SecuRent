@@ -82,7 +82,7 @@ const createTransaction = asyncHandler(async (req, res) => {
 	});
 
 	const transaction = new Transaction({
-		stripe_payment_intent_id: paymentIntent.id,
+		stripe_payment_id: paymentIntent.id,
 		amount,
 		currency,
 		status: 'intent',
@@ -128,7 +128,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 	);
 
 	const transaction = new Transaction({
-		stripe_payment_intent_id: paymentIntent.id,
+		stripe_payment_id: paymentIntent.id,
 		amount: item.price,
 		currency: item.currency,
 		status: 'intent',
