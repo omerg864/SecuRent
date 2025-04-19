@@ -15,6 +15,27 @@ interface AuthResponse {
 	message: string;
 }
 
+interface ValidResponse {
+	success: boolean;
+	message: string;
+	valid: boolean;
+}
+
+interface ClientStripeParamsResponse {
+	clientSecret: string;
+	success: boolean;
+	customer_stripe_id: string;
+	ephemeralKey: string;
+}
+
+interface TransactionIntentResponse {
+	clientSecret: string;
+	success: boolean;
+	customer_stripe_id: string;
+	ephemeralKey: string;
+	transactionId: string;
+}
+
 interface StepResponse {
 	success: boolean;
 	message: string;
@@ -212,4 +233,7 @@ export type {
 	LocationDetails,
 	Business,
 	StepResponse,
+	ClientStripeParamsResponse,
+	ValidResponse,
+	TransactionIntentResponse
 };

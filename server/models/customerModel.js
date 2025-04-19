@@ -27,9 +27,6 @@ const customerScheme = mongoose.Schema(
     stripe_customer_id: {
       type: String,
     },
-    creditCard: {
-      type: Object,
-    },
     rating: {
       type: Number,
     },
