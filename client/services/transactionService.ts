@@ -3,6 +3,7 @@ import {
   ChargeDepositPayload,
   TransactionResponse,
   Transaction,
+  ClientStripeParamsResponse,
 } from "./interfaceService";
 const chargeDeposit = async (
   transactionId: string,
@@ -29,14 +30,13 @@ const createTransactionFromItem = async (itemId: string) => {
   try {
     const accessToken = await checkToken();
     console.log("Access Token:", accessToken);
-    const response = await client.post<{ success: boolean }>(
+    const response = await client.get<ClientStripeParamsResponse>(
       `transaction/${itemId}`,
-      {},
       {
         headers: { Authorization: `Bearer ${accessToken}` },
       }
     );
-    return response.data.success;
+    return response;
   } catch (error) {
     throw error || "Transaction creation failed.";
   }
