@@ -142,6 +142,52 @@ const register = asyncHandler(async (req, res) => {
 	});
 });
 
+const refreshTokens = asyncHandler(async (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) {
+	res.status(400);
+	throw new Error("Refresh token is required");
+  }
+
+  let decoded;
+  try {
+	decoded = jwt.verify(refreshToken, process.env.JWT_SECRET_ADMIN_REFRESH);
+  } catch (err) {
+	throw new Error("Invalid or expired refresh token");
+  }
+
+  const admin = await Admin.findById(decoded.id);
+  if (!admin) {
+	res.status(404);
+	throw new Error("Business not found");
+  }
+
+  const storedToken = admin.refreshTokens?.find(
+	(t) => t.token === refreshToken
+  );
+  if (!storedToken) {
+	res.status(403);
+	throw new Error("Refresh token not recognized");
+  }
+
+  admin.refreshTokens = admin.refreshTokens.filter(
+	(t) => t.token !== refreshToken
+  );
+
+  const accessToken = generateBusinessAccessToken(admin._id);
+  const { refreshToken: newRefreshToken, unique } =
+	generateBusinessRefreshToken(admin._id);
+  admin.refreshTokens.push({ token: newRefreshToken, unique });
+
+  await admin.save();
+
+  res.status(200).json({
+	success: true,
+	accessToken,
+	refreshToken: newRefreshToken,
+  });
+});
+
 const googleLogin = asyncHandler(async (req, res) => {
 	const client = new OAuth2Client(
 		process.env.GOOGLE_CLIENT_ID,
@@ -582,4 +628,5 @@ export {
 	loginClient,
 	identifyUser,
 	adminAnalytics,
+	refreshTokens,
 };
