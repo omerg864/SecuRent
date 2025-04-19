@@ -434,8 +434,6 @@ const updateBusinessDetails = asyncHandler(async (req, res) => {
 });
 
 const verifyBank = asyncHandler(async (req, res) => {
-	account.requirements.currently_due.length === 0;
-
 	if (!req.business.stripe_account_id) {
 		res.status(400);
 		throw new Error('Stripe account not found for this business');
