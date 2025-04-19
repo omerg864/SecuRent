@@ -1,70 +1,70 @@
-import asyncHandler from "express-async-handler";
-import Transaction from "../models/transactionModel.js";
-import Item from "../models/itemModel.js";
-import { businesses } from "../config/websocket.js";
+import asyncHandler from 'express-async-handler';
+import Transaction from '../models/transactionModel.js';
+import Item from '../models/itemModel.js';
+import { businesses } from '../config/websocket.js';
 import stripe from '../config/stripe.js';
 import Customer from '../models/customerModel.js';
 
 const getBusinessTransactions = asyncHandler(async (req, res) => {
-  const transactions = await Transaction.find({
-    business: req.business._id,
+	const transactions = await Transaction.find({
+		business: req.business._id,
 		status: { $ne: 'intent' },
-  }).populate("customer", "name image phone");
-  res.status(200).json({
-    success: true,
-    transactions,
-  });
+	}).populate('customer', 'name image phone');
+	res.status(200).json({
+		success: true,
+		transactions,
+	});
 });
 
 const getCustomerTransactions = asyncHandler(async (req, res) => {
-  const transactions = await Transaction.find({
-    customer: req.customer._id,
+	const transactions = await Transaction.find({
+		customer: req.customer._id,
 		status: { $ne: 'intent' },
-  }).populate("business", "name image rating category");
-  res.status(200).json({
-    success: true,
-    transactions,
-  });
+	}).populate('business', 'name image rating category');
+	res.status(200).json({
+		success: true,
+		transactions,
+	});
 });
 
 const getTransactionByCustomer = asyncHandler(async (req, res) => {
-  const transaction = await Transaction.findById(req.params.id);
-  if (!transaction) {
-    res.status(404);
-    throw new Error("Transaction not found");
-  }
-  if (transaction.customer.toString() !== req.customer._id.toString()) {
-    res.status(401);
-    throw new Error("Unauthorized");
-  }
+	const transaction = await Transaction.findById(req.params.id);
+	if (!transaction) {
+		res.status(404);
+		throw new Error('Transaction not found');
+	}
+	if (transaction.customer.toString() !== req.customer._id.toString()) {
+		res.status(401);
+		throw new Error('Unauthorized');
+	}
 	if (transaction.status === 'intent') {
 		res.status(400);
 		throw new Error("Transaction is in 'intent' state");
 	}
-  res.status(200).json({
-    success: true,
-    transaction,
-  });
+	res.status(200).json({
+		success: true,
+		transaction,
+	});
 });
 
 const getTransactionByBusiness = asyncHandler(async (req, res) => {
-  const transaction = await Transaction.findById(req.params.id);
-  if (!transaction) {
-    res.status(404);
-    throw new Error("Transaction not found");
-  }
-  if (transaction.business.toString() !== req.business._id.toString()) {
-    res.status(401);
-    throw new Error("Unauthorized");
-  }
+	const transaction = await Transaction.findById(req.params.id);
+	if (!transaction) {
+		res.status(404);
+		throw new Error('Transaction not found');
+	}
+	if (transaction.business.toString() !== req.business._id.toString()) {
+		res.status(401);
+		throw new Error('Unauthorized');
+	}
 	if (transaction.status === 'intent') {
 		res.status(400);
 		throw new Error("Transaction is in 'intent' state");
 	}
-  res.status(200).json({
-    success: true,
-    transaction,
-  });
+	res.status(200).json({
+		success: true,
+		transaction,
+	});
 });
 
 const createTransaction = asyncHandler(async (req, res) => {
@@ -102,7 +102,7 @@ const createTransaction = asyncHandler(async (req, res) => {
 });
 
 const createTransactionFromItem = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+	const { id } = req.params;
 
 	const item = await Item.findById(id);
 	if (!item) {
@@ -142,31 +142,31 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 
 	await transaction.save();
 
-  if (item.temporary) {
-    await Item.findByIdAndDelete(id);
-  }
+	if (item.temporary) {
+		await Item.findByIdAndDelete(id);
+	}
 
-  const businessAssociated = businesses.filter(
-    (ws) => ws.id === item.business.toString()
-  );
+	const businessAssociated = businesses.filter(
+		(ws) => ws.id === item.business.toString()
+	);
 
-  if (businessAssociated.length > 0) {
-    for (const ws of businessAssociated) {
-      ws.send(
-        JSON.stringify({
-          type: "newTransaction",
-          data: {
-            item,
-          },
-        })
-      );
-    }
-  }
+	if (businessAssociated.length > 0) {
+		for (const ws of businessAssociated) {
+			ws.send(
+				JSON.stringify({
+					type: 'newTransaction',
+					data: {
+						item,
+					},
+				})
+			);
+		}
+	}
 
-  res.status(201).json({
-    success: true,
-    transaction,
-  });
+	res.status(201).json({
+		success: true,
+		transaction,
+	});
 });
 
 const closeTransactionById = asyncHandler(async (req, res) => {
@@ -246,21 +246,21 @@ const captureDeposit = asyncHandler(async (req, res) => {
 });
 
 const getTransactionAdmin = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const transaction = await Transaction.findById({
+	const { id } = req.params;
+	const transaction = await Transaction.findById({
 		id,
 		status: { $ne: 'intent' },
 	})
-    .populate("business", "name image rating category")
-    .populate("customer", "name image phone");
-  if (!transaction) {
-    res.status(404);
-    throw new Error("Transaction not found");
-  }
-  res.status(200).json({
-    success: true,
-    transaction,
-  });
+		.populate('business', 'name image rating category')
+		.populate('customer', 'name image phone');
+	if (!transaction) {
+		res.status(404);
+		throw new Error('Transaction not found');
+	}
+	res.status(200).json({
+		success: true,
+		transaction,
+	});
 });
 
 const getCustomerTransactionsAdmin = asyncHandler(async (req, res) => {
@@ -288,16 +288,16 @@ const getBusinessTransactionsAdmin = asyncHandler(async (req, res) => {
 });
 
 const getTransactionById = asyncHandler(async (req, res) => {
-  console.log('Checking transaction by id');
-  const transaction = await Transaction.findById(req.params.id).populate(
-    "customer",
-    "name image email"
-  );
+	console.log('Checking transaction by id');
+	const transaction = await Transaction.findById(req.params.id).populate(
+		'customer',
+		'name image email'
+	);
 
-  if (!transaction) {
-    res.status(404);
-    throw new Error("Transaction not found");
-  }
+	if (!transaction) {
+		res.status(404);
+		throw new Error('Transaction not found');
+	}
 	if (transaction.status === 'intent') {
 		res.status(400);
 		throw new Error("Transaction is in 'intent' state");
@@ -318,10 +318,10 @@ const getTransactionById = asyncHandler(async (req, res) => {
 		res.status(401);
 		throw new Error('Unauthorized');
 	}
-  res.status(200).json({
-    success: true,
-    transaction,
-  });
+	res.status(200).json({
+		success: true,
+		transaction,
+	});
 });
 
 const confirmTransactionPayment = asyncHandler(async (req, res) => {
