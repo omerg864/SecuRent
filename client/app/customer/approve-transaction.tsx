@@ -8,7 +8,10 @@ import { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import { getItemById } from '@/services/itemService';
-import { createTransactionFromItem } from '@/services/transactionService';
+import {
+	confirmTransactionPayment,
+	createTransactionFromItem,
+} from '@/services/transactionService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator } from 'react-native';
 import Toast from 'react-native-toast-message';
@@ -71,7 +74,8 @@ export default function ApproveTransaction() {
 	const openStripePaymentSheet = async (
 		clientStripeId: string,
 		ephemeralKey: string,
-		clientSecret: string
+		clientSecret: string,
+		transactionId: string
 	) => {
 		const { error: initError } = await initPaymentSheet({
 			customerId: clientStripeId,
@@ -89,12 +93,44 @@ export default function ApproveTransaction() {
 			await presentPaymentSheet();
 
 		if (sheetError) {
-			console.error('Payment failed:', sheetError.message);
-			// Show error to user
-		} else {
-			console.log('Payment confirmed');
-			// Call your backend to mark the transaction as "open"
+			console.error('Payment sheet error:', sheetError);
+			Toast.show({
+				type: 'error',
+				text1: sheetError.code,
+			});
+			return;
 		}
+
+		try {
+			const response = await confirmTransactionPayment(transactionId);
+
+			if (!response.success) {
+				Toast.show({
+					type: 'error',
+					text1: 'Failed to confirm payment',
+				});
+				return;
+			}
+
+			Toast.show({
+				type: 'success',
+				text1: 'Deposit approved successfully',
+			});
+			router.replace({
+				pathname: '/customer',
+			});
+		} catch (error: any) {
+			console.error(
+				'Error confirming payment:',
+				error.response.data.message
+			);
+			Toast.show({
+				type: 'error',
+				text1: error.response.data.message,
+			});
+			return;
+		}
+
 		setLoadingApprove(false);
 	};
 
@@ -106,15 +142,9 @@ export default function ApproveTransaction() {
 				openStripePaymentSheet(
 					response.data.customer_stripe_id,
 					response.data.ephemeralKey,
-					response.data.clientSecret
+					response.data.clientSecret,
+					response.data.transactionId
 				);
-				/*Toast.show({
-					type: 'success',
-					text1: 'Deposit approved successfully',
-				});
-				router.replace({
-					pathname: '/customer',
-				});*/
 			} else {
 				Toast.show({
 					type: 'error',

@@ -28,6 +28,14 @@ interface ClientStripeParamsResponse {
 	ephemeralKey: string;
 }
 
+interface TransactionIntentResponse {
+	clientSecret: string;
+	success: boolean;
+	customer_stripe_id: string;
+	ephemeralKey: string;
+	transactionId: string;
+}
+
 interface StepResponse {
 	success: boolean;
 	message: string;
@@ -226,5 +234,6 @@ export type {
 	Business,
 	StepResponse,
 	ClientStripeParamsResponse,
-	ValidResponse
+	ValidResponse,
+	TransactionIntentResponse
 };
