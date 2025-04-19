@@ -45,8 +45,8 @@
       "typedRoutes": true
     },
     "extra": {
-      "apiUrl": "https://securent-dev.onrender.com/api/",
-      "webSocketUrl": "wss://securent-dev.onrender.com",
+      "apiUrl": "https://securent.onrender.com/api/",
+      "webSocketUrl": "wss://securent.onrender.com",
       "stripePublishableKey": "pk_test_51RDn684bOOL8vIcKq2i2fZOnYfoQFhxSDoLkbmuLfZHfkJPXESsSmC3gKEVclvnLfGoF9ziZrdI4aY1xca0eaqjq00Toe4OFVw"
     }
   }
