@@ -34,7 +34,7 @@ router.put("/charge/:id", authBusiness, captureDeposit);
 router.get("/customer", authCustomer, getCustomerTransactions);
 router.get("/customer/:id", authCustomer, getTransactionByCustomer);
 router.post("/", authCustomer, createTransaction);
-router.post("/:id", authCustomer, createTransactionFromItem);
+router.get("/:id", authCustomer, createTransactionFromItem);
 router.post("/confirm/:id", authCustomer, confirmTransactionPayment);
 router.delete("/customer/delete/:id", authCustomer, deleteIntentTransaction);
 

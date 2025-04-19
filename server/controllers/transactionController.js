@@ -3,7 +3,6 @@ import Transaction from '../models/transactionModel.js';
 import Item from '../models/itemModel.js';
 import { businesses } from '../config/websocket.js';
 import stripe from '../config/stripe.js';
-import Customer from '../models/customerModel.js';
 
 const getBusinessTransactions = asyncHandler(async (req, res) => {
 	const transactions = await Transaction.find({
@@ -138,34 +137,25 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 		description: item.description,
 		return_date: item.return_date,
 		opened_at: Date.now(),
+		item: item._id,
 	});
 
 	await transaction.save();
 
-	if (item.temporary) {
-		await Item.findByIdAndDelete(id);
-	}
-
-	const businessAssociated = businesses.filter(
-		(ws) => ws.id === item.business.toString()
-	);
-
-	if (businessAssociated.length > 0) {
-		for (const ws of businessAssociated) {
-			ws.send(
-				JSON.stringify({
-					type: 'newTransaction',
-					data: {
-						item,
-					},
-				})
-			);
+	const ephemeralKey = await stripe.ephemeralKeys.create(
+		{
+			customer: req.customer.stripe_customer_id,
+		},
+		{
+			apiVersion: '2023-10-16',
 		}
-	}
+	);
 
 	res.status(201).json({
 		success: true,
-		transaction,
+		clientSecret: paymentIntent.client_secret,
+		customer_stripe_id: req.customer.stripe_customer_id,
+		ephemeralKey: ephemeralKey.secret,
 	});
 });
 
@@ -188,7 +178,9 @@ const closeTransactionById = asyncHandler(async (req, res) => {
 		throw new Error('Transaction is not in an authorized state');
 	}
 
-	await stripe.paymentIntents.cancel(transaction.stripe_payment_id);
+	await stripe.paymentIntents.cancel(transaction.stripe_payment_id, {
+		stripeAccount: transaction.business.stripe_account_id,
+	});
 
 	transaction.status = 'closed';
 	transaction.closed_at = new Date();
@@ -224,9 +216,15 @@ const captureDeposit = asyncHandler(async (req, res) => {
 
 	const amountToCharge = amount ? amount * 100 : transaction.amount * 100;
 
-	await stripe.paymentIntents.capture(transaction.stripe_payment_id, {
-		amount_to_capture: amountToCharge,
-	});
+	await stripe.paymentIntents.capture(
+		transaction.stripe_payment_id,
+		{
+			amount_to_capture: amountToCharge,
+		},
+		{
+			stripeAccount: transaction.business.stripe_account_id,
+		}
+	);
 
 	const chargedAmount = amount || transaction.amount; // charge full amount if not specified a partial amount
 
@@ -326,9 +324,8 @@ const getTransactionById = asyncHandler(async (req, res) => {
 
 const confirmTransactionPayment = asyncHandler(async (req, res) => {
 	const { id } = req.params;
-	const { isPaymentConfirmed } = req.body;
 
-	const transaction = await Transaction.findById(id);
+	const transaction = await Transaction.findById(id).populate('item');
 	if (!transaction) {
 		res.status(404);
 		throw new Error('Transaction not found');
@@ -339,13 +336,11 @@ const confirmTransactionPayment = asyncHandler(async (req, res) => {
 		throw new Error("Transaction is not in an 'intent' state");
 	}
 
-	if (!isPaymentConfirmed) {
-		res.status(400);
-		throw new Error('Payment not confirmed by frontend');
-	}
-
 	const paymentIntent = await stripe.paymentIntents.retrieve(
-		transaction.stripe_payment_id
+		transaction.stripe_payment_id,
+		{
+			stripeAccount: transaction.business.stripe_account_id,
+		}
 	);
 
 	if (paymentIntent.status !== 'requires_capture') {
@@ -353,6 +348,28 @@ const confirmTransactionPayment = asyncHandler(async (req, res) => {
 		throw new Error(
 			`PaymentIntent not ready for capture. Status: ${paymentIntent.status}`
 		);
+	}
+
+	const businessAssociated = businesses.filter(
+		(ws) => ws.id === transaction.business.toString()
+	);
+
+	if (businessAssociated.length > 0) {
+		for (const ws of businessAssociated) {
+			ws.send(
+				JSON.stringify({
+					type: 'newTransaction',
+					data: {
+						item: transaction.item,
+					},
+				})
+			);
+		}
+	}
+
+	if (transaction.item.temporary) {
+		await Item.findByIdAndDelete(transaction.item._id);
+		transaction.item = null;
 	}
 
 	transaction.status = 'open';
@@ -382,6 +399,10 @@ const deleteIntentTransaction = asyncHandler(async (req, res) => {
 	if (transaction.status !== 'intent') {
 		res.status(400);
 		throw new Error("Only transactions in 'intent' status can be deleted");
+	}
+
+	if (transaction.item) {
+		await Item.findByIdAndDelete(transaction.item);
 	}
 
 	await transaction.deleteOne();
