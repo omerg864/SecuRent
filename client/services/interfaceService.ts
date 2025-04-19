@@ -15,6 +15,11 @@ interface AuthResponse {
 	message: string;
 }
 
+interface ClientSecretResponse {
+	clientSecret: string;
+	success: boolean;
+}
+
 interface StepResponse {
 	success: boolean;
 	message: string;
@@ -212,4 +217,5 @@ export type {
 	LocationDetails,
 	Business,
 	StepResponse,
+	ClientSecretResponse,
 };

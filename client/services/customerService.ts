@@ -1,10 +1,18 @@
 import { client } from './httpClient';
-import { AuthData, AuthResponse, CreditCardData } from './interfaceService';
+import {
+	AuthData,
+	AuthResponse,
+	ClientSecretResponse,
+	CreditCardData,
+} from './interfaceService';
 import { checkToken } from './httpClient';
 import { buildFormData } from '@/utils/functions';
 import { FileObject } from '@/types/business';
 
-const registerCustomer = async (customerData: AuthData, file: FileObject | null) => {
+const registerCustomer = async (
+	customerData: AuthData,
+	file: FileObject | null
+) => {
 	try {
 		const formData = buildFormData(customerData, file);
 		console.log('Form data:', formData);
@@ -23,13 +31,28 @@ const registerCustomer = async (customerData: AuthData, file: FileObject | null)
 	}
 };
 
-const updateCreditCard = async (creditCardData: CreditCardData) => {
+const customerCardIntent = async () => {
 	try {
-		console.log(creditCardData);
+		const accessToken = await checkToken();
+		const response = await client.put<ClientSecretResponse>(
+			'customer/credit-card/intent',
+			{},
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response;
+	} catch (error) {
+		throw error || 'Credit card update failed.';
+	}
+};
+
+const updateCreditCard = async () => {
+	try {
 		const accessToken = await checkToken();
 		const response = await client.put<AuthResponse>(
 			'customer/update/credit-card',
-			creditCardData,
+			{},
 			{
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
@@ -86,4 +109,5 @@ export {
 	verifyEmailCustomer,
 	updateCustomerPassword,
 	resendCustomerVerificationCode,
+	customerCardIntent,
 };
