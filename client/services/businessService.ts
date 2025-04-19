@@ -5,11 +5,15 @@ import {
 	AuthResponse,
 	Business,
 	StepResponse,
+	ValidResponse,
 } from './interfaceService';
 import { BankDetails } from './interfaceService';
 import { FileObject } from '@/types/business';
 
-const registerBusiness = async (businessData: AuthData, file: FileObject | null) => {
+const registerBusiness = async (
+	businessData: AuthData,
+	file: FileObject | null
+) => {
 	try {
 		const formData = buildFormData(businessData, file);
 		const response = await client.post<AuthResponse>(
@@ -61,12 +65,11 @@ const verifyEmailBusiness = async (code: string, userId: string) => {
 	}
 };
 
-const updateBankDetails = async (bankDetails: BankDetails) => {
+const verifyBankDetails = async () => {
 	try {
 		const accessToken = await checkToken();
-		const response = await client.post<AuthResponse>(
+		const response = await client.get<ValidResponse>(
 			'business/verify-bank',
-			bankDetails,
 			{
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
@@ -106,11 +109,27 @@ const resendBusinessVerificationCode = async (userId: string) => {
 	}
 };
 
+const getStripeOnboardingLink = async () => {
+	try {
+		const accessToken = await checkToken();
+		const response = await client.get<{ url: string }>(
+			'business/stripe-onboarding',
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response;
+	} catch (error) {
+		throw error || 'Failed to get Stripe onboarding link.';
+	}
+};
+
 export {
 	registerBusiness,
 	verifyEmailBusiness,
-	updateBankDetails,
+	verifyBankDetails,
 	updateBusinessPassword,
 	resendBusinessVerificationCode,
 	updateBusinessDetails,
+	getStripeOnboardingLink,
 };

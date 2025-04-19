@@ -15,6 +15,12 @@ interface AuthResponse {
 	message: string;
 }
 
+interface ValidResponse {
+	success: boolean;
+	message: string;
+	valid: boolean;
+}
+
 interface ClientStripeParamsResponse {
 	clientSecret: string;
 	success: boolean;
@@ -220,4 +226,5 @@ export type {
 	Business,
 	StepResponse,
 	ClientStripeParamsResponse,
+	ValidResponse
 };
