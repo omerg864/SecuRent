@@ -111,12 +111,18 @@ const confirmTransactionPayment = async (id: string) => {
 	try {
 		const accessToken = await checkToken();
 
+		console.log('Access Token:', accessToken);
+
 		const response = await client.post<{
 			success: boolean;
 			transactions: Transaction[];
-		}>(`transaction/confirm/${id}`, {
-			headers: { Authorization: `Bearer ${accessToken}` },
-		});
+		}>(
+			`transaction/confirm/${id}`,
+			{},
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
 
 		return response.data;
 	} catch (error) {

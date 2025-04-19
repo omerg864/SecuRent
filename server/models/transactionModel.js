@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const transactionScheme = mongoose.Schema(
 	{
-		stripe_payment_intent_id: {
+		stripe_payment_id: {
 			type: String,
 			required: true,
 		},
