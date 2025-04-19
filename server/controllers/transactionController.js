@@ -287,11 +287,11 @@ const getBusinessTransactionsAdmin = asyncHandler(async (req, res) => {
 });
 
 const getTransactionById = asyncHandler(async (req, res) => {
-	console.log('Checking transaction by id');
 	const transaction = await Transaction.findById(req.params.id).populate(
 		'customer',
 		'name image email'
-	);
+	)
+	.populate("business", "name image rating category");
 
 	if (!transaction) {
 		res.status(404);
@@ -304,19 +304,21 @@ const getTransactionById = asyncHandler(async (req, res) => {
 
 	if (
 		req.customer &&
-		transaction.customer.toString() !== req.customer._id.toString()
-	) {
+		(!transaction.customer ||
+		  transaction.customer._id.toString() !== req.customer._id.toString())
+	  ) {
 		res.status(401);
 		throw new Error('Unauthorized');
-	}
+	  }
 
-	if (
+	  if (
 		req.business &&
-		transaction.business.toString() !== req.business._id.toString()
-	) {
+		(!transaction.business ||
+		  transaction.business._id.toString() !== req.business._id.toString())
+	  ) {
 		res.status(401);
 		throw new Error('Unauthorized');
-	}
+	  }
 	res.status(200).json({
 		success: true,
 		transaction,
