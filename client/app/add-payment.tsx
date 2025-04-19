@@ -9,7 +9,10 @@ import HapticButton from '@/components/ui/HapticButton';
 import { Ionicons } from '@expo/vector-icons';
 import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { updateCreditCard } from '@/services/customerService';
+import {
+	customerCardIntent,
+	updateCreditCard,
+} from '@/services/customerService';
 import Toast from 'react-native-toast-message';
 import { CardField, useStripe } from '@stripe/stripe-react-native';
 
@@ -19,11 +22,12 @@ const AddPaymentScreen = () => {
 	const [clientSecret, setClientSecret] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const params = useLocalSearchParams();
+	const [cardDetails, setCardDetails] = useState<any>(null);
 	const accountType = (params.accountType as string) || 'personal';
 
 	const fetchSetupIntent = async () => {
 		try {
-			const response: any = await updateCreditCard();
+			const response: any = await customerCardIntent();
 			if (!response.data.success) {
 				Toast.show({
 					type: 'error',
@@ -84,12 +88,24 @@ const AddPaymentScreen = () => {
 	};
 
 	const handleAddCard = async () => {
+		console.log('Card details:', cardDetails);
+		if (!cardDetails?.complete) {
+			Toast.show({
+				type: 'error',
+				text1: 'Please enter complete card details',
+			});
+			return;
+		}
+
 		setLoading(true);
 		const secret = clientSecret || (await fetchSetupIntent());
 
 		const { error, setupIntent } = await confirmSetupIntent(secret, {
 			paymentMethodType: 'Card',
 		});
+
+		console.log('Setup Intent:', setupIntent);
+		console.log('Error:', error);
 
 		if (error) {
 			Toast.show({ type: 'error', text1: error.message });
@@ -124,6 +140,10 @@ const AddPaymentScreen = () => {
 					<View className="mt-5">
 						<CardField
 							postalCodeEnabled={true}
+							onCardChange={(details) => {
+								console.log('onCardChange fired:', details);
+								setCardDetails(details);
+							}}
 							placeholders={{ number: '4242 4242 4242 4242' }}
 							style={{ height: 50, marginVertical: 30 }}
 						/>
