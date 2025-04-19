@@ -1,11 +1,7 @@
-'use client';
-
 import { useEffect, useState } from 'react';
 import { View, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ThemedTextInput } from '@/components/ui/ThemedTextInput';
 import { ThemedText } from '@/components/ui/ThemedText';
-import HapticButton from '@/components/ui/HapticButton';
 import { Ionicons } from '@expo/vector-icons';
 import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,14 +10,20 @@ import {
 	updateCreditCard,
 } from '@/services/customerService';
 import Toast from 'react-native-toast-message';
-import { useStripe } from '@stripe/stripe-react-native';
+import {
+	CustomerSheet,
+	CustomerSheetResult,
+} from '@stripe/stripe-react-native';
 
 const AddPaymentScreen = () => {
 	const router = useRouter();
-	const { initCustomerSheet, presentCustomerSheet } = useStripe();
 	const [loading, setLoading] = useState(false);
 	const params = useLocalSearchParams();
 	const accountType = (params.accountType as string) || 'personal';
+	const [customerSheetVisible, setCustomerSheetVisible] = useState(false);
+	const [clientSecret, setClientSecret] = useState('');
+	const [customerId, setCustomerId] = useState('');
+	const [ephemeralKey, setEphemeralKey] = useState('');
 
 	const fetchSetupIntent = async () => {
 		try {
@@ -35,7 +37,6 @@ const AddPaymentScreen = () => {
 			}
 			return response.data!;
 		} catch (error: any) {
-      console.error('Error fetching setup intent:', error.response.data);
 			Toast.show({
 				type: 'error',
 				text1: error.response.data.message,
@@ -43,83 +44,94 @@ const AddPaymentScreen = () => {
 		}
 	};
 
-	const handleSavePayment = async () => {
-		try {
-			const response: any = await updateCreditCard();
-			if (!response.data.success) {
-				Toast.show({
-					type: 'error',
-					text1: 'Internal Server Error',
-				});
-				return;
-			}
-
-			const storageKey = `completedSteps_${accountType}`;
-			const savedSteps = await AsyncStorage.getItem(storageKey);
-			const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
-
-			if (!completedSteps.includes('payment')) {
-				completedSteps.push('payment');
-				await AsyncStorage.setItem(
-					storageKey,
-					JSON.stringify(completedSteps)
-				);
-			}
-			await AsyncStorage.setItem('current_account_type', accountType);
-			Toast.show({
-				type: 'success',
-				text1: 'Payment method added successfully',
-			});
-			router.replace({
-				pathname: '/setup-screen',
-				params: {
-					accountType: accountType,
-				},
-			});
-		} catch (error: any) {
+	const handleSavePayment = async (result: CustomerSheetResult) => {
+		if (result.error) {
+			router.back();
 			Toast.show({
 				type: 'error',
-				text1: error.response.data.message,
+				text1: result.error.code,
 			});
+			return;
+		}
+		if (result.paymentMethod) {
+			try {
+				const response: any = await updateCreditCard();
+				if (!response.data.success) {
+					Toast.show({
+						type: 'error',
+						text1: 'Internal Server Error',
+					});
+					return;
+				}
+
+				const storageKey = `completedSteps_${accountType}`;
+				const savedSteps = await AsyncStorage.getItem(storageKey);
+				const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
+
+				if (!completedSteps.includes('payment')) {
+					completedSteps.push('payment');
+					await AsyncStorage.setItem(
+						storageKey,
+						JSON.stringify(completedSteps)
+					);
+				}
+				await AsyncStorage.setItem('current_account_type', accountType);
+				Toast.show({
+					type: 'success',
+					text1: 'Payment method added successfully',
+				});
+				router.replace({
+					pathname: '/setup-screen',
+					params: {
+						accountType: accountType,
+					},
+				});
+        setLoading(false);
+			} catch (error: any) {
+				Toast.show({
+					type: 'error',
+					text1: error.response.data.message,
+				});
+			}
 		}
 	};
 
 	const handleAddCard = async () => {
 		setLoading(true);
 		const data = await fetchSetupIntent();
-    console.log('Setup Intent Data:', data);
+		console.log('Setup Intent Data:', data);
 		if (!data) {
-      Toast.show({
-        type: 'error',
-        text1: 'Internal Server Error',
-      });
+			Toast.show({
+				type: 'error',
+				text1: 'Internal Server Error',
+			});
 			setLoading(false);
 			return;
 		}
 		const { clientSecret, customer_stripe_id, ephemeralKey } = data;
 
-		const { error: initError } = await initCustomerSheet({
-			merchantDisplayName: 'Expo, Inc.',
+		setClientSecret(clientSecret);
+		setCustomerId(customer_stripe_id);
+		setEphemeralKey(ephemeralKey);
 
-			customerId: customer_stripe_id,
-			customerEphemeralKeySecret: ephemeralKey,
+		const { error } = await CustomerSheet.initialize({
 			setupIntentClientSecret: clientSecret,
+			customerEphemeralKeySecret: ephemeralKey,
+			customerId: customer_stripe_id,
+			headerTextForSelectionScreen: 'Manage your payment method',
 		});
 
-		if (initError) {
-			console.error('Init error:', initError);
+		if (error) {
+			console.error('Error initializing CustomerSheet:', error);
+			Toast.show({
+				type: 'error',
+				text1: 'Failed to initialize payment method',
+			});
 			setLoading(false);
 			return;
 		}
 
-		const { error: sheetError } = await presentCustomerSheet();
-
-		if (sheetError) {
-			console.error('Sheet error:', sheetError);
-		} else {
-			console.log('Customer added a new payment method!');
-		}
-		setLoading(false);
+		setCustomerSheetVisible(true);
 	};
 
 	useEffect(() => {
@@ -129,7 +141,6 @@ const AddPaymentScreen = () => {
 	return (
 		<ParallaxScrollView
 			headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-			onBack={() => router.back()}
 			headerImage={
 				<Ionicons
 					name="card-outline"
@@ -148,27 +159,19 @@ const AddPaymentScreen = () => {
 						Enter your payment details
 					</ThemedText>
 
-					<View className="mt-5"></View>
-
-					{/* Save Button */}
-					<View className="flex-row justify-center mt-4">
-						<HapticButton
-							onPress={handleAddCard}
-							className="bg-indigo-600/30 py-3 px-8 rounded-xl w-full"
-							disabled={loading}
-						>
-							{loading ? (
-								<ActivityIndicator
-									size="small"
-									color="#FFFFFF"
-								/>
-							) : (
-								<ThemedText className="text-white text-center text-lg font-semibold">
-									Save Payment Method
-								</ThemedText>
-							)}
-						</HapticButton>
+					<View className="mt-5">
+						<CustomerSheet.Component
+							visible={customerSheetVisible}
+							setupIntentClientSecret={clientSecret}
+							customerEphemeralKeySecret={ephemeralKey}
+							customerId={customerId}
+							headerTextForSelectionScreen={
+								'Manage your payment method'
+							}
+							onResult={handleSavePayment}
+						/>
 					</View>
+					{loading && <ActivityIndicator />}
 				</View>
 			</ScrollView>
 		</ParallaxScrollView>
