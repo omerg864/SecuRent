@@ -156,6 +156,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 		clientSecret: paymentIntent.client_secret,
 		customer_stripe_id: req.customer.stripe_customer_id,
 		ephemeralKey: ephemeralKey.secret,
+		transactionId: transaction._id,
 	});
 });
 
