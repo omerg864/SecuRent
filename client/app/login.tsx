@@ -51,7 +51,10 @@ const LoginScreen = () => {
       expiration.setHours(expiration.getHours() + 23);
       AsyncStorage.setItem("Auth_Expiration", expiration.toISOString());
       if (response.user.role === "Customer") {
-        AsyncStorage.setItem("Customer_Data", JSON.stringify(response.user));
+        await AsyncStorage.multiSet([
+          ["current_account_type", "personal"],
+          ["Customer_Data", JSON.stringify(response.user)],
+        ]);
         if (!response.user.isValid) {
           AsyncStorage.setItem("UserID", response.user._id);
           AsyncStorage.setItem("Account_setup", "true");
@@ -75,19 +78,22 @@ const LoginScreen = () => {
           });
           return;
         }
-		AsyncStorage.removeItem("Account_setup");
-		Toast.show({
-			type: "success",
-			text1: "Login successful",
-		});
+        AsyncStorage.removeItem("Account_setup");
+        Toast.show({
+          type: "success",
+          text1: "Login successful",
+        });
         router.replace("/customer");
       } else {
-        AsyncStorage.setItem("Business_Data", JSON.stringify(response.user));
+        await AsyncStorage.multiSet([
+          ["current_account_type", "business"],
+          ["Business_Data", JSON.stringify(response.user)],
+        ]);
+
         if (!response.user.isValid) {
           console.log("Id" + response.user._id);
           AsyncStorage.setItem("UserID", response.user._id);
           AsyncStorage.setItem("Account_setup", "true");
-          AsyncStorage.setItem("current_account_type", "business");
           let completedSteps = [];
           if (response.user.isEmailValid) {
             completedSteps.push("email");
@@ -110,18 +116,18 @@ const LoginScreen = () => {
           });
           return;
         }
-		AsyncStorage.removeItem("Account_setup");
-		Toast.show({
-			type: "success",
-			text1: "Login successful",
-		});
+        AsyncStorage.removeItem("Account_setup");
+        Toast.show({
+          type: "success",
+          text1: "Login successful",
+        });
         router.replace("/business/business-home");
       }
     } catch (error: any) {
-        Toast.show({
-          type: "error",
-          text1: error.response.data.message,
-        });
+      Toast.show({
+        type: "error",
+        text1: error.response.data.message,
+      });
     }
     setLoading(false);
   };

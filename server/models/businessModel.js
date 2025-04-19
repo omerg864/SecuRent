@@ -76,6 +76,9 @@ const businessScheme = mongoose.Schema({
 	},
 	bank : {
 		type: Object,
+	},
+	stripe_account_id: {
+		type: String,
 	}
 });
 export default mongoose.model('Business', businessScheme);

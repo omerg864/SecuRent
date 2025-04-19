@@ -15,6 +15,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import '../global.css';
 import Toast from 'react-native-toast-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { StripeProvider } from '@stripe/stripe-react-native';
+import Constants from 'expo-constants';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -84,6 +86,9 @@ export default function RootLayout() {
 		}
 	}, [loaded]);
 
+	const stripePublishableKey = Constants.expoConfig?.extra
+		?.stripePublishableKey as string;
+
 	if (!loaded) {
 		return null;
 	}
@@ -94,29 +99,31 @@ export default function RootLayout() {
 				<ThemeProvider
 					value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
 				>
-					<Stack
-						screenOptions={{
-							headerShown: false, // Hide headers globally
-						}}
-					>
-						<Stack.Screen name="customer" />
-						<Stack.Screen name="business" />
-						<Stack.Screen name="login" />
-						<Stack.Screen name="get-started" />
-						<Stack.Screen name="register" />
-						<Stack.Screen name="+not-found" />
-						<Stack.Screen name="bank-details" />
-						<Stack.Screen name="setup-screen" />
-						<Stack.Screen name="verification" />
-						<Stack.Screen name="verify-email" />
-						<Stack.Screen name="add-payment" />
-						<Stack.Screen name="reset-password" />
-						<Stack.Screen name="restore-account" />
-					</Stack>
-					<StatusBar
-						style={colorScheme === 'dark' ? 'dark' : 'light'}
-					/>
-					<Toast />
+					<StripeProvider publishableKey={stripePublishableKey}>
+						<Stack
+							screenOptions={{
+								headerShown: false, // Hide headers globally
+							}}
+						>
+							<Stack.Screen name="customer" />
+							<Stack.Screen name="business" />
+							<Stack.Screen name="login" />
+							<Stack.Screen name="get-started" />
+							<Stack.Screen name="register" />
+							<Stack.Screen name="+not-found" />
+							<Stack.Screen name="bank-details" />
+							<Stack.Screen name="setup-screen" />
+							<Stack.Screen name="verification" />
+							<Stack.Screen name="verify-email" />
+							<Stack.Screen name="add-payment" />
+							<Stack.Screen name="reset-password" />
+							<Stack.Screen name="restore-account" />
+						</Stack>
+						<StatusBar
+							style={colorScheme === 'dark' ? 'dark' : 'light'}
+						/>
+						<Toast />
+					</StripeProvider>
 				</ThemeProvider>
 			</GestureHandlerRootView>
 		</AuthProvider>

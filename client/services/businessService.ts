@@ -7,8 +7,9 @@ import {
 	StepResponse,
 } from './interfaceService';
 import { BankDetails } from './interfaceService';
+import { FileObject } from '@/types/business';
 
-const registerBusiness = async (businessData: AuthData, file: File | null) => {
+const registerBusiness = async (businessData: AuthData, file: FileObject | null) => {
 	try {
 		const formData = buildFormData(businessData, file);
 		const response = await client.post<AuthResponse>(
@@ -26,21 +27,22 @@ const registerBusiness = async (businessData: AuthData, file: File | null) => {
 	}
 };
 
-const updateBusinessDetails = async (
-	businessData: Partial<Business>,
-) => {
+const updateBusinessDetails = async (businessData: Partial<Business>) => {
 	try {
 		const accessToken = await checkToken();
 		if (!accessToken) {
 			throw new Error('Access token is missing or invalid.');
 		}
 		console.log('Business data:', businessData);
-		const response = await client.put<StepResponse>('business/', businessData, {
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-				'Content-Type': 'multipart/form-data',
-			},
-		});
+		const response = await client.put<StepResponse>(
+			'business/',
+			businessData,
+			{
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			}
+		);
 		return response.data;
 	} catch (error) {
 		throw error || 'Business details update failed.';

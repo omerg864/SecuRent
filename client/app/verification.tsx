@@ -112,7 +112,6 @@ export default function VerifyBusinessNumberScreen() {
 				},
 			});
 		} catch (error: any) {
-			console.error('Error updating business details:', error);
 			Toast.show({
 				type: 'error',
 				text1: error.response.data.message,

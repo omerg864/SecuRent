@@ -19,6 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator } from 'react-native';
 import ProfileImageInput from '@/components/ProfileImageInput';
 import { emailRegex, passwordRegex } from '@/utils/regex';
+import { FileObject } from '@/types/business';
 
 const RegisterScreen = () => {
 	const [name, setName] = useState('');
@@ -30,7 +31,7 @@ const RegisterScreen = () => {
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 	const { accountType } = useLocalSearchParams();
-	const [file, setFile] = useState<File | null>(null);
+	const [file, setFile] = useState<FileObject | null>(null);
 
 	const goBack = () => {
 		router.back();
@@ -85,11 +86,13 @@ const RegisterScreen = () => {
 					return;
 				}
 				console.log('Business login response:', loginResponse);
+        AsyncStorage.setItem("UserID", loginResponse.user._id);
 				AsyncStorage.setItem('Access_Token', loginResponse.accessToken);
 				AsyncStorage.setItem(
 					'Refresh_Token',
 					loginResponse.refreshToken
 				);
+        AsyncStorage.setItem("current_account_type", "business");
 				AsyncStorage.setItem(
 					'Business_Data',
 					JSON.stringify(loginResponse.user)
@@ -106,13 +109,13 @@ const RegisterScreen = () => {
 					return;
 				}
 				console.log('Customer login response:', loginResponse);
-				console.log('Id:', loginResponse.user._id);
 				AsyncStorage.setItem('UserID', loginResponse.user._id);
 				AsyncStorage.setItem('Access_Token', loginResponse.accessToken);
 				AsyncStorage.setItem(
 					'Refresh_Token',
 					loginResponse.refreshToken
 				);
+        AsyncStorage.setItem("current_account_type", "personal");
 				AsyncStorage.setItem(
 					'Customer_Data',
 					JSON.stringify(loginResponse.user)
@@ -168,7 +171,7 @@ const RegisterScreen = () => {
 				<View className="space-y-6">
 					<ProfileImageInput
 						label={`${
-							accountType === 'business' && 'Business '
+							accountType === 'business' ? 'Business ' : ''
 						}Image`}
 						setFile={setFile}
 					/>

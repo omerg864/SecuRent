@@ -18,12 +18,10 @@ const QRCodeScreen = () => {
 	const { lastMessage } = useWebSocketContext();
 
 	useEffect(() => {
-		if (
-			lastMessage &&
-			lastMessage.data &&
-			lastMessage.data.type === 'newTransaction'
-		) {
-			const item = lastMessage.data.item;
+		if (lastMessage && lastMessage.data) {
+			const messageObject = JSON.parse(lastMessage.data);
+			if (messageObject.type !== 'newTransaction') return;
+			const item = messageObject.data.item;
 			if (item) {
 				if (item._id === id) {
 					router.dismissAll();
