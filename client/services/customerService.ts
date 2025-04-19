@@ -2,12 +2,13 @@ import { client } from './httpClient';
 import {
 	AuthData,
 	AuthResponse,
-	ClientSecretResponse,
+	ClientStripeParamsResponse,
 	CreditCardData,
 } from './interfaceService';
 import { checkToken } from './httpClient';
 import { buildFormData } from '@/utils/functions';
 import { FileObject } from '@/types/business';
+import { AxiosResponse } from 'axios';
 
 const registerCustomer = async (
 	customerData: AuthData,
@@ -31,10 +32,12 @@ const registerCustomer = async (
 	}
 };
 
-const customerCardIntent = async () => {
+const customerCardIntent = async (): Promise<
+	AxiosResponse<ClientStripeParamsResponse, any>
+> => {
 	try {
 		const accessToken = await checkToken();
-		const response = await client.put<ClientSecretResponse>(
+		const response = await client.put<ClientStripeParamsResponse>(
 			'customer/credit-card/intent',
 			{},
 			{

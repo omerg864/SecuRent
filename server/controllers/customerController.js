@@ -397,9 +397,14 @@ const setUpCustomerCard = asyncHandler(async (req, res) => {
 		throw new Error('Stripe customer not initialized');
 	}
 
-	const ephemeralKey = await stripe.ephemeralKeys.create({
-		customer: req.customer.stripe_customer_id,
-	});
+	const ephemeralKey = await stripe.ephemeralKeys.create(
+		{
+			customer: req.customer.stripe_customer_id,
+		},
+		{
+			apiVersion: '2025-03-31',
+		}
+	);
 
 	const setupIntent = await stripe.setupIntents.create({
 		customer: req.customer.stripe_customer_id,
