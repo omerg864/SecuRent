@@ -18,6 +18,8 @@ import { sendEmail } from '../utils/functions.js';
 import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
 import { v4 as uuidv4 } from 'uuid';
 import { admins } from '../config/websocket.js';
+import jwt from "jsonwebtoken";
+
 
 const successFullLogin = async (res, admin) => {
 	const accessToken = generateAdminAccessToken(admin._id);
@@ -174,9 +176,9 @@ const refreshTokens = asyncHandler(async (req, res) => {
 	(t) => t.token !== refreshToken
   );
 
-  const accessToken = generateBusinessAccessToken(admin._id);
+  const accessToken = generateAdminAccessToken(admin._id);
   const { refreshToken: newRefreshToken, unique } =
-	generateBusinessRefreshToken(admin._id);
+	generateAdminRefreshToken(admin._id);
   admin.refreshTokens.push({ token: newRefreshToken, unique });
 
   await admin.save();
