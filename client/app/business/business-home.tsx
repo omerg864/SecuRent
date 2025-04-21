@@ -9,8 +9,8 @@ import {
 import HapticButton from '@/components/ui/HapticButton';
 import { ThemedText } from '@/components/ui/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { Transaction } from '@/services/interfaceService';
 import { getBusinessTransactions } from '@/services/transactionService';
 import { useWebSocketContext } from '@/context/WebSocketContext';
@@ -54,18 +54,26 @@ const BusinessHomePage = () => {
 		}
 	};
 
-	useEffect(() => {
-		const loadInitialTransactions = async () => {
-			await loadTransaction(1);
-		};
+	useFocusEffect(
+		useCallback(() => {
+			loadTransaction(1);
 
-    if (lastMessage && lastMessage.data) {
+			// Optional cleanup if you want to reset state
+			return () => {
+				setTransactions([]);
+				setPage(1);
+				setHasMore(true);
+			};
+		}, [])
+	);
+
+	// 2. Runs only when `lastMessage` changes
+	useEffect(() => {
+		if (lastMessage && lastMessage.data) {
 			const messageObject = JSON.parse(lastMessage.data);
 			if (messageObject.type !== 'newTransaction') return;
-			loadInitialTransactions();
+			loadTransaction(1);
 		}
-
-		loadInitialTransactions();
 	}, [lastMessage]);
 
 	const renderTransaction: ListRenderItem<Transaction> = ({ item }) => (
@@ -74,7 +82,7 @@ const BusinessHomePage = () => {
 			onPress={() =>
 				router.push({
 					pathname: '/business/transaction-details',
-					params: { id: item._id },
+					params: { id: item._id, from: '/business/business-home' },
 				})
 			}
 		>

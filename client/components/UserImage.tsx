@@ -28,7 +28,7 @@ const UserImage = ({
 				<View
 					className={`w-${size || 16} h-${
 						size || 16
-					} rounded-full bg-blue-100 items-center justify-center mb-2 ${className}`}
+					} rounded-full bg-blue-100 items-center justify-center ${className}`}
 				>
 					<Text className="text-2xl font-bold text-blue-600">
 						{name?.[0] || '?'}
