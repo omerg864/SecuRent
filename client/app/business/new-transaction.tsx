@@ -11,9 +11,9 @@ import { DatePickerModal, TimePickerModal } from "react-native-paper-dates";
 import HapticButton from "@/components/ui/HapticButton";
 import PriceSelector from "@/components/PriceSelector";
 import { ThemedText } from "@/components/ui/ThemedText";
-import Toast from "react-native-toast-message";
 import { router } from "expo-router";
 import { createItem } from "@/services/itemService";
+import ShowToast from "@/components/ui/ShowToast";
 
 const format = {
   date: (d: Date) => d.toLocaleDateString("en-GB"),
@@ -33,14 +33,11 @@ const CreateTransactionScreen = () => {
   const handleTimeChange = (h: number, m: number) =>
     setDate(new Date(date.setHours(h, m)));
 
-  const showToast = (message: string) =>
-    Toast.show({ type: "error", text1: message });
-
   const handleContinue = async () => {
-    if (!desc) return showToast("Please fill item description");
-    if (!price) return showToast("Price must be set");
-    if (date < startDate.current) return showToast("Date is not valid");
-
+    if (!desc) return ShowToast("error", "Please fill item description");
+    if (!price) return ShowToast("error", "Price must be set");
+    if (date < startDate.current)
+      return ShowToast("error", "Date is not valid");
     setIsLoading(true);
     try {
       const response = await createItem(desc, date, price, true, 0);
@@ -53,7 +50,10 @@ const CreateTransactionScreen = () => {
       });
     } catch (error: any) {
       console.log(error.response);
-      showToast(error?.response?.data?.message || "Unexpected error occurred");
+      ShowToast(
+        "error",
+        error?.response?.data?.message || "Unexpected error occurred"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -124,7 +124,6 @@ const CreateTransactionScreen = () => {
         setPrice={setPrice}
         steps={50}
         currency="ILS"
-        maxPrice={1000}
       />
 
       <HapticButton
