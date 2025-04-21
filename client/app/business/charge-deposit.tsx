@@ -42,8 +42,6 @@ const ChargeDepositScreen = () => {
 		[transaction, currencies]
 	);
 
-	console.log(customer);
-
 	useEffect(() => {
 		const fetchTransaction = async () => {
 			if (!transactionId) {
@@ -101,6 +99,7 @@ const ChargeDepositScreen = () => {
 			});
 			setAmount(0);
 			setReason('');
+			router.back();
 		} catch (error: any) {
 			console.error('Error charging deposit:', error);
 			Toast.show({
@@ -141,7 +140,12 @@ const ChargeDepositScreen = () => {
 
 				<View className="bg-gray-100 bg-white rounded-2xl p-6 flex-row items-center justify-between mb-6 shadow-md">
 					<View className="flex-row items-center space-x-3">
-            <UserImage image={customer?.image} name={customer?.name} size={10} className='mr-2'/>
+						<UserImage
+							image={customer?.image}
+							name={customer?.name}
+							size={10}
+							className="mr-2"
+						/>
 						<Text className="text-base font-semibold text-[#2D2A2E]">
 							{customer?.name || 'Customer'}
 						</Text>

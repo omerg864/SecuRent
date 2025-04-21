@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
 	View,
 	TouchableOpacity,
@@ -11,7 +11,12 @@ import {
 	Text,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import {
+	useRouter,
+	useLocalSearchParams,
+	useFocusEffect,
+	RelativePathString,
+} from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import HapticButton from '@/components/ui/HapticButton';
@@ -25,7 +30,7 @@ import UserImage from '@/components/UserImage';
 
 export default function TransactionDetails() {
 	const router = useRouter();
-	const { id } = useLocalSearchParams();
+	const { id, from } = useLocalSearchParams();
 
 	const [transaction, setTransaction] = useState<Transaction | null>(null);
 	const [isOpen, setIsOpen] = useState(true);
@@ -40,6 +45,49 @@ export default function TransactionDetails() {
 		accountType === 'business'
 			? transaction?.customer?.name
 			: transaction?.business?.name;
+
+	useFocusEffect(
+		useCallback(() => {
+			const fetchData = async () => {
+				try {
+					const type = await AsyncStorage.getItem(
+						'current_account_type'
+					);
+					setAccountType(type);
+
+					if (!id || typeof id !== 'string') {
+						Toast.show({
+							type: 'error',
+							text1: 'Missing transaction ID',
+						});
+						return;
+					}
+
+					const data = await getTransactionById(id);
+					setTransaction(data);
+					setIsOpen(data.status === 'open');
+				} catch (error: any) {
+					Toast.show({
+						type: 'error',
+						text1: 'Failed to load transaction',
+						text2: error.message || 'Please try again later',
+					});
+				} finally {
+					setLoading(false);
+				}
+			};
+
+			fetchData();
+
+			// Optional cleanup if you want to reset state
+			return () => {
+				setTransaction(null);
+				setIsOpen(true);
+				setLoading(true);
+				setAccountType(null);
+			};
+		}, [id])
+	);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -75,6 +123,7 @@ export default function TransactionDetails() {
 	const handleCloseTransaction = async () => {
 		try {
 			if (!id || typeof id !== 'string') return;
+			setLoading(true);
 			const updated = await closeTransaction(id);
 			setTransaction(updated);
 			setIsOpen(false);
@@ -89,6 +138,7 @@ export default function TransactionDetails() {
 				text2: error.message || 'Try again',
 			});
 		}
+		setLoading(false);
 	};
 
 	const handleChargeDeposit = () => {
@@ -126,7 +176,9 @@ export default function TransactionDetails() {
 			{/* Floating Back Button + Title */}
 			<View className="absolute top-20 left-5 z-10">
 				<HapticButton
-					onPress={() => router.back()}
+					onPress={() =>
+						router.replace({ pathname: from as RelativePathString })
+					}
 					className="bg-white p-2 rounded-full shadow-md"
 				>
 					<Feather name="arrow-left" size={24} color="black" />

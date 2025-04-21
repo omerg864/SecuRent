@@ -15,9 +15,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Transaction } from '@/services/interfaceService';
-import userImage from '@/assets/images/user.png';
 import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import UserImage from '@/components/UserImage';
 
 const PAGE_SIZE = 8;
@@ -40,36 +39,44 @@ const TransactionsPage = () => {
 	const [page, setPage] = useState(1);
 	const [isLoading, setIsLoading] = useState(false);
 
-	useEffect(() => {
-		const fetchTransactionsData = async () => {
-			try {
-				setIsLoading(true);
-				const accountType = await AsyncStorage.getItem(
-					'current_account_type'
-				);
-				setAccountType(accountType);
-				const fetchedTransactions =
-					accountType === 'business'
-						? await getBusinessTransactions()
-						: await getCustomerTransactions();
-				const sorted = fetchedTransactions.success
-					? fetchedTransactions.transactions.sort(
-							(a: Transaction, b: Transaction) =>
-								new Date(b.createdAt).getTime() -
-								new Date(a.createdAt).getTime()
-					  )
-					: [];
-				setAllTransactions(sorted);
-				setPage(1);
-			} catch (error) {
-				console.log('error fetching transactions: ', error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
+	useFocusEffect(
+		useCallback(() => {
+			const fetchTransactionsData = async () => {
+				try {
+					setIsLoading(true);
+					const accountType = await AsyncStorage.getItem(
+						'current_account_type'
+					);
+					setAccountType(accountType);
+					const fetchedTransactions =
+						accountType === 'business'
+							? await getBusinessTransactions()
+							: await getCustomerTransactions();
+					const sorted = fetchedTransactions.success
+						? fetchedTransactions.transactions.sort(
+								(a: Transaction, b: Transaction) =>
+									new Date(b.createdAt).getTime() -
+									new Date(a.createdAt).getTime()
+						  )
+						: [];
+					setAllTransactions(sorted);
+					setPage(1);
+				} catch (error) {
+					console.log('error fetching transactions: ', error);
+				} finally {
+					setIsLoading(false);
+				}
+			};
 
-		fetchTransactionsData();
-	}, []);
+			fetchTransactionsData();
+
+			// Optional cleanup if you want to reset state
+			return () => {
+				setAllTransactions([]);
+				setPage(1);
+			};
+		}, [])
+	);
 
 	const applyFilters = useCallback(() => {
 		const lower = search.toLowerCase();
@@ -118,8 +125,14 @@ const TransactionsPage = () => {
 	const renderItem = ({ item }: { item: Transaction }) => {
 		const colorClass = statusColors[item.status] ?? 'text-gray-700';
 
-    const userImage = accountType === 'business' ? item.customer?.image : item.business?.image;
-    const userName = accountType === 'business' ? item.customer?.name : item.business?.name;
+		const userImage =
+			accountType === 'business'
+				? item.customer?.image
+				: item.business?.image;
+		const userName =
+			accountType === 'business'
+				? item.customer?.name
+				: item.business?.name;
 
 		return (
 			<TouchableOpacity
@@ -130,12 +143,17 @@ const TransactionsPage = () => {
 							: '/customer/transaction-details';
 					router.push({
 						pathname: routePath,
-						params: { id: item._id },
+						params: { id: item._id, from: accountType === 'business' ? '/business/transactions' : '/customer/transactions' },
 					});
 				}}
 				className="flex-row justify-between items-center bg-white rounded-xl mb-4 px-4 py-3 shadow-sm border border-gray-200"
 			>
-        <UserImage image={userImage} name={userName} size={10} className='mr-4'/>
+				<UserImage
+					image={userImage}
+					name={userName}
+					size={10}
+					className="mr-4"
+				/>
 				<View className="flex-1">
 					<Text className="text-sm font-medium text-gray-900">
 						{accountType === 'business'

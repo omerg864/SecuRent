@@ -163,7 +163,9 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 const closeTransactionById = asyncHandler(async (req, res) => {
 	const { id } = req.params;
 
-	const transaction = await Transaction.findById(id);
+	const transaction = await Transaction.findById(id)
+		.populate('customer', 'name image phone')
+		.populate('business', 'name image rating category');
 	if (!transaction) {
 		res.status(404);
 		throw new Error('Transaction not found');
@@ -278,8 +280,9 @@ const getBusinessTransactionsAdmin = asyncHandler(async (req, res) => {
 	const { id } = req.params;
 	const transactions = await Transaction.find({
 		business: id,
-	}).populate('customer', 'name image phone')
-	.populate('business', 'name image rating category');
+	})
+		.populate('customer', 'name image phone')
+		.populate('business', 'name image rating category');
 	res.status(200).json({
 		success: true,
 		transactions,
@@ -287,11 +290,9 @@ const getBusinessTransactionsAdmin = asyncHandler(async (req, res) => {
 });
 
 const getTransactionById = asyncHandler(async (req, res) => {
-	const transaction = await Transaction.findById(req.params.id).populate(
-		'customer',
-		'name image email'
-	)
-	.populate("business", "name image rating category");
+	const transaction = await Transaction.findById(req.params.id)
+		.populate('customer', 'name image email')
+		.populate('business', 'name image rating category');
 
 	if (!transaction) {
 		res.status(404);
@@ -305,20 +306,20 @@ const getTransactionById = asyncHandler(async (req, res) => {
 	if (
 		req.customer &&
 		(!transaction.customer ||
-		  transaction.customer._id.toString() !== req.customer._id.toString())
-	  ) {
+			transaction.customer._id.toString() !== req.customer._id.toString())
+	) {
 		res.status(401);
 		throw new Error('Unauthorized');
-	  }
+	}
 
-	  if (
+	if (
 		req.business &&
 		(!transaction.business ||
-		  transaction.business._id.toString() !== req.business._id.toString())
-	  ) {
+			transaction.business._id.toString() !== req.business._id.toString())
+	) {
 		res.status(401);
 		throw new Error('Unauthorized');
-	  }
+	}
 	res.status(200).json({
 		success: true,
 		transaction,
