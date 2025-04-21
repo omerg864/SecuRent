@@ -18,6 +18,8 @@ import { sendEmail } from '../utils/functions.js';
 import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
 import { v4 as uuidv4 } from 'uuid';
 import { admins } from '../config/websocket.js';
+import jwt from "jsonwebtoken";
+
 
 const successFullLogin = async (res, admin) => {
 	const accessToken = generateAdminAccessToken(admin._id);
@@ -140,6 +142,52 @@ const register = asyncHandler(async (req, res) => {
 		success: true,
 		message: 'Admin registered successfully',
 	});
+});
+
+const refreshTokens = asyncHandler(async (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) {
+	res.status(400);
+	throw new Error("Refresh token is required");
+  }
+
+  let decoded;
+  try {
+	decoded = jwt.verify(refreshToken, process.env.JWT_SECRET_ADMIN_REFRESH);
+  } catch (err) {
+	throw new Error("Invalid or expired refresh token");
+  }
+
+  const admin = await Admin.findById(decoded.id);
+  if (!admin) {
+	res.status(404);
+	throw new Error("Business not found");
+  }
+
+  const storedToken = admin.refreshTokens?.find(
+	(t) => t.token === refreshToken
+  );
+  if (!storedToken) {
+	res.status(403);
+	throw new Error("Refresh token not recognized");
+  }
+
+  admin.refreshTokens = admin.refreshTokens.filter(
+	(t) => t.token !== refreshToken
+  );
+
+  const accessToken = generateAdminAccessToken(admin._id);
+  const { refreshToken: newRefreshToken, unique } =
+	generateAdminRefreshToken(admin._id);
+  admin.refreshTokens.push({ token: newRefreshToken, unique });
+
+  await admin.save();
+
+  res.status(200).json({
+	success: true,
+	accessToken,
+	refreshToken: newRefreshToken,
+  });
 });
 
 const googleLogin = asyncHandler(async (req, res) => {
@@ -572,6 +620,51 @@ const adminAnalytics = asyncHandler(async (req, res) => {
 	});
 });
 
+const getAllBusinesses = asyncHandler(async (req, res) => {
+
+	const page = parseInt(req.query.page) || 1;
+	const limit = 10;
+	const skip = (page - 1) * limit;
+
+	const totalBusinesses = await Business.countDocuments();
+	const totalPages = Math.ceil(totalBusinesses / limit);
+
+
+	const businesses = await Business.find()
+		.skip(skip)
+		.limit(limit)
+		.select('-password -refreshTokens -verificationCode -stripe_account_id'); 
+
+		for (let i = 0; i < businesses.length; i++) {
+			const business = businesses[i].toObject(); // convert to plain object
+		
+			// Total transactions
+			const transactionCount = await Transaction.countDocuments({
+				business: business._id,
+			});
+		
+			// Only "charged" transactions
+			const chargedTransactionCount = await Transaction.countDocuments({
+				business: business._id,
+				status: 'charged',
+			});
+		
+			business.transactionCount = transactionCount;
+			business.chargedTransactionCount = chargedTransactionCount;
+		
+			businesses[i] = business; // update the array
+		}
+	
+
+	res.status(200).json({
+		success: true,
+		page,
+		totalPages,
+		totalBusinesses,
+		businesses,
+	});
+});
+
 export {
 	login,
 	register,
@@ -582,4 +675,6 @@ export {
 	loginClient,
 	identifyUser,
 	adminAnalytics,
+	refreshTokens,
+	getAllBusinesses,
 };

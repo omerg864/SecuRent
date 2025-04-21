@@ -8,7 +8,9 @@ import {
   verifyAdmin,
   loginClient,
   identifyUser,
-  adminAnalytics
+  adminAnalytics,
+  refreshTokens,
+  getAllBusinesses
 } from "../controllers/adminController.js";
 import { authAdmin } from "../middleware/authMiddleware.js";
 import { upload } from "../middleware/uploadMiddleware.js";
@@ -19,6 +21,7 @@ router.post("/login", login);
 router.post("/register", upload.single("image"), register);
 router.post("/google", googleLogin);
 router.post("/login/client", loginClient);
+router.post("/refresh-token", refreshTokens);
 //! security vulnerability: this route should be protected
 router.get("/identify-user", identifyUser);
 
@@ -27,5 +30,7 @@ router.put("/update", authAdmin, upload.single("Image"), updateAdmin);
 router.delete("/:id", authAdmin, deleteAdmin);
 router.put("/verify/:id", authAdmin, verifyAdmin);
 router.get("/analytics", authAdmin, adminAnalytics);
+router.get("/get-all-businesses", authAdmin, getAllBusinesses); // Get all businesses
+
 
 export default router;
