@@ -14,6 +14,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Transaction } from '@/services/interfaceService';
 import { getBusinessTransactions } from '@/services/transactionService';
 import { useWebSocketContext } from '@/context/WebSocketContext';
+import { currencies } from '@/utils/constants';
 
 const PAGE_SIZE = 5;
 
@@ -29,9 +30,10 @@ const BusinessHomePage = () => {
 	const handleNewTransaction = () => {
 		router.push('/business/new-transaction');
 	};
+	const loadTransaction = async (pageToLoad = 1, reset = false) => {
+		if (isLoading) return;
+		if (pageToLoad > 1 && !hasMore) return;
 
-	const loadTransaction = async (pageToLoad = 1) => {
-		if (isLoading || !hasMore) return;
 		setIsLoading(true);
 
 		try {
@@ -44,7 +46,23 @@ const BusinessHomePage = () => {
 				pageToLoad * PAGE_SIZE
 			);
 
-			setTransactions((prev) => [...prev, ...paginated]);
+			// Reset transactions or append based on the reset flag
+			if (reset) {
+				setTransactions(paginated);
+			} else {
+				// Use a Map to ensure uniqueness by _id
+				const uniqueTransactions = new Map();
+
+				// Add existing transactions
+				transactions.forEach((t) => uniqueTransactions.set(t._id, t));
+
+				// Add new transactions, overwriting if they already exist
+				paginated.forEach((t) => uniqueTransactions.set(t._id, t));
+
+				// Convert back to array
+				setTransactions(Array.from(uniqueTransactions.values()));
+			}
+
 			setHasMore(paginated.length === PAGE_SIZE);
 			setPage(pageToLoad + 1);
 		} catch (error) {
@@ -54,11 +72,11 @@ const BusinessHomePage = () => {
 		}
 	};
 
+	// Update the useFocusEffect to use the reset parameter
 	useFocusEffect(
 		useCallback(() => {
-			loadTransaction(1);
+			loadTransaction(1, true); // true means reset the list
 
-			// Optional cleanup if you want to reset state
 			return () => {
 				setTransactions([]);
 				setPage(1);
@@ -67,12 +85,17 @@ const BusinessHomePage = () => {
 		}, [])
 	);
 
-	// 2. Runs only when `lastMessage` changes
+	// Update the WebSocket effect to handle new transactions better
 	useEffect(() => {
 		if (lastMessage && lastMessage.data) {
-			const messageObject = JSON.parse(lastMessage.data);
-			if (messageObject.type !== 'newTransaction') return;
-			loadTransaction(1);
+			try {
+				const messageObject = JSON.parse(lastMessage.data);
+				if (messageObject.type !== 'newTransaction') return;
+
+				loadTransaction(1, true);
+			} catch (error) {
+				console.error('Error processing WebSocket message:', error);
+			}
 		}
 	}, [lastMessage]);
 
@@ -101,7 +124,9 @@ const BusinessHomePage = () => {
 				style={{ color: 'black' }}
 				className="text-base font-semibold"
 			>
-				{item.amount}
+				{item.amount}{' '}
+				{currencies.find((currency) => currency.code === item?.currency)
+					?.symbol || '₪'}
 			</ThemedText>
 		</TouchableOpacity>
 	);

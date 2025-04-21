@@ -72,9 +72,9 @@ const PriceSelector: React.FC<PriceSelectorProps> = ({
 			</View>
 			<View className="flex-row justify-between">
 				{displayPriceList &&
-					priceList.map((p) => (
+					priceList.map((p, index) => (
 						<TouchableOpacity
-							key={p}
+							key={index}
 							className={`border-2 rounded-lg py-4 flex-1 mx-1 items-center ${
 								price === p
 									? 'bg-indigo-600 border-indigo-600'
