@@ -9,7 +9,8 @@ import {
   loginClient,
   identifyUser,
   adminAnalytics,
-  refreshTokens
+  refreshTokens,
+  getAllBusinesses
 } from "../controllers/adminController.js";
 import { authAdmin } from "../middleware/authMiddleware.js";
 import { upload } from "../middleware/uploadMiddleware.js";
@@ -29,5 +30,7 @@ router.put("/update", authAdmin, upload.single("Image"), updateAdmin);
 router.delete("/:id", authAdmin, deleteAdmin);
 router.put("/verify/:id", authAdmin, verifyAdmin);
 router.get("/analytics", authAdmin, adminAnalytics);
+router.get("/get-all-businesses", authAdmin, getAllBusinesses); // Get all businesses
+
 
 export default router;

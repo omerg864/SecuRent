@@ -42,14 +42,15 @@ const BusinessesTable = ({ businesses }) => {
 					>
 						<Link
 							to={`/business/${business._id}`}
+							state={business}
 							className="flex items-center gap-3 p-2.5 xl:p-5 hover:bg-gray-2 dark:hover:bg-meta-4"
 						>
 							<div className="flex-shrink-0 hidden sm:block">
 								<img
 									className="h-8 w-8 rounded-full"
 									src={
-										business.logo
-											? business.logo
+										business.image
+											? business.image
 											: './business-icon.png'
 									}
 									alt="Brand"
@@ -62,18 +63,18 @@ const BusinessesTable = ({ businesses }) => {
 
 						<div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
 							<p className="text-black dark:text-white">
-								{business.category}
+								{business.category[0] || 'No Category'}
 							</p>
 						</div>
 
 						<div className="flex items-center justify-center p-2.5 xl:p-5">
 							<p className="text-black dark:text-white">
-								{business.transactions}
+								{business.transactionCount}
 							</p>
 						</div>
 
 						<div className="flex items-center justify-center p-2.5 xl:p-5">
-							<p className="text-meta-3">{business.charges}</p>
+							<p className="text-meta-3">{business.chargedTransactionCount}</p>
 						</div>
 					</div>
 				))}

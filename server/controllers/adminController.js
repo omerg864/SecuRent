@@ -620,6 +620,51 @@ const adminAnalytics = asyncHandler(async (req, res) => {
 	});
 });
 
+const getAllBusinesses = asyncHandler(async (req, res) => {
+
+	const page = parseInt(req.query.page) || 1;
+	const limit = 10;
+	const skip = (page - 1) * limit;
+
+	const totalBusinesses = await Business.countDocuments();
+	const totalPages = Math.ceil(totalBusinesses / limit);
+
+
+	const businesses = await Business.find()
+		.skip(skip)
+		.limit(limit)
+		.select('-password -refreshTokens -verificationCode -stripe_account_id'); 
+
+		for (let i = 0; i < businesses.length; i++) {
+			const business = businesses[i].toObject(); // convert to plain object
+		
+			// Total transactions
+			const transactionCount = await Transaction.countDocuments({
+				business: business._id,
+			});
+		
+			// Only "charged" transactions
+			const chargedTransactionCount = await Transaction.countDocuments({
+				business: business._id,
+				status: 'charged',
+			});
+		
+			business.transactionCount = transactionCount;
+			business.chargedTransactionCount = chargedTransactionCount;
+		
+			businesses[i] = business; // update the array
+		}
+	
+
+	res.status(200).json({
+		success: true,
+		page,
+		totalPages,
+		totalBusinesses,
+		businesses,
+	});
+});
+
 export {
 	login,
 	register,
@@ -631,4 +676,5 @@ export {
 	identifyUser,
 	adminAnalytics,
 	refreshTokens,
+	getAllBusinesses,
 };

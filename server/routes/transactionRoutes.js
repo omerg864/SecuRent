@@ -27,14 +27,14 @@ const router = express.Router();
 // TODO: add middleware business to protect routes
 router.get("/business", authBusiness, getBusinessTransactions);
 router.get("/business/:id", authBusiness, getTransactionByBusiness);
-router.put("/release/:id", authBusiness, closeTransactionById);
+router.put("/close/:id", authBusiness, closeTransactionById);
 router.put("/charge/:id", authBusiness, captureDeposit);
 
 // TODO: add middleware customer to protect routes
 router.get("/customer", authCustomer, getCustomerTransactions);
 router.get("/customer/:id", authCustomer, getTransactionByCustomer);
 router.post("/", authCustomer, createTransaction);
-router.post("/:id", authCustomer, createTransactionFromItem);
+router.get("/:id", authCustomer, createTransactionFromItem);
 router.post("/confirm/:id", authCustomer, confirmTransactionPayment);
 router.delete("/customer/delete/:id", authCustomer, deleteIntentTransaction);
 
