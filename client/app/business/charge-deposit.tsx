@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import HapticButton from "@/components/ui/HapticButton";
 import { ThemedText } from "@/components/ui/ThemedText";
-import userImage from "@/assets/images/user.png";
+
 import {
   chargeDeposit,
   getTransactionById,
@@ -84,10 +84,19 @@ const ChargeDepositScreen = () => {
 
       <View className="bg-gray-100 rounded-2xl p-6 flex-row items-center justify-between mb-6 shadow-md border-2 border-gray-300">
         <View className="flex-row items-center space-x-3">
-          <Image
-            source={customer?.image || userImage}
-            className="w-10 h-10 rounded-full mr-2"
-          />
+          {customer?.image ? (
+            <Image
+              source={{ uri: customer.image }}
+              className="w-10 h-10 rounded-full mr-2"
+            />
+          ) : (
+            <View className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center mr-2">
+              <Text className="text-2xl font-bold text-blue-600">
+                {customer?.name?.[0]}
+              </Text>
+            </View>
+          )}
+
           <Text className="text-base font-semibold text-[#2D2A2E]">
             {customer?.name || "Customer"}
           </Text>
