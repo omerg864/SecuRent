@@ -160,7 +160,7 @@ const TransactionsPage = () => {
 							? `${item.customer?.name}`
 							: `${item.business?.name}`}
 					</Text>
-					<Text className="text-xs text-gray-400 mt-4">
+					<Text className="text-xs text-gray-400 mt-1">
 						{new Date(item.createdAt).toLocaleString([], {
 							day: '2-digit',
 							month: '2-digit',
@@ -174,8 +174,8 @@ const TransactionsPage = () => {
 				<Text className={`text-sm font-medium ${colorClass}`}>
 					{item.status === 'charged'
 						? `${item.amount} ${item.currency}`
-						: item.status}
-				</Text>
+						: item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+						</Text>
 			</TouchableOpacity>
 		);
 	};
