@@ -78,6 +78,23 @@ export default function VerifyBusinessNumberScreen() {
 				currency: currency,
 				category: categories,
 			});
+			const businessData = await AsyncStorage.getItem('Business_Data');
+			if (businessData) {
+				const parsedBusinessData = JSON.parse(businessData);
+				parsedBusinessData.companyNumber = businessNumber.trim();
+				parsedBusinessData.phone = phoneNumber.trim();
+				parsedBusinessData.address = selectedLocation?.address;
+				parsedBusinessData.location = {
+					lat: selectedLocation?.lat || 0,
+					lng: selectedLocation?.lng || 0,
+				};
+				parsedBusinessData.currency = currency;
+				parsedBusinessData.category = categories;
+				await AsyncStorage.setItem(
+					'Business_Data',
+					JSON.stringify(parsedBusinessData)
+				);
+			}
 
 			if (!response.success) {
 				setLoading(false);
