@@ -77,11 +77,20 @@ const analytics = async () => {
 	}
 };
 
-const getAllBusinesses = async (page) => {
+const getAllBusinesses = async (page, name = '') => {
 	try {
 		const accessToken = await checkToken();
 		if (!accessToken) {
 			throw new Error('Access token is missing or invalid.');
+		}
+		if (name) {
+			const response = await client.get(
+				`admin/get-all-businesses?page=${page}&name=${name}`,
+				{
+					headers: { Authorization: `Bearer ${accessToken}` },
+				}
+			);
+			return response.data;
 		}
 		const response = await client.get(`admin/get-all-businesses?page=${page}`, {
 			headers: { Authorization: `Bearer ${accessToken}` },
