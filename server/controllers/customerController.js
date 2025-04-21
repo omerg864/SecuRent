@@ -13,6 +13,7 @@ import { sendEmail } from '../utils/functions.js';
 import valid from 'card-validator';
 import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
 import { v4 as uuidv4 } from 'uuid';
+import stripe from '../config/stripe.js';
 
 //Successfull login
 const successFullLogin = async (res, customer) => {
@@ -37,7 +38,7 @@ const successFullLogin = async (res, customer) => {
 const registerCustomer = asyncHandler(async (req, res) => {
 	const { name, email, password } = req.body;
 
-  console.log('req.file', req.file);
+	console.log('req.file', req.file);
 
 	if (!name || !email || !password) {
 		res.status(400);
@@ -88,6 +89,13 @@ const registerCustomer = asyncHandler(async (req, res) => {
 		password: hashedPassword,
 		image: imageUrl,
 	});
+
+	//register customer in stripe
+	const stripeCustomer = await stripe.customers.create({
+		name,
+		email,
+	});
+	customer.stripe_customer_id = stripeCustomer.id; // save the stripe customer ID in the customer document
 
 	const verificationCode = Math.floor(
 		100000 + Math.random() * 900000
@@ -156,6 +164,7 @@ const googleLoginCustomer = asyncHandler(async (req, res) => {
 		process.env.GOOGLE_CLIENT_SECRET,
 		'postmessage'
 	);
+
 	const { code } = req.body;
 
 	if (!code) {
@@ -191,6 +200,14 @@ const googleLoginCustomer = asyncHandler(async (req, res) => {
 			creditCard: {},
 			rating: 0,
 		});
+
+		const stripeCustomer = await stripe.customers.create({
+			name: payload?.name,
+			email,
+		});
+
+		customer.stripe_customer_id = stripeCustomer.id;
+		await customer.save();
 	}
 
 	await successFullLogin(res, customer);
@@ -374,53 +391,60 @@ const refreshTokens = asyncHandler(async (req, res) => {
 	});
 });
 
-const updateCustomerCreditCard = asyncHandler(async (req, res) => {
-	const { number, expiry, cvv, cardHolderName } = req.body;
-
-	if (!number || !expiry || !cvv || !cardHolderName) {
+const setUpCustomerCard = asyncHandler(async (req, res) => {
+	if (!req.customer.stripe_customer_id) {
 		res.status(400);
-		throw new Error('Missing credit card details');
+		throw new Error('Stripe customer not initialized');
 	}
 
-	const numberValidation = valid.number(number);
-	const expiryValidation = valid.expirationDate(expiry);
-	const cvvValidation = valid.cvv(cvv);
+	const ephemeralKey = await stripe.ephemeralKeys.create(
+		{
+			customer: req.customer.stripe_customer_id,
+		},
+		{
+			apiVersion: '2023-10-16',
+		}
+	);
 
-	if (
-		!numberValidation.isValid ||
-		!expiryValidation.isValid ||
-		!cvvValidation.isValid
-	) {
-		res.status(401);
-		throw new Error('Invalid credit card information');
+	const setupIntent = await stripe.setupIntents.create({
+		customer: req.customer.stripe_customer_id,
+	});
+
+	res.json({
+		clientSecret: setupIntent.client_secret,
+		ephemeralKey: ephemeralKey.secret,
+		customer_stripe_id: req.customer.stripe_customer_id,
+		success: true,
+	});
+});
+
+const updateCustomerCreditCard = asyncHandler(async (req, res) => {
+	if (!req.customer.stripe_customer_id) {
+		res.status(400);
+		throw new Error('Stripe customer not initialized');
 	}
 
-	const customer = await Customer.findById(req.customer._id);
-	if (!customer) {
-		res.status(402);
-		throw new Error('Customer not found');
+	const cards = await stripe.paymentMethods.list({
+		customer: req.customer.stripe_customer_id,
+		type: 'card',
+	});
+
+	if (cards.data.length === 0) {
+		res.status(400);
+		throw new Error('No cards found for this customer');
 	}
 
-	customer.creditCard = {
-		number: `**** **** **** ${number.slice(-4)}`,
-		expiry,
-		cardHolderName,
-		cardType: numberValidation.card?.niceType || 'Unknown',
-	};
+	req.customer.isPaymentValid = true;
 
-	customer.isPaymentValid = true;
-
-	if (customer.isEmailValid) {
-		customer.isValid = true;
+	if (req.customer.isEmailValid) {
+		req.customer.isValid = true;
 	}
-
-	await customer.save();
+	await req.customer.save();
 
 	res.status(200).json({
 		success: true,
-		valid: customer.isValid,
-		message: 'Credit card updated successfully',
-		card: customer.creditCard,
+		message: 'Card updated successfully',
+		isValid: req.customer.isValid,
 	});
 });
 
@@ -510,4 +534,5 @@ export {
 	updateCustomerCreditCard,
 	verifyEmail,
 	resendVerificationCode,
+	setUpCustomerCard,
 };

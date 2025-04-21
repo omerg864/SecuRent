@@ -12,6 +12,7 @@ import {
 	verifyEmail,
 	updateBusinessPassword,
 	resendVerificationCode,
+	getStripeOnboardingLink,
 } from '../controllers/businessController.js';
 import { authBusiness } from '../middleware/authMiddleware.js';
 import { upload } from '../middleware/uploadMiddleware.js';
@@ -23,15 +24,16 @@ router.post('/register', upload.single('image'), registerBusiness);
 router.post('/login', loginBusiness);
 router.post('/google-login', googleLoginBusiness);
 router.post('/refresh-token', refreshTokens);
-router.put('/', authBusiness, updateBusinessDetails);
-router.post('/verify-bank', authBusiness, upload.single('image'), verifyBank);
+router.put('/', authBusiness, upload.single('image'), updateBusinessDetails);
+router.get('/verify-bank', authBusiness, verifyBank);
 router.post('/verify-email', verifyEmail);
 router.post('/resend-code', resendVerificationCode);
 
 // Protected Routes (Requires Authentication)
 router.put('/update', authBusiness, upload.single('image'), updateBusiness);
 router.delete('/delete', authBusiness, deleteBusiness);
-router.get('/:id', authBusiness, getBusinessById);
 router.put('/update-password', authBusiness, updateBusinessPassword);
+router.get('/stripe-onboarding', authBusiness, getStripeOnboardingLink);
+router.get('/:id', authBusiness, getBusinessById);
 
 export default router;
