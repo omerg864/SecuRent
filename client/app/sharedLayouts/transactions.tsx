@@ -18,6 +18,7 @@ import { Transaction } from '@/services/interfaceService';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import UserImage from '@/components/UserImage';
+import { currencies } from '@/utils/constants';
 
 const PAGE_SIZE = 8;
 
@@ -134,6 +135,9 @@ const TransactionsPage = () => {
 				? item.customer?.name
 				: item.business?.name;
 
+		const currencySymbol = currencies.find(
+			(currency) => currency.code === item.currency)?.symbol || '₪';
+
 		return (
 			<TouchableOpacity
 				onPress={() => {
@@ -151,7 +155,7 @@ const TransactionsPage = () => {
 				<UserImage
 					image={userImage}
 					name={userName}
-					size={10}
+					size={12}
 					className="mr-4"
 				/>
 				<View className="flex-1">
@@ -173,7 +177,7 @@ const TransactionsPage = () => {
 				</View>
 				<Text className={`text-sm font-medium ${colorClass}`}>
 					{item.status === 'charged'
-						? `${item.amount} ${item.currency}`
+						? `${item.charged}${currencySymbol}`
 						: item.status.charAt(0).toUpperCase() + item.status.slice(1)}
 						</Text>
 			</TouchableOpacity>

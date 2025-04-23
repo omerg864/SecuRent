@@ -171,7 +171,7 @@ const closeTransactionById = asyncHandler(async (req, res) => {
 		throw new Error('Transaction not found');
 	}
 
-	if (transaction.business.toString() !== req.business._id.toString()) {
+	if (transaction.business._id.toString() !== req.business._id.toString()) {
 		res.status(401);
 		throw new Error('Unauthorized');
 	}
