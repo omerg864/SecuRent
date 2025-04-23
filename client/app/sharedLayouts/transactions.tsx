@@ -151,7 +151,7 @@ const TransactionsPage = () => {
 				<UserImage
 					image={userImage}
 					name={userName}
-					size={10}
+					size={12}
 					className="mr-4"
 				/>
 				<View className="flex-1">

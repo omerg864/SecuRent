@@ -143,7 +143,7 @@ const ChargeDepositScreen = () => {
 						<UserImage
 							image={customer?.image}
 							name={customer?.name}
-							size={10}
+							size={12}
 							className="mr-2"
 						/>
 						<Text className="text-base font-semibold text-[#2D2A2E]">
