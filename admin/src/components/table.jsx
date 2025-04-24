@@ -20,7 +20,7 @@ export function TableBody({ className, ...props }) {
 export function TableRow({ className, ...props }) {
   return (
     <tr
-      className={`border-b transition-colors hover:bg-meta-4 data-[state=selected]:bg-muted ${
+      className={`border-b transition-colors hover:bg-gray-200 dark:hover:bg-meta-4 data-[state=selected]:bg-muted ${
         className || ""
       }`}
       {...props}
