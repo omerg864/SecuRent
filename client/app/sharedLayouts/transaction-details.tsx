@@ -201,8 +201,7 @@ export default function TransactionDetails() {
 						className="mb-2"
 					/>
 					<Text className="text-lg font-medium text-black">
-						{transaction.customer?.name ||
-							transaction.business?.name}
+						{userName}
 					</Text>
 				</View>
 
