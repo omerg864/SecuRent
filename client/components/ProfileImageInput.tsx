@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { Button, Image, Text, View } from 'react-native';
 import HapticButton from '@/components/ui/HapticButton';
@@ -9,12 +9,18 @@ interface ProfileImageInputProps {
 	setFile: (file: FileObject | null) => void;
 	label?: string;
 	labelClassName?: string;
+	containerClassName?: string;
+	themeText?: boolean;
+	file: FileObject | null;
 }
 
 export default function ProfileImageInput({
 	setFile,
 	label,
 	labelClassName,
+	themeText = true,
+	containerClassName,
+	file
 }: ProfileImageInputProps) {
 	const [uri, setUri] = useState<string | null>(null);
 
@@ -39,12 +45,26 @@ export default function ProfileImageInput({
 		}
 	};
 
+	useEffect(() => {
+		if (!file) {
+			setUri(null);
+		}
+	}, [file]);
+
 	return (
-		<View className="space-y-4 mt-8 flex-col gap-4">
+		<View className={`${containerClassName} flex-col gap-4`}>
 			<View className="items-center">
-				<ThemedText className={`text-sm font-medium ${labelClassName}`}>
-					{label}
-				</ThemedText>
+				{themeText ? (
+					<ThemedText
+						className={`text-sm font-medium ${labelClassName}`}
+					>
+						{label}
+					</ThemedText>
+				) : (
+					<Text className={`text-lg font-lg ${labelClassName}`}>
+						{label}
+					</Text>
+				)}
 				<HapticButton
 					onPress={pickImage}
 					className="w-24 h-24 rounded-full bg-gray-300 justify-center items-center mt-2 overflow-hidden"

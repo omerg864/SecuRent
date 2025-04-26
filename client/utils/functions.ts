@@ -1,4 +1,5 @@
-import { FileObject } from "@/types/business";
+import { FileObject } from '@/types/business';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const getDistance = (
 	lat1: number,
@@ -32,4 +33,10 @@ export const buildFormData = (data: any, file: FileObject | null): FormData => {
 		formData.append('image', file as any);
 	}
 	return formData;
+};
+
+export const getBusinessCurrencySymbol = async () => {
+	const businessData = await AsyncStorage.getItem('Business_Data');
+	const parsedData = businessData ? JSON.parse(businessData) : null;
+	return parsedData?.currency || 'ILS';
 };

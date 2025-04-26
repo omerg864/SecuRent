@@ -1,23 +1,22 @@
+import { FileObject } from '@/types/business';
 import { checkToken, client } from './httpClient';
 import { Item } from './interfaceService';
+import { buildFormData } from '@/utils/functions';
 
-const createItem = async (
+const createTemporaryItem = async (
 	description: string,
 	date: Date,
-	price: number,
-	temporary: boolean,
-	duration: Number
+	price: number
 ) => {
 	try {
 		const accessToken = await checkToken();
-		const response = await client.post<{item: Item, success: boolean}>(
+		const response = await client.post<{ item: Item; success: boolean }>(
 			'item',
 			{
-				temporary,
+				temporary: true,
 				description,
 				date,
 				price,
-				duration,
 			},
 			{
 				headers: { Authorization: `Bearer ${accessToken}` },
@@ -29,10 +28,44 @@ const createItem = async (
 	}
 };
 
+const createBusinessItem = async (
+	description: string,
+	price: number,
+	duration: number,
+	timeUnit: string,
+	file: FileObject | null = null
+) => {
+	try {
+		const accessToken = await checkToken();
+		const formData = buildFormData(
+			{
+				description,
+				price,
+				duration,
+				timeUnit,
+			},
+			file
+		);
+		const response = await client.post<{ item: Item; success: boolean }>(
+			'item',
+			formData,
+			{
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					'Content-Type': 'multipart/form-data',
+				},
+			}
+		);
+		return response.data;
+	} catch (error) {
+		throw error || 'Temporary item creation failed.';
+	}
+};
+
 const getItemById = async (itemId: string) => {
 	try {
 		const accessToken = await checkToken();
-		const response = await client.get<{item: Item, success: boolean}>(
+		const response = await client.get<{ item: Item; success: boolean }>(
 			`item/${itemId}`,
 			{
 				headers: { Authorization: `Bearer ${accessToken}` },
@@ -45,4 +78,4 @@ const getItemById = async (itemId: string) => {
 	}
 };
 
-export { createItem , getItemById };
+export { createTemporaryItem, createBusinessItem, getItemById };
