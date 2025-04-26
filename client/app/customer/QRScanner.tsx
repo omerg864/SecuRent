@@ -4,8 +4,8 @@ import {
 	useCameraPermissions,
 	BarcodeScanningResult,
 } from 'expo-camera';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import {
 	Button,
 	StyleSheet,
@@ -30,6 +30,14 @@ export default function QRScannerScreen() {
 			setScanned(false);
 		};
 	}, []);
+
+	useFocusEffect(
+		useCallback(() => {
+			return () => {
+				setScanned(false);
+			};
+		}, [])
+	);
 
 	if (!permission) {
 		return <View />;
@@ -80,12 +88,13 @@ export default function QRScannerScreen() {
 				pathname: '/customer/approve-transaction',
 				params: { id },
 			});
+			setScanned(false);
 		}
 	};
 
 	const goBack = () => {
-		setScanned(false);
 		router.back();
+		setScanned(false);
 	};
 
 	return (
