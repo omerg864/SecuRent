@@ -570,9 +570,15 @@ const getNearbyBusinesses = asyncHandler(async (req, res) => {
 					type: 'Point',
 					coordinates: [parseFloat(lng), parseFloat(lat)],
 				},
-				distanceField: 'distance',
-				maxDistance: parseFloat(radius) * 1000, // meters
+				distanceField: 'distance', // Distance in meters
+				maxDistance: parseFloat(radius) * 1000, // Max distance in meters
 				spherical: true,
+			},
+		},
+		// 🛠️ Convert distance from meters to kilometers
+		{
+			$addFields: {
+				distance: { $divide: ['$distance', 1000] }, // meters ➔ kilometers
 			},
 		},
 		{ $match: { 'rating.overall': { $gte: parseFloat(rating) } } },
@@ -600,6 +606,22 @@ const getNearbyBusinesses = asyncHandler(async (req, res) => {
 					},
 			  ]
 			: []),
+		// Project only safe fields
+		{
+			$project: {
+				name: 1,
+				phone: 1,
+				address: 1,
+				category: 1,
+				image: 1,
+				currency: 1,
+				rating: 1,
+				location: 1,
+				distance: 1, 
+				isValid: 1,
+				reviewSummary: 1,
+			},
+		},
 	]);
 
 	res.status(200).json({ success: true, businesses });

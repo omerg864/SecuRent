@@ -1,7 +1,7 @@
 import { Image, Text, View } from 'react-native';
-import { Business } from '../types/business';
 import StarRating from './StarRating';
 import HapticButton from '@/components/ui/HapticButton';
+import { Business } from '@/services/interfaceService';
 
 interface BusinessCardProps {
 	business: Business;
@@ -9,7 +9,10 @@ interface BusinessCardProps {
 
 const BusinessCard: React.FC<BusinessCardProps> = ({ business }) => {
 	return (
-		<HapticButton className="bg-indigo-700 rounded-lg p-4 mb-4" onPress={() => {}}>
+		<HapticButton
+			className="bg-indigo-700 rounded-lg p-4 mb-4"
+			onPress={() => {}}
+		>
 			<View className="flex-row items-center">
 				<View className="w-12 h-12 bg-white rounded-full items-center justify-center mr-3">
 					<Image
@@ -23,7 +26,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business }) => {
 							{business.name}
 						</Text>
 						<Text className="text-white text-sm">
-							{business.distance} km away
+							{(business.distance || 0).toFixed(2)} km away
 						</Text>
 					</View>
 					<Text className="text-white text-sm">
