@@ -5,6 +5,11 @@ import Transaction from '../models/transactionModel.js';
 import Business from '../models/businessModel.js';
 import { v4 as uuidv4 } from 'uuid';
 import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
+import {
+	CHARGED_SCORE,
+	CHARGED_WEIGHT,
+	REVIEW_WEIGHT,
+} from '../utils/constants.js';
 
 const addToAvg = (oldValue, newValue, count) => {
 	return (oldValue * count + newValue) / (count + 1);
@@ -65,17 +70,20 @@ const generateReviewScores = async (content) => {
 	if (scores.reliability) countScored++;
 	if (scores.price) countScored++;
 
+	const quality = scores.quality ?? 0;
+	const reliability = scores.reliability ?? 0;
+	const price = scores.price ?? 0;
+	const sumCategories = quality + reliability + price;
+
 	countScored = countScored || 1; // Avoid division by zero
 
-	const overallScore =
-		(scores.quality ?? 0 + scores.reliability ?? 0 + scores.price ?? 0) /
-		countScored;
+	const overallScore = sumCategories / countScored;
 
 	return {
 		overall: overallScore ?? 0,
-		quality: scores.quality ?? 0,
-		reliability: scores.reliability ?? 0,
-		price: scores.price ?? 0,
+		quality,
+		reliability,
+		price,
 	};
 };
 
@@ -178,6 +186,8 @@ const createReview = asyncHandler(async (req, res) => {
 			quality: 0,
 			reliability: 0,
 			price: 0,
+			reviewOverall: 0,
+			charged: 0,
 		};
 	}
 
@@ -189,7 +199,7 @@ const createReview = asyncHandler(async (req, res) => {
 		};
 	}
 
-	const businessOverallScore = business.rating.overall ?? 0;
+	const businessOverallScore = business.rating.reviewOverall ?? 0;
 	const businessQualityScore = business.rating.quality ?? 0;
 	const businessReliabilityScore = business.rating.reliability ?? 0;
 	const businessPriceScore = business.rating.price ?? 0;
@@ -200,11 +210,20 @@ const createReview = asyncHandler(async (req, res) => {
 	const reliabilityScore = scores.reliability ?? businessReliabilityScore;
 	const priceScore = scores.price ?? businessPriceScore;
 
-	business.rating.overall = addToAvg(
+	const newReviewOverallScore = addToAvg(
 		businessOverallScore,
 		overallScore,
 		reviewsCount
 	);
+
+	const chargedScore = business.rating.charged ?? CHARGED_SCORE;
+
+	const newOverallScore =
+		newReviewOverallScore * REVIEW_WEIGHT + chargedScore * CHARGED_WEIGHT;
+
+	business.rating.overall = newOverallScore;
+	business.rating.charged = chargedScore;
+	business.rating.reviewOverall = newReviewOverallScore;
 	business.rating.quality = addToAvg(
 		businessQualityScore,
 		qualityScore,
@@ -368,7 +387,7 @@ const updateReview = asyncHandler(async (req, res) => {
 
 		console.log('scores:', scores);
 
-		const businessOverallScore = business.rating.overall ?? 0;
+		const businessOverallScore = business.rating.reviewOverall ?? 0;
 		const businessQualityScore = business.rating.quality ?? 0;
 		const businessReliabilityScore = business.rating.reliability ?? 0;
 		const businessPriceScore = business.rating.price ?? 0;
@@ -379,12 +398,21 @@ const updateReview = asyncHandler(async (req, res) => {
 		const reliabilityScore = scores.reliability ?? businessReliabilityScore;
 		const priceScore = scores.price ?? businessPriceScore;
 
-		business.rating.overall = updateAvg(
+		const newReviewOverallScore = updateAvg(
 			businessOverallScore,
-			review.rating.overall,
+			review.rating.reviewOverall,
 			overallScore,
 			reviewsCount
 		);
+
+		const chargedScore = business.rating.charged ?? CHARGED_SCORE;
+
+		const newOverallScore =
+			newReviewOverallScore * REVIEW_WEIGHT + chargedScore * CHARGED_WEIGHT;
+
+		business.rating.overall = newOverallScore;
+		business.rating.charged = chargedScore;
+		business.rating.reviewOverall = newReviewOverallScore;
 
 		business.rating.quality = updateAvg(
 			businessQualityScore,
@@ -462,11 +490,21 @@ const deleteReview = asyncHandler(async (req, res) => {
 
 	await Promise.all(promises);
 
-	business.rating.overall = removeFromAvg(
-		business.rating.overall,
-		review.rating.overall,
+	const newReviewOverallScore = removeFromAvg(
+		business.rating.reviewOverall,
+		review.rating.reviewOverall,
 		businessReviews.length
-	);
+	) ?? 0;
+
+	const chargedScore = business.rating.charged ?? CHARGED_SCORE;
+
+	const newOverallScore =
+		newReviewOverallScore * REVIEW_WEIGHT + chargedScore * CHARGED_WEIGHT;
+
+	business.rating.overall = newOverallScore;
+	business.rating.charged = chargedScore;
+	business.rating.reviewOverall = newReviewOverallScore;
+
 	business.rating.quality = removeFromAvg(
 		business.rating.quality,
 		review.rating.quality,
