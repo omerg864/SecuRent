@@ -35,7 +35,12 @@ const businessScheme = mongoose.Schema({
 		},
 	],
 	rating: {
-		type: Number,
+		type: {
+			overall: { type: Number, default: 0 },
+			quality: { type: Number, default: 0 },
+			reliability: { type: Number, default: 0 },
+			price: { type: Number, default: 0 },
+		},
 	},
 	address: {
 		type: String,
@@ -43,7 +48,7 @@ const businessScheme = mongoose.Schema({
 	location: {
 		type: {
 			lat: { type: Number },
-			lng: { type: Number }
+			lng: { type: Number },
 		},
 	},
 	image: {
@@ -74,8 +79,19 @@ const businessScheme = mongoose.Schema({
 		type: Boolean,
 		default: false,
 	},
+	reviewSummary: {
+		type: String,
+		default: '',
+	},
+	insights: {
+		type: {
+			quality: { type: String, default: '' },
+			reliability: { type: String, default: '' },
+			price: { type: String, default: '' },
+		},
+	},
 	stripe_account_id: {
 		type: String,
-	}
+	},
 });
 export default mongoose.model('Business', businessScheme);

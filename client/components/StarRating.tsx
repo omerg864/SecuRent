@@ -1,22 +1,24 @@
-import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import { View } from 'react-native';
+import Star from './Star';
 
 interface StarRatingProps {
 	rating: number;
+	size?: number;
 }
 
-const StarRating: React.FC<StarRatingProps> = ({ rating }) => {
+const StarRating: React.FC<StarRatingProps> = ({ rating, size = 22 }) => {
 	return (
-		<View className="flex-row">
-			{[1, 2, 3, 4, 5].map((star) => (
-				<FontAwesome
-					key={star}
-					name="star"
-					size={20}
-					color={star <= rating ? '#FFD700' : '#E0E0E0'}
-				/>
-			))}
+		<View style={{ flexDirection: 'row' }}>
+			{[0, 1, 2, 3, 4].map((index) => {
+				const currentStarRating = Math.min(
+					Math.max(rating - index, 0),
+					1
+				);
+				return (
+					<Star key={index} fill={currentStarRating} size={size} />
+				);
+			})}
 		</View>
 	);
 };
