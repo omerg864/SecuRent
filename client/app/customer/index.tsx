@@ -88,9 +88,11 @@ const CustomerHome: React.FC = () => {
 				selectedCategory,
 				searchText
 			);
+			console.log('userLocation', location.coords.latitude, location.coords.longitude);
+			console.log('businessResponse', businessResponse);
 			setBusinesses(businessResponse);
 		} catch (error) {
-			console.log('error fetching transactions: ', error);
+			console.log('error fetching businesses: ', error);
 		} finally {
 			setLoading(false);
 		}
