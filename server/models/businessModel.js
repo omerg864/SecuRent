@@ -35,15 +35,27 @@ const businessScheme = mongoose.Schema({
 		},
 	],
 	rating: {
-		type: Number,
+		type: {
+			reviewOverall: { type: Number, default: 0 },
+			quality: { type: Number, default: 0 },
+			reliability: { type: Number, default: 0 },
+			price: { type: Number, default: 0 },
+			charged: { type: Number, default: 5 },
+			overall: { type: Number, default: 0 },
+		},
 	},
 	address: {
 		type: String,
 	},
 	location: {
 		type: {
-			lat: { type: Number },
-			lng: { type: Number }
+			type: String, // This must be "Point"
+			enum: ['Point'],
+			required: true,
+		},
+		coordinates: {
+			type: [Number], // [longitude, latitude]
+			required: true,
 		},
 	},
 	image: {
@@ -74,8 +86,21 @@ const businessScheme = mongoose.Schema({
 		type: Boolean,
 		default: false,
 	},
+	reviewSummary: {
+		type: String,
+		default: '',
+	},
+	insights: {
+		type: {
+			quality: { type: String, default: '' },
+			reliability: { type: String, default: '' },
+			price: { type: String, default: '' },
+		},
+	},
 	stripe_account_id: {
 		type: String,
-	}
+	},
 });
+
+businessScheme.index({ location: '2dsphere' });
 export default mongoose.model('Business', businessScheme);
