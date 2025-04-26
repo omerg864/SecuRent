@@ -214,13 +214,24 @@ const closeTransactionById = asyncHandler(async (req, res) => {
 
 	const transactionCount =
 		(await Transaction.countDocuments({
-			business: transactionObject.business._id,
+			business: transaction.business._id,
 		})) || 0;
 
 	const chargedTransactionCount = await Transaction.countDocuments({
-		business: transactionObject.business._id,
+		business: transaction.business._id,
 		status: 'charged',
 	});
+
+	if (!business.rating) {
+		business.rating = {
+			reviewOverall: 5,
+			quality: 0,
+			reliability: 0,
+			price: 0,
+			charged: 5,
+			overall: 0,
+		};
+	}
 
 	const chargedScore = 5 - (chargedTransactionCount / transactionCount) * 5;
 	const reviewOverallScore = business.rating.reviewOverall || 5;
@@ -286,13 +297,24 @@ const captureDeposit = asyncHandler(async (req, res) => {
 
 	await transaction.save();
 
+	if (!business.rating) {
+		business.rating = {
+			reviewOverall: 5,
+			quality: 0,
+			reliability: 0,
+			price: 0,
+			charged: 5,
+			overall: 0,
+		};
+	}
+
 	const transactionCount =
 		(await Transaction.countDocuments({
-			business: transactionObject.business._id,
+			business: transaction.business._id,
 		})) || 0;
 
 	const chargedTransactionCount = await Transaction.countDocuments({
-		business: transactionObject.business._id,
+		business: transaction.business._id,
 		status: 'charged',
 	});
 

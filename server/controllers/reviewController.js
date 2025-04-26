@@ -408,7 +408,8 @@ const updateReview = asyncHandler(async (req, res) => {
 		const chargedScore = business.rating.charged ?? CHARGED_SCORE;
 
 		const newOverallScore =
-			newReviewOverallScore * REVIEW_WEIGHT + chargedScore * CHARGED_WEIGHT;
+			newReviewOverallScore * REVIEW_WEIGHT +
+			chargedScore * CHARGED_WEIGHT;
 
 		business.rating.overall = newOverallScore;
 		business.rating.charged = chargedScore;
@@ -490,11 +491,12 @@ const deleteReview = asyncHandler(async (req, res) => {
 
 	await Promise.all(promises);
 
-	const newReviewOverallScore = removeFromAvg(
-		business.rating.reviewOverall,
-		review.rating.reviewOverall,
-		businessReviews.length
-	) ?? 0;
+	const newReviewOverallScore =
+		removeFromAvg(
+			business.rating.reviewOverall ?? 0,
+			review.rating.reviewOverall ?? 0,
+			businessReviews.length
+		) ?? 0;
 
 	const chargedScore = business.rating.charged ?? CHARGED_SCORE;
 
