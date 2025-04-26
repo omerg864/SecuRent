@@ -2,6 +2,11 @@ import mongoose from 'mongoose';
 
 const ReviewSchema = mongoose.Schema(
 	{
+		transaction: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'Transaction',
+			required: true,
+		},
 		business: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Business',
@@ -16,10 +21,12 @@ const ReviewSchema = mongoose.Schema(
 			required: true,
 		},
 		rating: {
-			type: Number,
-			required: true,
-			min: 1,
-			max: 5,
+			type: {
+				overall: { type: Number, default: 0 },
+				quality: { type: Number, default: 0 },
+				reliability: { type: Number, default: 0 },
+				price: { type: Number, default: 0 },
+			},
 		},
 		content: {
 			type: String,

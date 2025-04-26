@@ -44,6 +44,10 @@ const transactionScheme = mongoose.Schema(
 		charged: {
 			type: Number,
 		},
+		review: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'Review',
+		},
 		charged_description: {
 			type: String,
 		},
