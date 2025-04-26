@@ -1,78 +1,31 @@
 'use client';
 
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
 	View,
 	Text,
 	TextInput,
 	ScrollView,
 	ActivityIndicator,
-	Alert,
 	Modal,
 	Button,
 } from 'react-native';
 import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import BusinessCard from '../../components/BusinessCard';
 import { ThemedView } from '@/components/ui/ThemedView';
-import type { Business } from '../../types/business';
 import HapticButton from '@/components/ui/HapticButton';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
-import { getDistance } from '@/utils/functions';
 import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
 import Toast from 'react-native-toast-message';
-
-const businesses_obj: Business[] = [
-	{
-		id: '1',
-		name: 'Bike Shop',
-		address: 'Eli visel 2 Rishon Lezion',
-		category: 'Bike Rental',
-		distance: 0,
-		rating: 5,
-		latitude: 31.9697,
-		longitude: 34.7722,
-	},
-	{
-		id: '2',
-		name: 'Bowling Center',
-		address: 'Eli visel 18 Rishon Lezion',
-		category: 'Bowling',
-		distance: 0,
-		rating: 2.6,
-		latitude: 31.9692,
-		longitude: 34.773,
-	},
-	{
-		id: '3',
-		name: 'Scuba Marine',
-		address: 'ahi dakar 12 Rishon Lezion',
-		category: 'Scuba diving',
-		distance: 0,
-		rating: 4.3,
-		latitude: 31.9635,
-		longitude: 34.7701,
-	},
-	{
-		id: '4',
-		name: 'Auto Center',
-		address: 'rotchild 2 Rishon Lezion',
-		category: 'Car Rental',
-		distance: 0,
-		rating: 4.8,
-		latitude: 31.9735,
-		longitude: 34.7745,
-	},
-];
+import { getNearestBusinesses } from '@/services/businessService';
+import { Business } from '@/services/interfaceService';
 
 const CustomerHome: React.FC = () => {
 	const [searchText, setSearchText] = useState<string>('');
-	const [businesses, setBusinesses] = useState<Business[]>(businesses_obj);
-
-	const [updatedBusinesses, setUpdatedBusinesses] =
-		useState<Business[]>(businesses);
+	const [businesses, setBusinesses] = useState<Business[]>([]);
 	const [userLocation, setUserLocation] = useState<{
 		latitude: number;
 		longitude: number;
@@ -107,76 +60,53 @@ const CustomerHome: React.FC = () => {
 
 	const onSearch = (text: string) => {
 		setSearchText(text);
-		if (!text) {
-			applyFilters();
-			return;
-		}
-		const filteredBusinesses = updatedBusinesses.filter((business) =>
-			business.name.toLowerCase().includes(text.toLowerCase())
-		);
-		setUpdatedBusinesses(filteredBusinesses);
 	};
 
-	useEffect(() => {
-		(async () => {
-			const { status } =
-				await Location.requestForegroundPermissionsAsync();
-			if (status !== 'granted') {
-				Toast.show({
-					type: 'error',
-					text1: 'Permission Denied',
-					text2: 'Location access is required to show your position.',
-				});
-				setLoading(false);
-				return;
-			}
-
-			const location = await Location.getCurrentPositionAsync({});
-			setUserLocation({
-				latitude: location.coords.latitude,
-				longitude: location.coords.longitude,
+	const fetchBusinesses = async () => {
+		const { status } = await Location.requestForegroundPermissionsAsync();
+		if (status !== 'granted') {
+			Toast.show({
+				type: 'error',
+				text1: 'Permission Denied',
+				text2: 'Location access is required to show your position.',
 			});
-
-			const updatedList = businesses.map((business) => ({
-				...business,
-				distance: parseFloat(
-					getDistance(
-						location.coords.latitude,
-						location.coords.longitude,
-						business.latitude,
-						business.longitude
-					).toFixed(2)
-				), // Distance in Km
-			}));
-			setBusinesses(updatedList);
-			setUpdatedBusinesses(updatedList);
 			setLoading(false);
-		})();
-	}, []);
-
-	// Function to apply filters
-	const applyFilters = () => {
-		if (!searchText) {
-			const filteredBusinesses = businesses.filter(
-				(business) =>
-					business.distance <= maxDistance &&
-					(selectedCategory === 'All' ||
-						business.category === selectedCategory) &&
-					business.rating >= minRating
-			);
-			setUpdatedBusinesses(filteredBusinesses);
 			return;
 		}
-		const filteredBusinesses = updatedBusinesses.filter(
-			(business) =>
-				business.distance <= maxDistance &&
-				(selectedCategory === 'All' ||
-					business.category === selectedCategory) &&
-				business.rating >= minRating
-		);
-		setUpdatedBusinesses(filteredBusinesses);
-		setModalVisible(false);
+
+		const location = await Location.getCurrentPositionAsync({});
+		setUserLocation({
+			latitude: location.coords.latitude,
+			longitude: location.coords.longitude,
+		});
+		try {
+			const businessResponse = await getNearestBusinesses(
+				location.coords.latitude,
+				location.coords.longitude,
+				maxDistance,
+				minRating,
+				selectedCategory,
+				searchText
+			);
+			setBusinesses(businessResponse);
+		} catch (error) {
+			console.log('error fetching transactions: ', error);
+		} finally {
+			setLoading(false);
+		}
 	};
+
+	useFocusEffect(
+		useCallback(() => {
+			fetchBusinesses();
+
+			// Optional cleanup if you want to reset state
+			return () => {
+				setBusinesses([]);
+				setSearchText('');
+			};
+		}, [])
+	);
 
 	if (loading) {
 		return (
@@ -266,8 +196,8 @@ const CustomerHome: React.FC = () => {
 					className="flex-1"
 					showsVerticalScrollIndicator={false}
 				>
-					{updatedBusinesses.map((business) => (
-						<BusinessCard key={business.id} business={business} />
+					{businesses.map((business) => (
+						<BusinessCard key={business._id} business={business} />
 					))}
 					<View className="h-4" />
 				</ScrollView>
@@ -345,7 +275,7 @@ const CustomerHome: React.FC = () => {
 							<Button
 								title="Apply"
 								color="blue"
-								onPress={applyFilters}
+								onPress={() => fetchBusinesses()}
 							/>
 						</View>
 					</View>

@@ -49,8 +49,13 @@ const businessScheme = mongoose.Schema({
 	},
 	location: {
 		type: {
-			lat: { type: Number },
-			lng: { type: Number },
+			type: String, // This must be "Point"
+			enum: ['Point'],
+			required: true,
+		},
+		coordinates: {
+			type: [Number], // [longitude, latitude]
+			required: true,
 		},
 	},
 	image: {
@@ -96,4 +101,6 @@ const businessScheme = mongoose.Schema({
 		type: String,
 	},
 });
+
+businessScheme.index({ location: '2dsphere' });
 export default mongoose.model('Business', businessScheme);

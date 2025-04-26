@@ -7,7 +7,6 @@ import {
 	StepResponse,
 	ValidResponse,
 } from './interfaceService';
-import { BankDetails } from './interfaceService';
 import { FileObject } from '@/types/business';
 
 const registerBusiness = async (
@@ -124,6 +123,33 @@ const getStripeOnboardingLink = async () => {
 	}
 };
 
+const getNearestBusinesses = async (
+	lat: number,
+	lng: number,
+	radius = 10,
+	rating = 0,
+	category = 'all',
+	search = ''
+) => {
+	try {
+		const accessToken = await checkToken();
+		const response = await client.get<{
+			success: boolean;
+			businesses: Business[];
+		}>(
+			`business/nearby?lat=${lat}&lng=${lng}&radius=${radius}&rating=${rating}&category=${encodeURIComponent(
+				category
+			)}&search=${encodeURIComponent(search)}`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response.data.businesses; // Notice: we return the businesses array
+	} catch (error) {
+		throw error || 'Failed to get nearest businesses.';
+	}
+};
+
 export {
 	registerBusiness,
 	verifyEmailBusiness,
@@ -132,4 +158,5 @@ export {
 	resendBusinessVerificationCode,
 	updateBusinessDetails,
 	getStripeOnboardingLink,
+	getNearestBusinesses,
 };
