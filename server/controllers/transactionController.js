@@ -3,6 +3,8 @@ import Transaction from '../models/transactionModel.js';
 import Item from '../models/itemModel.js';
 import { businesses } from '../config/websocket.js';
 import stripe from '../config/stripe.js';
+import { CHARGED_WEIGHT, REVIEW_WEIGHT } from '../utils/constants.js';
+import Business from '../models/businessModel.js';
 
 const getBusinessTransactions = asyncHandler(async (req, res) => {
 	const transactions = await Transaction.find({
@@ -127,19 +129,19 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 		}
 	);
 
-
 	let return_date = item.return_date;
 
 	if (!item.temporary) {
 		if (item.timeUnit === 'days') {
-			return_date = new Date(Date.now() + item.duration * 24 * 60 * 60 * 1000);
+			return_date = new Date(
+				Date.now() + item.duration * 24 * 60 * 60 * 1000
+			);
 		} else if (item.timeUnit === 'hours') {
 			return_date = new Date(Date.now() + item.duration * 60 * 60 * 1000);
 		} else if (item.timeUnit === 'minutes') {
 			return_date = new Date(Date.now() + item.duration * 60 * 1000);
 		}
 	}
-
 
 	const transaction = new Transaction({
 		stripe_payment_id: paymentIntent.id,
@@ -195,6 +197,12 @@ const closeTransactionById = asyncHandler(async (req, res) => {
 		throw new Error('Transaction is not in an authorized state');
 	}
 
+	const business = await Business.findById(transaction.business._id);
+	if (!business) {
+		res.status(404);
+		throw new Error('Business not found');
+	}
+
 	await stripe.paymentIntents.cancel(transaction.stripe_payment_id, {
 		stripeAccount: transaction.business.stripe_account_id,
 	});
@@ -203,6 +211,36 @@ const closeTransactionById = asyncHandler(async (req, res) => {
 	transaction.closed_at = new Date();
 
 	await transaction.save();
+
+	const transactionCount =
+		(await Transaction.countDocuments({
+			business: transaction.business._id,
+		})) || 0;
+
+	const chargedTransactionCount = await Transaction.countDocuments({
+		business: transaction.business._id,
+		status: 'charged',
+	});
+
+	if (!business.rating) {
+		business.rating = {
+			reviewOverall: 5,
+			quality: 0,
+			reliability: 0,
+			price: 0,
+			charged: 5,
+			overall: 0,
+		};
+	}
+
+	const chargedScore = 5 - (chargedTransactionCount / transactionCount) * 5;
+	const reviewOverallScore = business.rating.reviewOverall || 5;
+
+	business.rating.charged = chargedScore;
+	business.rating.overall =
+		reviewOverallScore * REVIEW_WEIGHT + chargedScore * CHARGED_WEIGHT;
+
+	await business.save();
 
 	res.status(200).json({
 		success: true,
@@ -231,6 +269,12 @@ const captureDeposit = asyncHandler(async (req, res) => {
 		throw new Error('Transaction is not in open state');
 	}
 
+	const business = await Business.findById(transaction.business);
+	if (!business) {
+		res.status(404);
+		throw new Error('Business not found');
+	}
+
 	const amountToCharge = amount ? amount * 100 : transaction.amount * 100;
 
 	await stripe.paymentIntents.capture(
@@ -252,6 +296,36 @@ const captureDeposit = asyncHandler(async (req, res) => {
 		charged_description || 'Charged full deposit';
 
 	await transaction.save();
+
+	if (!business.rating) {
+		business.rating = {
+			reviewOverall: 5,
+			quality: 0,
+			reliability: 0,
+			price: 0,
+			charged: 5,
+			overall: 0,
+		};
+	}
+
+	const transactionCount =
+		(await Transaction.countDocuments({
+			business: transaction.business._id,
+		})) || 0;
+
+	const chargedTransactionCount = await Transaction.countDocuments({
+		business: transaction.business._id,
+		status: 'charged',
+	});
+
+	const chargedScore = 5 - (chargedTransactionCount / transactionCount) * 5;
+	const reviewOverallScore = business.rating.reviewOverall || 5;
+
+	business.rating.charged = chargedScore;
+	business.rating.overall =
+		reviewOverallScore * REVIEW_WEIGHT + chargedScore * CHARGED_WEIGHT;
+
+	await business.save();
 
 	res.status(200).json({
 		success: true,

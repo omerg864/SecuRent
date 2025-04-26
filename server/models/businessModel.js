@@ -36,10 +36,12 @@ const businessScheme = mongoose.Schema({
 	],
 	rating: {
 		type: {
-			overall: { type: Number, default: 0 },
+			reviewOverall: { type: Number, default: 0 },
 			quality: { type: Number, default: 0 },
 			reliability: { type: Number, default: 0 },
 			price: { type: Number, default: 0 },
+			charged: { type: Number, default: 5 },
+			overall: { type: Number, default: 0 },
 		},
 	},
 	address: {
