@@ -563,35 +563,44 @@ const getNearbyBusinesses = asyncHandler(async (req, res) => {
 		throw new Error('Invalid radius');
 	}
 
-	const query = {
-		location: {
-			$geoWithin: {
-				$centerSphere: [
-					[parseFloat(lng), parseFloat(lat)],
-					parseFloat(radius) / 6378.1,
-				],
+	const businesses = await Business.aggregate([
+		{
+			$geoNear: {
+				near: {
+					type: 'Point',
+					coordinates: [parseFloat(lng), parseFloat(lat)],
+				},
+				distanceField: 'distance',
+				maxDistance: parseFloat(radius) * 1000, // meters
+				spherical: true,
 			},
 		},
-		'rating.overall': { $gte: parseFloat(rating) },
-	};
-
-	// Category filter
-	if (category !== 'all') {
-		query.category = {
-			$elemMatch: {
-				$regex: new RegExp(category, 'i'),
-			},
-		};
-	}
-
-	// Search by business name
-	if (search.trim() !== '') {
-		query.name = {
-			$regex: new RegExp(search, 'i'), // case-insensitive search on name
-		};
-	}
-
-	const businesses = await Business.find(query);
+		{ $match: { 'rating.overall': { $gte: parseFloat(rating) } } },
+		...(category !== 'all'
+			? [
+					{
+						$match: {
+							category: {
+								$elemMatch: {
+									$regex: new RegExp(category, 'i'),
+								},
+							},
+						},
+					},
+			  ]
+			: []),
+		...(search.trim() !== ''
+			? [
+					{
+						$match: {
+							name: {
+								$regex: new RegExp(search, 'i'),
+							},
+						},
+					},
+			  ]
+			: []),
+	]);
 
 	res.status(200).json({ success: true, businesses });
 });
