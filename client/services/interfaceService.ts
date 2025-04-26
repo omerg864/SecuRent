@@ -78,7 +78,11 @@ interface Business {
 	email: string;
 	phone: string;
 	address: string;
-	location: { lat: number; lng: number };
+	location: {
+		type: string;
+		coordinates: [number, number]; // [longitude, latitude]
+	};
+	distance?: number;
 	createdAt: Date;
 	updatedAt: Date;
 	image: string;
@@ -235,5 +239,5 @@ export type {
 	StepResponse,
 	ClientStripeParamsResponse,
 	ValidResponse,
-	TransactionIntentResponse
+	TransactionIntentResponse,
 };

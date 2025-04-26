@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
 	View,
 	Text,
@@ -36,9 +36,9 @@ const CustomerHome: React.FC = () => {
 
 	const router = useRouter();
 	const [loading, setLoading] = useState(true);
-	const [selectedCategory, setSelectedCategory] = useState('All');
+	const [selectedCategory, setSelectedCategory] = useState('all');
 	const [categories, setCategories] = useState([
-		{ label: 'All', value: 'All' },
+		{ label: 'All', value: 'all' },
 		{ label: 'Bike Rental', value: 'Bike Rental' },
 		{ label: 'Bowling', value: 'Bowling' },
 		{ label: 'Scuba Diving', value: 'Scuba diving' },
@@ -60,6 +60,11 @@ const CustomerHome: React.FC = () => {
 
 	const onSearch = (text: string) => {
 		setSearchText(text);
+	};
+
+	const applyFilters = () => {
+		setModalVisible(false);
+		fetchBusinesses();
 	};
 
 	const fetchBusinesses = async () => {
@@ -88,7 +93,11 @@ const CustomerHome: React.FC = () => {
 				selectedCategory,
 				searchText
 			);
-			console.log('userLocation', location.coords.latitude, location.coords.longitude);
+			console.log('userLocation', location);
+			console.log('maxDistance', maxDistance);
+			console.log('minRating', minRating);
+			console.log('selectedCategory', selectedCategory);
+			console.log('searchText', searchText);
 			console.log('businessResponse', businessResponse);
 			setBusinesses(businessResponse);
 		} catch (error) {
@@ -109,6 +118,10 @@ const CustomerHome: React.FC = () => {
 			};
 		}, [])
 	);
+
+	useEffect(() => {
+		fetchBusinesses();
+	}, [searchText]);
 
 	if (loading) {
 		return (
@@ -237,9 +250,10 @@ const CustomerHome: React.FC = () => {
 						<Text className="text-gray-700 mt-4">Category</Text>
 						<Picker
 							selectedValue={selectedCategory}
-							onValueChange={(itemValue) =>
-								setSelectedCategory(itemValue)
-							}
+							onValueChange={(itemValue) => {
+								console.log('Selected :', itemValue);
+								setSelectedCategory(itemValue);
+							}}
 							mode="dropdown" // Ensures dropdown mode for Android
 							style={{
 								width: '100%',
@@ -277,7 +291,7 @@ const CustomerHome: React.FC = () => {
 							<Button
 								title="Apply"
 								color="blue"
-								onPress={() => fetchBusinesses()}
+								onPress={applyFilters}
 							/>
 						</View>
 					</View>
