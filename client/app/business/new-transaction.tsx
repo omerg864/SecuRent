@@ -1,4 +1,4 @@
-import React, { useEffect, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
 	View,
 	Text,
@@ -8,18 +8,15 @@ import {
 	ActivityIndicator,
 } from 'react-native';
 import { DatePickerModal, TimePickerModal } from 'react-native-paper-dates';
-import { DatePickerModal, TimePickerModal } from 'react-native-paper-dates';
 import HapticButton from '@/components/ui/HapticButton';
 import PriceSelector from '@/components/PriceSelector';
 import { ThemedText } from '@/components/ui/ThemedText';
-import { router } from 'expo-router';
-import { createItem } from '@/services/itemService';
+import { router, useFocusEffect } from 'expo-router';
+import { createTemporaryItem } from '@/services/itemService';
 import ShowToast from '@/components/ui/ShowToast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { currencies } from '@/utils/constants';
-import { createTemporaryItem } from '@/services/itemService';
-import PricePicker from '@/components/PricePicker';
-import { getBusinessCurrencySymbol } from '@/utils/functions';
+import Toast from 'react-native-toast-message';
 
 const format = {
 	date: (d: Date) => d.toLocaleDateString('en-GB'),
@@ -35,53 +32,78 @@ const CreateTransactionScreen = () => {
 	const [date, setDate] = useState(new Date());
 	const [show, setShow] = useState({ date: false, time: false });
 	const [isLoading, setIsLoading] = useState(false);
-	const [currency, setCurrency] = useState('ILS');
 
 	const handleDateChange = (d?: Date) => d && setDate(d);
 	const handleTimeChange = (h: number, m: number) =>
 		setDate(new Date(date.setHours(h, m)));
 
 	const handleContinue = async () => {
-		if (!desc) return ShowToast('error', 'Please fill item description');
-		if (!price) return ShowToast('error', 'Price must be set');
-		if (date < startDate.current)
-			return ShowToast('error', 'Date is not valid');
-		setIsLoading(true);
-		try {
-			const response = await createItem(desc, date, price, true, 0);
-			if (!response) throw new Error('Internal Server Error');
-
-			resetForm();
-			router.push({
-				pathname: '/business/QRCodeScreen',
-				params: { id: response.item._id },
-			});
-		} catch (error: any) {
-			console.log(error.response);
-			ShowToast(
-				'error',
-				error?.response?.data?.message || 'Unexpected error occurred'
-			);
-		} finally {
+		let error = '';
+		if (!desc) {
+			error = 'Please fill item description';
+			Toast.show({ type: 'error', text1: `${error}` });
+			return;
+		}
+		if (!price) {
+			error = 'Price must be set';
+			Toast.show({ type: 'error', text1: `${error}` });
+			return;
+		}
+		if (date < startDate.current) {
+			error = 'Date is not valid';
+			Toast.show({ type: 'error', text1: `${error}` });
+			return;
+		}
+		if (error) {
+			Toast.show({ type: 'error', text1: `${error}` });
+		} else {
+			// create temporary item
+			setIsLoading(true);
+			try {
+				const response = await createTemporaryItem(desc, date, price);
+				if (!response) {
+					setIsLoading(false);
+					Toast.show({
+						type: 'error',
+						text1: 'Internal Server Error',
+					});
+					return;
+				}
+				setDesc('');
+				setPrice(0);
+				setDate(new Date());
+				setShow({ date: false, time: false });
+				router.push({
+					pathname: '/business/QRCodeScreen',
+					params: {
+						id: response.item._id,
+					},
+				});
+			} catch (error: any) {
+				console.log(error.response);
+				Toast.show({
+					type: 'error',
+					text1: error.response.data.message,
+				});
+			}
 			setIsLoading(false);
 		}
 	};
 
-	useEffect(() => {
-		const getSymbol = async () => {
-			const symbol = await getBusinessCurrencySymbol();
-			setCurrency(symbol);
-		};
+	useFocusEffect(
+		useCallback(() => {
+			const resetForm = () => {
+				setDesc('');
+				setPrice(0);
+				setDate(new Date());
+				setShow({ date: false, time: false });
+			};
 
-		getSymbol();
-	}, []);
-
-	const resetForm = () => {
-		setDesc('');
-		setPrice(0);
-		setDate(new Date());
-		setShow({ date: false, time: false });
-	};
+			return () => {
+				resetForm();
+			};
+		}, [])
+	);
 
 	useEffect(() => {
 		const fetchBusinessData = async () => {
