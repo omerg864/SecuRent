@@ -36,7 +36,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business }) => {
 			</View>
 			<View className="flex-row justify-between mt-2">
 				<Text className="text-white">{business.category}</Text>
-				<StarRating rating={business.rating} />
+				<StarRating rating={business.rating.overall} />
 			</View>
 		</HapticButton>
 	);

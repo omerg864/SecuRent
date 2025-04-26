@@ -86,7 +86,14 @@ interface Business {
 	createdAt: Date;
 	updatedAt: Date;
 	image: string;
-	rating: number;
+	rating: {
+		overall: number;
+		reviewOverall: number;
+		reliability: number;
+		quality: number;
+		price: number;
+		charged: number;
+	};
 	role: string;
 	category: string[];
 	currency: string;
