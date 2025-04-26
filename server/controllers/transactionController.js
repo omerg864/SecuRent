@@ -127,6 +127,20 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 		}
 	);
 
+
+	let return_date = item.return_date;
+
+	if (!item.temporary) {
+		if (item.timeUnit === 'days') {
+			return_date = new Date(Date.now() + item.duration * 24 * 60 * 60 * 1000);
+		} else if (item.timeUnit === 'hours') {
+			return_date = new Date(Date.now() + item.duration * 60 * 60 * 1000);
+		} else if (item.timeUnit === 'minutes') {
+			return_date = new Date(Date.now() + item.duration * 60 * 1000);
+		}
+	}
+
+
 	const transaction = new Transaction({
 		stripe_payment_id: paymentIntent.id,
 		amount: item.price,
@@ -135,7 +149,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 		business: item.business,
 		customer: req.customer._id,
 		description: item.description,
-		return_date: item.return_date,
+		return_date,
 		opened_at: Date.now(),
 		item: item._id,
 	});
@@ -163,13 +177,15 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 const closeTransactionById = asyncHandler(async (req, res) => {
 	const { id } = req.params;
 
-	const transaction = await Transaction.findById(id);
+	const transaction = await Transaction.findById(id)
+		.populate('customer', 'name image phone')
+		.populate('business', 'name image rating category');
 	if (!transaction) {
 		res.status(404);
 		throw new Error('Transaction not found');
 	}
 
-	if (transaction.business.toString() !== req.business._id.toString()) {
+	if (transaction.business._id.toString() !== req.business._id.toString()) {
 		res.status(401);
 		throw new Error('Unauthorized');
 	}
@@ -278,8 +294,9 @@ const getBusinessTransactionsAdmin = asyncHandler(async (req, res) => {
 	const { id } = req.params;
 	const transactions = await Transaction.find({
 		business: id,
-		status: { $ne: 'intent' },
-	}).populate('customer', 'name image phone');
+	})
+		.populate('customer', 'name image phone')
+		.populate('business', 'name image rating category');
 	res.status(200).json({
 		success: true,
 		transactions,
@@ -287,11 +304,9 @@ const getBusinessTransactionsAdmin = asyncHandler(async (req, res) => {
 });
 
 const getTransactionById = asyncHandler(async (req, res) => {
-	console.log('Checking transaction by id');
-	const transaction = await Transaction.findById(req.params.id).populate(
-		'customer',
-		'name image email'
-	);
+	const transaction = await Transaction.findById(req.params.id)
+		.populate('customer', 'name image email')
+		.populate('business', 'name image rating category');
 
 	if (!transaction) {
 		res.status(404);
@@ -304,7 +319,8 @@ const getTransactionById = asyncHandler(async (req, res) => {
 
 	if (
 		req.customer &&
-		transaction.customer.toString() !== req.customer._id.toString()
+		(!transaction.customer ||
+			transaction.customer._id.toString() !== req.customer._id.toString())
 	) {
 		res.status(401);
 		throw new Error('Unauthorized');
@@ -312,7 +328,8 @@ const getTransactionById = asyncHandler(async (req, res) => {
 
 	if (
 		req.business &&
-		transaction.business.toString() !== req.business._id.toString()
+		(!transaction.business ||
+			transaction.business._id.toString() !== req.business._id.toString())
 	) {
 		res.status(401);
 		throw new Error('Unauthorized');

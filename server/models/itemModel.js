@@ -30,6 +30,11 @@ const ItemSchema = mongoose.Schema(
             type: Number,
             default: null,
         },
+        timeUnit:{
+            type: String,
+            enum: ['days', 'minutes', 'hours'],
+            default: 'days',
+        },
         temporary:{
             type: Boolean,
             default: false,

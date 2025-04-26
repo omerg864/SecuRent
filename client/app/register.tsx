@@ -86,13 +86,13 @@ const RegisterScreen = () => {
 					return;
 				}
 				console.log('Business login response:', loginResponse);
-        AsyncStorage.setItem("UserID", loginResponse.user._id);
+				AsyncStorage.setItem('UserID', loginResponse.user._id);
 				AsyncStorage.setItem('Access_Token', loginResponse.accessToken);
 				AsyncStorage.setItem(
 					'Refresh_Token',
 					loginResponse.refreshToken
 				);
-        AsyncStorage.setItem("current_account_type", "business");
+				AsyncStorage.setItem('current_account_type', 'business');
 				AsyncStorage.setItem(
 					'Business_Data',
 					JSON.stringify(loginResponse.user)
@@ -115,7 +115,7 @@ const RegisterScreen = () => {
 					'Refresh_Token',
 					loginResponse.refreshToken
 				);
-        AsyncStorage.setItem("current_account_type", "personal");
+				AsyncStorage.setItem('current_account_type', 'personal');
 				AsyncStorage.setItem(
 					'Customer_Data',
 					JSON.stringify(loginResponse.user)
@@ -170,6 +170,7 @@ const RegisterScreen = () => {
 
 				<View className="space-y-6">
 					<ProfileImageInput
+						file={file}
 						label={`${
 							accountType === 'business' ? 'Business ' : ''
 						}Image`}

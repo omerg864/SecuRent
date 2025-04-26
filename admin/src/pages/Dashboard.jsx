@@ -6,7 +6,7 @@ import { GrGroup } from 'react-icons/gr';
 import { IoBusinessOutline } from 'react-icons/io5';
 import { FaExchangeAlt } from 'react-icons/fa';
 import { GrSync } from 'react-icons/gr';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Loader from '../components/Loader';
 import { analytics } from '../services/adminServices';
 
@@ -23,6 +23,7 @@ const ECommerce = () => {
 		transactionsThisWeek: [],
 		transactionsLastWeek: [],
 	});
+	const hasFetched = useRef(false);
 
 	const getAnalytics = async () => {
 		setIsLoading(true);
@@ -38,7 +39,10 @@ const ECommerce = () => {
 	};
 
 	useEffect(() => {
-		getAnalytics();
+		if (!hasFetched.current) {
+			hasFetched.current = true;
+			getAnalytics();
+		}
 	}, []);
 
 	if (isLoading) {

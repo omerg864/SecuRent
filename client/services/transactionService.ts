@@ -15,7 +15,12 @@ const chargeDeposit = async (
 	}
 
 	try {
-		const response = await client.put(`/charge/${transactionId}`, payload);
+		const response = await client.put(
+			`transaction/charge/${transactionId}`,
+			payload, {
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
 		return response.data;
 	} catch (error: any) {
 		console.error(

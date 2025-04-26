@@ -4,12 +4,43 @@ import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
 import { v4 as uuidv4 } from 'uuid';
 
 const createItem = asyncHandler(async (req, res) => {
-	const { description, price, temporary, date, duration} = req.body;
+	const { description, price, temporary, date, duration, timeUnit} = req.body;
 
 	if (!description || !price) {
 		res.status(400);
 		throw new Error('Please provide all required fields');
 	}
+
+	if (isNaN(price)) {
+		res.status(400);
+		throw new Error('Price must be a number');
+	}
+
+	if (temporary && !date) {
+		res.status(400);
+		throw new Error('Please provide a return date for temporary items');
+	}
+
+	if (!temporary && (!duration || !timeUnit)) {
+		res.status(400);
+		throw new Error('Please provide duration and time unit for items');
+	}
+
+	if (!temporary && date) {
+		res.status(400);
+		throw new Error('Permanent items cannot have a return date');
+	}
+
+	if (!temporary && (!['days', 'hours', 'minutes'].includes(timeUnit) || isNaN(duration))) {
+		res.status(400);
+		throw new Error('Invalid time unit or duration for permanent items');
+	}
+
+	if (temporary && date < new Date()) {
+		res.status(400);
+		throw new Error('Return date cannot be in the past');
+	}
+
 
 	let imageUrl = '';
 
@@ -26,6 +57,7 @@ const createItem = asyncHandler(async (req, res) => {
 		business: req.business._id,
 		description,
 		price,
+		timeUnit,
 		currency: req.business.currency || 'USD',
 		image: imageUrl,
 		temporary,
