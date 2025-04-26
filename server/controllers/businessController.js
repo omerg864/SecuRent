@@ -13,6 +13,7 @@ import { sendEmail } from '../utils/functions.js';
 import { verifyCompanyNumber } from '../utils/externalFunctions.js';
 import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
 import { v4 as uuidv4 } from 'uuid';
+import stripe from '../config/stripe.js';
 
 //Reusable login success function
 const successFullLogin = async (res, business) => {
@@ -81,6 +82,18 @@ const registerBusiness = asyncHandler(async (req, res) => {
 		password: hashedPassword,
 		image: imageUrl || undefined,
 	});
+
+	const stripeAccount = await stripe.accounts.create({
+		type: 'express',
+		country: 'US',
+		email,
+		capabilities: {
+			card_payments: { requested: true },
+			transfers: { requested: true },
+		},
+	});
+
+	business.stripe_account_id = stripeAccount.id;
 
 	const verificationCode = Math.floor(
 		100000 + Math.random() * 900000
@@ -421,32 +434,22 @@ const updateBusinessDetails = asyncHandler(async (req, res) => {
 });
 
 const verifyBank = asyncHandler(async (req, res) => {
-	const { accountNumber, sortCode, bankName, accountHolderName } = req.body;
+	if (!req.business.stripe_account_id) {
+		res.status(400);
+		throw new Error('Stripe account not found for this business');
+	}
+
+	const account = await stripe.accounts.retrieve(
+		req.business.stripe_account_id
+	);
+
+	if (account.requirements.currently_due.length > 0) {
+		res.status(400);
+		throw new Error('Bank account not verified yet');
+	}
+
 	const business = await Business.findById(req.business._id);
 
-	if (!business) {
-		res.status(404);
-		throw new Error('Business not found');
-	}
-
-	if (!accountNumber || !sortCode) {
-		res.status(400);
-		throw new Error('Account number and sort code are required');
-	}
-
-	if (!bankName || !accountHolderName) {
-		res.status(401);
-		throw new Error('Bank name and account holder name are required');
-	}
-
-	const bank = {
-		accountNumber,
-		sortCode,
-		bankName,
-		accountHolderName,
-	};
-
-	business.bank = bank;
 	business.isBankValid = true;
 	if (business.isEmailValid && business.isCompanyNumberVerified) {
 		business.isValid = true;
@@ -457,7 +460,6 @@ const verifyBank = asyncHandler(async (req, res) => {
 		success: true,
 		valid: business.isValid,
 		message: 'Bank verified and updated successfully',
-		bank,
 	});
 });
 
@@ -516,6 +518,25 @@ const resendVerificationCode = asyncHandler(async (req, res) => {
 	});
 });
 
+const getStripeOnboardingLink = asyncHandler(async (req, res) => {
+	if (!req.business.stripe_account_id) {
+		res.status(400);
+		throw new Error('Stripe account not found for this business');
+	}
+
+	const accountLink = await stripe.accountLinks.create({
+		account: req.business.stripe_account_id,
+		refresh_url: `${process.env.CLIENT_URL}/business/stripe-setup-failed`,
+		return_url: `${process.env.CLIENT_URL}/business/stripe-setup-success`,
+		type: 'account_onboarding',
+	});
+
+	res.status(200).json({
+		success: true,
+		url: accountLink.url,
+	});
+});
+
 export {
 	registerBusiness,
 	loginBusiness,
@@ -529,4 +550,5 @@ export {
 	verifyBank,
 	updateBusinessPassword,
 	resendVerificationCode,
+	getStripeOnboardingLink,
 };

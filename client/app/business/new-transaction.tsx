@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useEffect, useRef, useState } from 'react';
 import {
 	View,
 	Text,
@@ -8,10 +8,15 @@ import {
 	ActivityIndicator,
 } from 'react-native';
 import { DatePickerModal, TimePickerModal } from 'react-native-paper-dates';
+import { DatePickerModal, TimePickerModal } from 'react-native-paper-dates';
 import HapticButton from '@/components/ui/HapticButton';
+import PriceSelector from '@/components/PriceSelector';
 import { ThemedText } from '@/components/ui/ThemedText';
-import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
+import { createItem } from '@/services/itemService';
+import ShowToast from '@/components/ui/ShowToast';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { currencies } from '@/utils/constants';
 import { createTemporaryItem } from '@/services/itemService';
 import PricePicker from '@/components/PricePicker';
 import { getBusinessCurrencySymbol } from '@/utils/functions';
@@ -20,72 +25,44 @@ const format = {
 	date: (d: Date) => d.toLocaleDateString('en-GB'),
 	time: (d: Date) =>
 		d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-	currency: (n: number) => n.toLocaleString() + '₪',
 };
 
-export default () => {
-	const startDate = useRef<Date>(new Date());
-
+const CreateTransactionScreen = () => {
+	const startDate = useRef(new Date());
 	const [desc, setDesc] = useState('');
 	const [price, setPrice] = useState(0);
+	const [currencySymbol, setCurrencySymbol] = useState('₪');
 	const [date, setDate] = useState(new Date());
 	const [show, setShow] = useState({ date: false, time: false });
 	const [isLoading, setIsLoading] = useState(false);
 	const [currency, setCurrency] = useState('ILS');
 
-	const updateDate = (d?: Date) => d && setDate(d);
-	const updateTime = (h: number, m: number) =>
+	const handleDateChange = (d?: Date) => d && setDate(d);
+	const handleTimeChange = (h: number, m: number) =>
 		setDate(new Date(date.setHours(h, m)));
 
-	const handleContinueButton = async () => {
-		let error = '';
-		if (!desc) {
-			error = 'Please fill item description';
-			Toast.show({ type: 'error', text1: `${error}` });
-			return;
-		}
-		if (!price) {
-			error = 'Price must be set';
-			Toast.show({ type: 'error', text1: `${error}` });
-			return;
-		}
-		if (date < startDate.current) {
-			error = 'Date is not valid';
-			Toast.show({ type: 'error', text1: `${error}` });
-			return;
-		}
-		if (error) {
-			Toast.show({ type: 'error', text1: `${error}` });
-		} else {
-			// create temporary item
-			setIsLoading(true);
-			try {
-				const response = await createTemporaryItem(desc, date, price);
-				if (!response) {
-					setIsLoading(false);
-					Toast.show({
-						type: 'error',
-						text1: 'Internal Server Error',
-					});
-					return;
-				}
-				setDesc('');
-				setPrice(0);
-				setDate(new Date());
-				setShow({ date: false, time: false });
-				router.push({
-					pathname: '/business/QRCodeScreen',
-					params: {
-						id: response.item._id,
-					},
-				});
-			} catch (error: any) {
-				console.log(error.response);
-				Toast.show({
-					type: 'error',
-					text1: error.response.data.message,
-				});
-			}
+	const handleContinue = async () => {
+		if (!desc) return ShowToast('error', 'Please fill item description');
+		if (!price) return ShowToast('error', 'Price must be set');
+		if (date < startDate.current)
+			return ShowToast('error', 'Date is not valid');
+		setIsLoading(true);
+		try {
+			const response = await createItem(desc, date, price, true, 0);
+			if (!response) throw new Error('Internal Server Error');
+
+			resetForm();
+			router.push({
+				pathname: '/business/QRCodeScreen',
+				params: { id: response.item._id },
+			});
+		} catch (error: any) {
+			console.log(error.response);
+			ShowToast(
+				'error',
+				error?.response?.data?.message || 'Unexpected error occurred'
+			);
+		} finally {
 			setIsLoading(false);
 		}
 	};
@@ -99,12 +76,40 @@ export default () => {
 		getSymbol();
 	}, []);
 
+	const resetForm = () => {
+		setDesc('');
+		setPrice(0);
+		setDate(new Date());
+		setShow({ date: false, time: false });
+	};
+
+	useEffect(() => {
+		const fetchBusinessData = async () => {
+			try {
+				const data = await AsyncStorage.getItem('Business_Data');
+				if (data) {
+					const parsedData = JSON.parse(data);
+					const currency = parsedData?.currency || 'ILS';
+					setCurrencySymbol(
+						currencies.find((c) => c.code === currency)?.symbol ||
+							'₪'
+					);
+				}
+			} catch (error) {
+				console.error('Error fetching business data:', error);
+			}
+		};
+
+		fetchBusinessData();
+	}, []);
+
 	return (
 		<View className="flex-1 p-6 bg-white">
 			<Text className="text-xl font-bold mb-2">New Transaction</Text>
 			<Text className="text-xl mb-8">
 				Create new transaction for a customer
 			</Text>
+
 			<Text className="text-lg font-semibold mb-2">Description</Text>
 			<TextInput
 				className="border border-gray-300 rounded-lg p-3 text-lg bg-gray-100 mb-6"
@@ -117,56 +122,59 @@ export default () => {
 					Return time and date
 				</Text>
 				<View style={styles.row}>
-					<TouchableOpacity
-						style={styles.input}
-						onPress={() => setShow({ ...show, date: true })}
-					>
-						<Text>{format.date(date)}</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={styles.input}
-						onPress={() => setShow({ ...show, time: true })}
-					>
-						<Text>{format.time(date)}</Text>
-					</TouchableOpacity>
+					{['date', 'time'].map((type) => (
+						<TouchableOpacity
+							key={type}
+							style={styles.input}
+							onPress={() =>
+								setShow((prev) => ({ ...prev, [type]: true }))
+							}
+						>
+							<Text>{format[type as 'date' | 'time'](date)}</Text>
+						</TouchableOpacity>
+					))}
 				</View>
 
 				<DatePickerModal
 					locale="en-GB"
 					mode="single"
 					visible={show.date}
-					onDismiss={() => setShow({ ...show, date: false })}
+					onDismiss={() =>
+						setShow((prev) => ({ ...prev, date: false }))
+					}
 					date={date}
 					onConfirm={({ date }) => {
-						updateDate(date);
-						setShow({ ...show, date: false });
+						handleDateChange(date);
+						setShow((prev) => ({ ...prev, date: false }));
 					}}
 				/>
 
 				<TimePickerModal
 					visible={show.time}
-					onDismiss={() => setShow({ ...show, time: false })}
+					onDismiss={() =>
+						setShow((prev) => ({ ...prev, time: false }))
+					}
 					onConfirm={({ hours, minutes }) => {
-						updateTime(hours, minutes);
-						setShow({ ...show, time: false });
+						handleTimeChange(hours, minutes);
+						setShow((prev) => ({ ...prev, time: false }));
 					}}
 					hours={date.getHours()}
 					minutes={date.getMinutes()}
 				/>
 			</View>
 
-			<PricePicker
-				currency={currency}
+			<PriceSelector
+				title="Set Price"
 				price={price}
 				setPrice={setPrice}
-				label="Set Price"
-				containerStyle="mb-8"
+				steps={50}
+				currencySymbol={currencySymbol}
 			/>
 
 			<HapticButton
-				className="bg-white rounded-full py-4 items-center mb-5 shadow-lg mt-5"
+				className="rounded-full py-4 items-center mb-5 shadow-lg mt-5"
 				style={{ backgroundColor: '#4338CA' }}
-				onPress={handleContinueButton}
+				onPress={handleContinue}
 				disabled={isLoading}
 			>
 				{isLoading ? (
@@ -184,15 +192,6 @@ export default () => {
 	);
 };
 
-const AmountBtn = ({ onPress, children }: any) => (
-	<TouchableOpacity
-		className="border-2 border-gray-300 rounded-lg w-12 h-12 items-center justify-center"
-		onPress={onPress}
-	>
-		<Text className="text-2xl">{children}</Text>
-	</TouchableOpacity>
-);
-
 const styles = StyleSheet.create({
 	row: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
 	input: {
@@ -204,3 +203,5 @@ const styles = StyleSheet.create({
 		backgroundColor: '#f3f4f6',
 	},
 });
+
+export default CreateTransactionScreen;

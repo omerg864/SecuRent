@@ -2,8 +2,9 @@ import mongoose from 'mongoose';
 
 const transactionScheme = mongoose.Schema(
 	{
-		transaction_id: {
+		stripe_payment_id: {
 			type: String,
+			required: true,
 		},
 		amount: {
 			type: Number,
@@ -45,6 +46,10 @@ const transactionScheme = mongoose.Schema(
 		},
 		charged_description: {
 			type: String,
+		},
+		item: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'Item',
 		},
 	},
 	{ timestamps: true }

@@ -25,7 +25,7 @@ const Register = () => {
 				.min(8, 'Password must be at least 8 characters')
 				.regex(password_regex, {
 					message:
-						'Password must contain at least 1 uppercase, 1 lowercase, 1 number',
+						'Password must contain at least 1 uppercase, 1 lowercase, 1 number and 1 special character',
 				}),
 			confirmPassword: z.string(),
 			code: z.string().min(6, 'Code must be at least 6 characters long'),

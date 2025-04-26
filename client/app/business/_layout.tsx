@@ -13,14 +13,17 @@ import { View } from 'react-native';
 
 export default function Layout() {
 	const router = useRouter();
-
+	//<ActivityIndicator size="small" color="#4B5563"/>
+	// <Text className="text-2xl font-medium w-24 text-center text-[#2D2A2E]">
+	//   {amount > 0 ? `${amount}₪` : amount}
+	// </Text>
 	const handleLogout = async () => {
 		try {
 			await AsyncStorage.removeItem('Business_Data');
 			await AsyncStorage.removeItem('Access_Token');
 			await AsyncStorage.removeItem('Refresh_Token');
 			await AsyncStorage.removeItem('Auth_Expiration');
-      await AsyncStorage.removeItem("current_account_type");
+			await AsyncStorage.removeItem('current_account_type');
 			await AsyncStorage.removeItem('UserID');
 
 			router.replace('/login');
@@ -81,6 +84,31 @@ export default function Layout() {
 						options={{
 							drawerLabel: 'QR Code',
 							title: 'QR Code',
+							drawerItemStyle: { display: 'none' },
+							headerShown: false,
+						}}
+					/>
+					<Drawer.Screen
+						name="transactions"
+						options={{
+							drawerLabel: 'Transactions',
+							title: 'Transactions',
+						}}
+					/>
+					<Drawer.Screen
+						name="charge-deposit"
+						options={{
+							drawerLabel: 'Charge deposit',
+							title: 'Charge deposit',
+							drawerItemStyle: { display: 'none' },
+							headerShown: false,
+						}}
+					/>
+					<Drawer.Screen
+						name="transaction-details"
+						options={{
+							drawerLabel: 'Transaction Details',
+							title: 'Transaction Details',
 							drawerItemStyle: { display: 'none' },
 							headerShown: false,
 						}}

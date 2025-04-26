@@ -77,4 +77,52 @@ const analytics = async () => {
 	}
 };
 
-export { register, login, googleLogin, analytics };
+const getAllBusinesses = async (page, name = '') => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken) {
+			throw new Error('Access token is missing or invalid.');
+		}
+		if (name) {
+			const response = await client.get(
+				`admin/get-all-businesses?page=${page}&name=${name}`,
+				{
+					headers: { Authorization: `Bearer ${accessToken}` },
+				}
+			);
+			return response.data;
+		}
+		const response = await client.get(`admin/get-all-businesses?page=${page}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
+		return response.data;
+	} catch (error) {
+		console.log('Get all businesses error: ', error);
+		throw new Error(
+			error.response?.data?.message || 'Get all businesses failed'
+		);
+	}
+};
+
+const getBusinessTransactions = async (businessId) => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken) {
+			throw new Error('Access token is missing or invalid.');
+		}
+		const response = await client.get(
+			`transaction/admin/business/${businessId}`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response.data;
+	} catch (error) {
+		console.log('Get business transactions error: ', error);
+		throw new Error(
+			error.response?.data?.message || 'Get business transactions failed'
+		);
+	}
+}
+
+export { register, login, googleLogin, analytics , getAllBusinesses , getBusinessTransactions };
