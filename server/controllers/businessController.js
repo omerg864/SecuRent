@@ -413,9 +413,15 @@ const updateBusinessDetails = asyncHandler(async (req, res) => {
 		);
 		business.image = imageUrl;
 	}
+
+	const geoLocation = {
+		type: 'Point',
+		coordinates: [location.lng, location.lat], // important: [lng, lat]
+	};
+
 	business.companyNumber = companyNumber;
 	business.address = address;
-	business.location = location;
+	business.location = geoLocation;
 	business.phone = phone;
 	business.currency = currency;
 	business.category = category || [];
@@ -537,6 +543,90 @@ const getStripeOnboardingLink = asyncHandler(async (req, res) => {
 	});
 });
 
+const getNearbyBusinesses = asyncHandler(async (req, res) => {
+	const {
+		lat,
+		lng,
+		radius = 10,
+		rating = 0,
+		category = 'all',
+		search = '',
+	} = req.query;
+
+	if (isNaN(lat) || isNaN(lng)) {
+		res.status(400);
+		throw new Error('Latitude and longitude are required');
+	}
+
+	if (isNaN(radius) || radius <= 0) {
+		res.status(400);
+		throw new Error('Invalid radius');
+	}
+
+	const businesses = await Business.aggregate([
+		{
+			$geoNear: {
+				near: {
+					type: 'Point',
+					coordinates: [parseFloat(lng), parseFloat(lat)],
+				},
+				distanceField: 'distance', // Distance in meters
+				maxDistance: parseFloat(radius) * 1000, // Max distance in meters
+				spherical: true,
+			},
+		},
+		// 🛠️ Convert distance from meters to kilometers
+		{
+			$addFields: {
+				distance: { $divide: ['$distance', 1000] }, // meters ➔ kilometers
+			},
+		},
+		{ $match: { 'rating.overall': { $gte: parseFloat(rating) } } },
+		...(category !== 'all'
+			? [
+					{
+						$match: {
+							category: {
+								$elemMatch: {
+									$regex: new RegExp(category, 'i'),
+								},
+							},
+						},
+					},
+			  ]
+			: []),
+		...(search.trim() !== ''
+			? [
+					{
+						$match: {
+							name: {
+								$regex: new RegExp(search, 'i'),
+							},
+						},
+					},
+			  ]
+			: []),
+		// Project only safe fields
+		{
+			$project: {
+				name: 1,
+				phone: 1,
+				address: 1,
+				category: 1,
+				image: 1,
+				currency: 1,
+				rating: 1,
+				location: 1,
+				distance: 1, 
+				isValid: 1,
+				reviewSummary: 1,
+			},
+		},
+	]);
+
+	res.status(200).json({ success: true, businesses });
+});
+
 export {
 	registerBusiness,
 	loginBusiness,
@@ -551,4 +641,5 @@ export {
 	updateBusinessPassword,
 	resendVerificationCode,
 	getStripeOnboardingLink,
+	getNearbyBusinesses,
 };

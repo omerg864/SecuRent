@@ -78,11 +78,22 @@ interface Business {
 	email: string;
 	phone: string;
 	address: string;
-	location: { lat: number; lng: number };
+	location: {
+		type: string;
+		coordinates: [number, number]; // [longitude, latitude]
+	};
+	distance?: number;
 	createdAt: Date;
 	updatedAt: Date;
 	image: string;
-	rating: number;
+	rating: {
+		overall: number;
+		reviewOverall: number;
+		reliability: number;
+		quality: number;
+		price: number;
+		charged: number;
+	};
 	role: string;
 	category: string[];
 	currency: string;
@@ -235,5 +246,5 @@ export type {
 	StepResponse,
 	ClientStripeParamsResponse,
 	ValidResponse,
-	TransactionIntentResponse
+	TransactionIntentResponse,
 };
