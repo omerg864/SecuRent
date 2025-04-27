@@ -380,7 +380,8 @@ const getBusinessTransactionsAdmin = asyncHandler(async (req, res) => {
 const getTransactionById = asyncHandler(async (req, res) => {
 	const transaction = await Transaction.findById(req.params.id)
 		.populate('customer', 'name image email')
-		.populate('business', 'name image rating category');
+		.populate('business', 'name image rating category')
+		.populate('review', 'images content');
 
 	if (!transaction) {
 		res.status(404);
