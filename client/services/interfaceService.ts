@@ -215,6 +215,11 @@ interface Transaction {
 	charged_description?: string;
 	createdAt: string;
 	updatedAt: string;
+	review?: {
+		_id?: string;
+		image?: string[];
+		content?: string;
+	};
 }
 
 interface LocationPrediction {
