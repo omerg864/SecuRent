@@ -70,7 +70,7 @@ const AddReview = () => {
 			contentContainerStyle={{ flexGrow: 1 }}
 			className="bg-white"
 		>
-			<View className="flex-1 px-6 pb-8 pt-40">
+			<View className="flex-1 px-6 pb-8 pt-20 ">
 				<Text className="text-2xl font-semibold text-gray-800 text-center mb-8">
 					Tell us what you think about {'\n'} {businessName}
 				</Text>
@@ -109,7 +109,7 @@ const AddReview = () => {
 					disabled={isSubmitting}
 					className="mt-14"
 				>
-					<View className="bg-blue-600 py-4 rounded-lg">
+					<View className="bg-blue-600 py-4 rounded-full">
 						<Text className="text-white font-semibold text-center text-base">
 							{isSubmitting ? 'Submitting...' : 'Submit Review'}
 						</Text>

@@ -113,6 +113,7 @@ export default function Layout() {
 						options={{
 							drawerLabel: 'Add Review',
 							headerShown: false,
+							drawerItemStyle: { display: 'none' },
 						}}
 					/>
 				</Drawer>
