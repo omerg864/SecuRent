@@ -14,6 +14,7 @@ const router = express.Router();
 
 router.post('/', authBusiness, upload.single('image'), createItem);
 router.put('/:id',authBusiness ,upload.single('image'), updateItem);
+router.get('/business/:id', authBusiness, getItemById);
 router.get('/', getItems);
 router.get('/:id',authCustomer ,getItemById);
 router.delete('/:id',authBusiness , deleteItem);
