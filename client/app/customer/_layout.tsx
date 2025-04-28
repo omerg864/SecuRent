@@ -108,6 +108,14 @@ export default function Layout() {
 							headerShown: false,
 						}}
 					/>
+					<Drawer.Screen
+						name="add-review"
+						options={{
+							drawerLabel: 'Add Review',
+							headerShown: false,
+							drawerItemStyle: { display: 'none' },
+						}}
+					/>
 				</Drawer>
 			</GestureHandlerRootView>
 		</WebSocketProvider>

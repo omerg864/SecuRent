@@ -120,6 +120,17 @@ export default function TransactionDetails() {
 		fetchData();
 	}, [id]);
 
+	const handleAddReview = () => {
+		router.push({
+			pathname: '/customer/add-review',
+			params: {
+				businessName: transaction?.business?.name,
+				businessImage: transaction?.business?.image,
+				transactionId: id,
+			},
+		});
+	};
+
 	const handleCloseTransaction = async () => {
 		try {
 			if (!id || typeof id !== 'string') return;
@@ -192,7 +203,10 @@ export default function TransactionDetails() {
 				</Text>
 			</View>
 
-			<ScrollView className="flex-1 px-6">
+			<ScrollView
+				className="flex-1 px-6"
+				contentContainerStyle={{ paddingBottom: 100 }}
+			>
 				<View className="items-center mb-8 mt-2">
 					<UserImage
 						image={userImage}
@@ -307,6 +321,19 @@ export default function TransactionDetails() {
 					</Text>
 				)}
 			</ScrollView>
+
+			{!isOpen && accountType === 'personal' && (
+				<View className="absolute bottom-4 left-0 right-0 px-6 pb-6 bg-white">
+					<HapticButton
+						className="bg-green-500 rounded-full py-4 items-center mb-3"
+						onPress={handleAddReview}
+					>
+						<Text className="text-white font-semibold text-lg">
+							Add review!
+						</Text>
+					</HapticButton>
+				</View>
+			)}
 
 			{isOpen && accountType === 'business' && (
 				<View className="absolute bottom-4 left-0 right-0 px-6 pb-6 bg-white">
