@@ -40,3 +40,7 @@ export const getBusinessCurrencySymbol = async () => {
 	const parsedData = businessData ? JSON.parse(businessData) : null;
 	return parsedData?.currency || 'ILS';
 };
+
+export const NormalizedImage = (
+	value: string | string[] | undefined
+): string | undefined => (Array.isArray(value) ? value[0] : value);

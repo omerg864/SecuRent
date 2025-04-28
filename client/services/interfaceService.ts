@@ -217,8 +217,9 @@ interface Transaction {
 	updatedAt: string;
 	review?: {
 		_id?: string;
-		image?: string[];
+		images?: string[];
 		content?: string;
+		createdAt?: Date;
 	};
 }
 
