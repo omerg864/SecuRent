@@ -1,6 +1,8 @@
 import asyncHandler from 'express-async-handler';
 import Business from '../models/businessModel.js';
 import Customer from '../models/customerModel.js';
+import Item from '../models/itemModel.js';
+import Review from '../models/reviewModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { email_regex, password_regex, phone_regex } from '../utils/regex.js';
@@ -627,6 +629,48 @@ const getNearbyBusinesses = asyncHandler(async (req, res) => {
 	res.status(200).json({ success: true, businesses });
 });
 
+const getBusinessProfile = asyncHandler(async (req, res) => {
+	const id = req.params.id;
+	console.log('id: ', id);
+	if (!id) {
+		console,log("'Business ID is required");
+		res.status(400);
+		throw new Error('Business ID is required');
+	}
+	const business = await Business.findById(id).select(
+		'-password -refreshTokens -verificationCode -isValid -isEmailValid -isCompanyNumberVerified -isBankValid'
+	);
+	if (!business) {
+		console.log('Business not found');
+		res.status(404);
+		throw new Error('Business not found');
+	}
+	const items = await Item.find({ business: id, temporary: false });
+	const reviews = await Review.find({ business: id })
+		.populate('customer', 'name image')
+		.select('-business -temporary -createdAt -updatedAt -__v')
+		.sort({ createdAt: -1 });
+	const businessProfile = {
+		business: {
+			_id: business._id,
+			name: business.name,
+			phone: business.phone,
+			image: business.image,
+			address: business.address,
+			category: business.category,
+			currency: business.currency,
+			rating: business.rating,
+			location: business.location,
+			reviewSummary: business.reviewSummary,
+		},
+		items,
+		reviews,
+	};
+	res.status(200).json({ success: true, businessProfile });	
+});
+
+
+
 export {
 	registerBusiness,
 	loginBusiness,
@@ -642,4 +686,5 @@ export {
 	resendVerificationCode,
 	getStripeOnboardingLink,
 	getNearbyBusinesses,
+	getBusinessProfile,
 };
