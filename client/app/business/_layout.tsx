@@ -120,6 +120,15 @@ export default function Layout() {
 							title: 'New Item',
 						}}
 					/>
+					<Drawer.Screen
+						name="edit-item"
+						options={{
+							drawerLabel: 'Edit Item',
+							title: 'Edit Item',
+							drawerItemStyle: { display: 'none' },
+							headerShown: true,
+						}}
+					/>
 				</Drawer>
 			</GestureHandlerRootView>
 		</WebSocketProvider>
