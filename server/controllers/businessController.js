@@ -631,7 +631,6 @@ const getNearbyBusinesses = asyncHandler(async (req, res) => {
 
 const getBusinessProfile = asyncHandler(async (req, res) => {
 	const id = req.params.id;
-	console.log('id: ', id);
 	if (!id) {
 		console,log("'Business ID is required");
 		res.status(400);
