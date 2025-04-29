@@ -4,7 +4,8 @@ import {
     Text,
     TextInput,
     ScrollView,
-    ActivityIndicator
+    ActivityIndicator,
+    Alert
 } from "react-native";
 import ProfileImageInput from "@/components/ProfileImageInput";
 import { FileObject } from "@/types/business";
@@ -12,15 +13,19 @@ import { Picker } from "@react-native-picker/picker";
 import PricePicker from "@/components/PricePicker";
 import Toast from "react-native-toast-message";
 import { ThemedText } from "@/components/ui/ThemedText";
-import { getItemByIdForBusiness, updateItemById } from "@/services/itemService";
+import {
+    deleteItemById,
+    getItemByIdForBusiness,
+    updateItemById
+} from "@/services/itemService";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { getBusinessCurrencySymbol } from "@/utils/functions";
 import { Item } from "@/services/interfaceService";
 import HapticButton from "@/components/ui/HapticButton";
 
 export default function EditItem() {
-   // const { id } = useLocalSearchParams<{ id: string }>();
-   const id = "680cfad746f7383eb9e11803"; // temporary id till we connect to a real one
+    // const { id } = useLocalSearchParams<{ id: string }>();
+    const id = "680f9da65bda4dd5928f17c3"; // temporary id till we connect to a real one
     const router = useRouter();
 
     const [desc, setDesc] = useState("");
@@ -32,40 +37,46 @@ export default function EditItem() {
     const [isLoading, setIsLoading] = useState(false);
     const [currency, setCurrency] = useState("ILS");
     const [initialLoading, setInitialLoading] = useState(true);
-    const [originalImageExists, setOriginalImageExists] = useState(false); 
+    const [originalImageExists, setOriginalImageExists] = useState(false);
+    const [itemNotFound, setItemNotFound] = useState(false);
 
     const timeUnits = ["minutes", "hours", "days"];
 
     useEffect(() => {
         const fetchItem = async () => {
             try {
-                const response = await getItemByIdForBusiness(id); 
+                const response = await getItemByIdForBusiness(id);
                 const item = response.item as Item;
 
-                if (item) {
-                    setDesc(item.description);
-                    setPrice(item.price);
-                    setDuration(String(item.duration || ""));
-                    setTimeUnit(item.timeUnit || "days");
+                if (!item) {
+                    setItemNotFound(true);
+                    return;
+                }
 
-                    if (item.image) {
-                        setFile({
-                            uri: item.image,
-                            name: "image.jpg",
-                            type: "image/jpeg"
-                        });
-                        setOriginalImageExists(true); // הייתה תמונה
-                    } else {
-                        setFile(null);
-                        setOriginalImageExists(false); // לא הייתה תמונה
-                    }
+                setDesc(item.description);
+                setPrice(item.price);
+                setDuration(String(item.duration || ""));
+                setTimeUnit(item.timeUnit || "days");
+
+                if (item.image) {
+                    setFile({
+                        uri: item.image,
+                        name: "image.jpg",
+                        type: "image/jpeg"
+                    });
+                    setOriginalImageExists(true);
                 } else {
-                    Toast.show({ type: "error", text1: "Item not found" });
-                    router.back();
+                    setFile(null);
+                    setOriginalImageExists(false);
                 }
             } catch (error: any) {
-                Toast.show({ type: "error", text1: "Error fetching item" });
-                router.back();
+                const status = error?.response?.status;
+                if (status === 404) {
+                    setItemNotFound(true);
+                } else {
+                    Toast.show({ type: "error", text1: "Error fetching item" });
+                    router.back();
+                }
             } finally {
                 setInitialLoading(false);
             }
@@ -100,7 +111,6 @@ export default function EditItem() {
 
             if (file) {
                 if (file.uri.startsWith("file://")) {
-                    // תמונה חדשה שנבחרה
                     formData.append("image", {
                         uri: file.uri,
                         name: file.name,
@@ -138,6 +148,40 @@ export default function EditItem() {
         setIsLoading(false);
     };
 
+    const handleDelete = () => {
+        Alert.alert(
+            "Delete Item",
+            "Are you sure you want to delete this item?",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            setIsLoading(true);
+                            await deleteItemById(id);
+                            Toast.show({
+                                type: "success",
+                                text1: "Item deleted successfully"
+                            });
+                            router.replace("/business/business-home");
+                        } catch (error: any) {
+                            Toast.show({
+                                type: "error",
+                                text1:
+                                    error.response?.data.message ||
+                                    "Delete failed"
+                            });
+                        } finally {
+                            setIsLoading(false);
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
     const onDurationChange = (val: string) => {
         setDuration(val);
         const num = parseInt(val);
@@ -160,10 +204,15 @@ export default function EditItem() {
     if (initialLoading) {
         return (
             <View className='flex-1 justify-center items-center bg-white'>
-                <ActivityIndicator
-                    size='large'
-                    color='#4338CA'
-                />
+                <ActivityIndicator size='large' color='#4338CA' />
+            </View>
+        );
+    }
+
+    if (itemNotFound) {
+        return (
+            <View className='flex-1 justify-center items-center bg-white'>
+                <Text className='text-xl text-gray-600'>Item not found</Text>
             </View>
         );
     }
@@ -229,13 +278,27 @@ export default function EditItem() {
             <HapticButton
                 onPress={handleSubmit}
                 disabled={isLoading}
-                className='rounded-full py-4 items-center mt-5 bg-indigo-700'
+                className='rounded-full py-4 items-center mt-1 bg-indigo-700'
             >
                 {isLoading ? (
                     <ActivityIndicator color='#fff' />
                 ) : (
                     <ThemedText className='text-white font-semibold text-lg'>
                         Edit Item
+                    </ThemedText>
+                )}
+            </HapticButton>
+
+            <HapticButton
+                onPress={handleDelete}
+                disabled={isLoading}
+                className='rounded-full py-3 items-center mt-2 bg-red-500 w-64 self-center'
+            >
+                {isLoading ? (
+                    <ActivityIndicator color='#fff' />
+                ) : (
+                    <ThemedText className='text-white font-semibold text-base'>
+                        Delete Item
                     </ThemedText>
                 )}
             </HapticButton>

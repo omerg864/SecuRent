@@ -114,10 +114,29 @@ const updateItemById = async (
     }
 };
 
+const deleteItemById = async (id: string) => {
+    try {
+        const accessToken = await checkToken();
+        const response = await client.delete<{ success: boolean; message?: string }>(
+            `item/${id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error || "Item deletion failed.";
+    }
+};
+
+
 export {
     createTemporaryItem,
     createBusinessItem,
     getItemById,
     updateItemById,
-    getItemByIdForBusiness
+    getItemByIdForBusiness,
+    deleteItemById
 };
