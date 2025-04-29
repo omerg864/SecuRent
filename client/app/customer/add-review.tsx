@@ -5,7 +5,6 @@ import {
 	TextInput,
 	ScrollView,
 	Alert,
-	SafeAreaView,
 } from 'react-native';
 import HapticButton from '@/components/ui/HapticButton';
 import UserImage from '@/components/UserImage';
