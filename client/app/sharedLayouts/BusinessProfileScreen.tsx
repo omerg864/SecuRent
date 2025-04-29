@@ -252,22 +252,19 @@ const BusinessProfileScreen = () => {
                         >
                           {item.price} {business.currency}
                         </ThemedText>
-
-                        {isBusiness && (
-                          <View className="flex-row items-center mt-1">
-                            <Ionicons
-                              name="time-outline"
-                              size={14}
-                              color="#666"
-                            />
-                            <ThemedText
-                              className="text-xs ml-1 text-gray-500"
-                              darkColor="black"
-                            >
-                              {item.duration} {item.timeUnit}
-                            </ThemedText>
-                          </View>
-                        )}
+                        <View className="flex-row items-center mt-1">
+                          <Ionicons
+                            name="time-outline"
+                            size={14}
+                            color="#666"
+                          />
+                          <ThemedText
+                            className="text-xs ml-1 text-gray-500"
+                            darkColor="black"
+                          >
+                            {item.duration} {item.timeUnit}
+                          </ThemedText>
+                        </View>
                       </View>
                     </View>
                   </View>
