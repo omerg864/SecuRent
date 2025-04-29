@@ -73,26 +73,29 @@ export default function ItemForm({
             />
 
             {/* Duration */}
-            <View className='mt-8'>
+            <View className='mt-8 mb-6'>
                 <Text className='text-lg font-semibold mb-3'>Duration</Text>
                 <View className='flex-row gap-4 items-center'>
                     <View className='flex-1'>
                         <TextInput
-                            className={`border rounded-xl p-3 text-lg text-center bg-gray-100 ${
+                            className={`border rounded-xl px-3 text-lg text-center bg-gray-100 h-12 ${
                                 durationError
                                     ? "border-red-500"
                                     : "border-gray-300"
                             }`}
+                            style={{ textAlignVertical: "center" }}
                             keyboardType='numeric'
                             value={duration}
                             onChangeText={onDurationChange}
                         />
                     </View>
 
-                    <View className='flex-1 border border-gray-300 rounded-xl bg-white overflow-hidden'>
+                    <View className='flex-1 border border-gray-300 rounded-xl bg-white h-44 justify-center'>
                         <Picker
                             selectedValue={timeUnit}
                             onValueChange={setTimeUnit}
+                            style={{ height: "100%" }}
+                            itemStyle={{ fontSize: 18 }}
                         >
                             {timeUnits.map((unit) => (
                                 <Picker.Item
