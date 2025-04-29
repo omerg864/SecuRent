@@ -22,6 +22,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { getBusinessCurrencySymbol } from "@/utils/functions";
 import { Item } from "@/services/interfaceService";
 import HapticButton from "@/components/ui/HapticButton";
+import ItemForm from "@/components/forms/ItemForm";
 
 export default function EditItem() {
     // const { id } = useLocalSearchParams<{ id: string }>();
@@ -204,7 +205,10 @@ export default function EditItem() {
     if (initialLoading) {
         return (
             <View className='flex-1 justify-center items-center bg-white'>
-                <ActivityIndicator size='large' color='#4338CA' />
+                <ActivityIndicator
+                    size='large'
+                    color='#4338CA'
+                />
             </View>
         );
     }
@@ -223,57 +227,22 @@ export default function EditItem() {
             <Text className='text-xl mb-8'>
                 Update details of your business item
             </Text>
-
-            <ProfileImageInput
-                file={file}
-                setFile={setFile}
-                containerClassName='mb-6'
-                themeText={false}
-                label='Item Image'
-            />
-
-            <Text className='text-lg font-semibold mb-2'>Description</Text>
-            <TextInput
-                className='border rounded-lg p-3 bg-gray-100 mb-6'
-                value={desc}
-                onChangeText={setDesc}
-            />
-
-            <PricePicker
-                label='Price'
+            
+            <ItemForm
+                desc={desc}
+                setDesc={setDesc}
                 price={price}
                 setPrice={setPrice}
+                file={file}
+                setFile={setFile}
+                duration={duration}
+                setDuration={setDuration}
+                timeUnit={timeUnit}
+                setTimeUnit={setTimeUnit}
+                durationError={durationError}
+                onDurationChange={onDurationChange}
                 currency={currency}
             />
-
-            <View className='mt-8'>
-                <Text className='text-lg font-semibold mb-3'>Duration</Text>
-                <TextInput
-                    className='border rounded-xl p-3 text-center bg-gray-100'
-                    keyboardType='numeric'
-                    value={duration}
-                    onChangeText={onDurationChange}
-                />
-
-                <Picker
-                    selectedValue={timeUnit}
-                    onValueChange={setTimeUnit}
-                >
-                    {timeUnits.map((unit) => (
-                        <Picker.Item
-                            key={unit}
-                            label={unit.charAt(0).toUpperCase() + unit.slice(1)}
-                            value={unit}
-                        />
-                    ))}
-                </Picker>
-
-                {durationError ? (
-                    <Text className='text-red-500 mt-2 text-sm'>
-                        {durationError}
-                    </Text>
-                ) : null}
-            </View>
 
             <HapticButton
                 onPress={handleSubmit}
