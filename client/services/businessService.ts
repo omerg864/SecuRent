@@ -153,7 +153,6 @@ const getNearestBusinesses = async (
 const getBusinessProfile = async (businessId: string) => {
 	try {
 		const accessToken = await checkToken();
-		console.log('Business ID: ', businessId);
 		const response : any = await client.get<Business>(
 			`business/business-profile/${businessId}`,
 
@@ -161,7 +160,7 @@ const getBusinessProfile = async (businessId: string) => {
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
 		);
-		console.log('Business profile: ', response.data.businessProfile);
+		console.log('Business profile:', response.data.businessProfile);
 		return response.data.businessProfile;
 	} catch (error) {
 		throw error || 'Failed to get business profile.';
