@@ -26,7 +26,7 @@ import ItemForm from "@/components/forms/ItemForm";
 
 export default function EditItem() {
     // const { id } = useLocalSearchParams<{ id: string }>();
-    const id = "680f9da65bda4dd5928f17c3"; // temporary id till we connect to a real one
+    const id = "6810b5fa4bfa65508311aae2"; // temporary id till we connect to a real one
     const router = useRouter();
 
     const [desc, setDesc] = useState("");
@@ -35,13 +35,13 @@ export default function EditItem() {
     const [duration, setDuration] = useState("");
     const [timeUnit, setTimeUnit] = useState("days");
     const [durationError, setDurationError] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
     const [currency, setCurrency] = useState("ILS");
     const [initialLoading, setInitialLoading] = useState(true);
     const [originalImageExists, setOriginalImageExists] = useState(false);
     const [itemNotFound, setItemNotFound] = useState(false);
-
-    const timeUnits = ["minutes", "hours", "days"];
+    const [loadingAction, setLoadingAction] = useState<
+        "edit" | "delete" | null
+    >(null);
 
     useEffect(() => {
         const fetchItem = async () => {
@@ -101,7 +101,7 @@ export default function EditItem() {
             return;
         }
 
-        setIsLoading(true);
+        setLoadingAction("edit");
         try {
             const formData = new FormData();
 
@@ -134,7 +134,7 @@ export default function EditItem() {
 
             if (!response) {
                 Toast.show({ type: "error", text1: "Internal Server Error" });
-                setIsLoading(false);
+                setLoadingAction(null);
                 return;
             }
 
@@ -146,7 +146,7 @@ export default function EditItem() {
                 text1: error.response?.data.message || "Update failed"
             });
         }
-        setIsLoading(false);
+        setLoadingAction(null);
     };
 
     const handleDelete = () => {
@@ -159,8 +159,8 @@ export default function EditItem() {
                     text: "Delete",
                     style: "destructive",
                     onPress: async () => {
+                        setLoadingAction("delete");
                         try {
-                            setIsLoading(true);
                             await deleteItemById(id);
                             Toast.show({
                                 type: "success",
@@ -175,7 +175,7 @@ export default function EditItem() {
                                     "Delete failed"
                             });
                         } finally {
-                            setIsLoading(false);
+                            setLoadingAction(null);
                         }
                     }
                 }
@@ -227,7 +227,7 @@ export default function EditItem() {
             <Text className='text-xl mb-8'>
                 Update details of your business item
             </Text>
-            
+
             <ItemForm
                 desc={desc}
                 setDesc={setDesc}
@@ -246,10 +246,10 @@ export default function EditItem() {
 
             <HapticButton
                 onPress={handleSubmit}
-                disabled={isLoading}
+                disabled={loadingAction !== null}
                 className='rounded-full py-4 items-center mt-1 bg-indigo-700'
             >
-                {isLoading ? (
+                {loadingAction === "edit" ? (
                     <ActivityIndicator color='#fff' />
                 ) : (
                     <ThemedText className='text-white font-semibold text-lg'>
@@ -260,10 +260,10 @@ export default function EditItem() {
 
             <HapticButton
                 onPress={handleDelete}
-                disabled={isLoading}
+                disabled={loadingAction !== null}
                 className='rounded-full py-3 items-center mt-2 bg-red-500 w-64 self-center'
             >
-                {isLoading ? (
+                {loadingAction === "delete" ? (
                     <ActivityIndicator color='#fff' />
                 ) : (
                     <ThemedText className='text-white font-semibold text-base'>
