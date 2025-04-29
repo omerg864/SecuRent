@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, ScrollView, Alert } from 'react-native';
+import {
+	View,
+	Text,
+	TextInput,
+	ScrollView,
+	Alert,
+	SafeAreaView,
+} from 'react-native';
 import HapticButton from '@/components/ui/HapticButton';
 import UserImage from '@/components/UserImage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -8,6 +15,7 @@ import { FileObject } from '@/types/business';
 import { createReview } from '@/services/ReviewService';
 import ShowToast from '@/components/ui/ShowToast';
 import { NormalizedImage } from '@/utils/functions';
+import FloatingBackArrowButton from '@/components/ui/FloatingBackArrowButton';
 
 const AddReview = () => {
 	const router = useRouter();
@@ -52,6 +60,7 @@ const AddReview = () => {
 			contentContainerStyle={{ flexGrow: 1 }}
 			className="bg-white"
 		>
+			<FloatingBackArrowButton />
 			<View className="flex-1 px-6 pb-8 pt-20">
 				<Text className="text-2xl font-semibold text-gray-800 text-center mb-8">
 					Tell us what you think about {'\n'} {businessName}
@@ -59,6 +68,7 @@ const AddReview = () => {
 				<View className="items-center justify-center mb-8">
 					<UserImage
 						image={NormalizedImage(businessImage)}
+						name={businessName as string}
 						size={16}
 						className="mb-2"
 					/>
