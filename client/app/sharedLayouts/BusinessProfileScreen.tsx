@@ -25,10 +25,14 @@ import StarRating from "@/components/StarRating";
 import { getBusinessProfile } from "@/services/businessService";
 import { deleteItem } from "@/services/itemService";
 import UserImage from "@/components/UserImage";
+import { BusinessDetails } from "@/services/interfaceService";
+import { currencies } from "@/utils/constants";
 
 const BusinessProfileScreen = () => {
   const [activeTab, setActiveTab] = useState("items");
-  const [businessData, setBusinessData] = useState(null);
+  const [businessData, setBusinessData] = useState<BusinessDetails | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isBusiness, setIsBusiness] = useState(false);
 
@@ -41,12 +45,15 @@ const BusinessProfileScreen = () => {
         try {
           setIsLoading(true);
           const storedUserId = await AsyncStorage.getItem("UserID");
-          const id = params.id || storedUserId;
+          const id: any = params.id || storedUserId;
           setIsBusiness(!params.id);
+          if (params.id == storedUserId) {
+            setIsBusiness(true);
+          }
           const data = await getBusinessProfile(id);
           setBusinessData(data);
-        } catch (error) {
-          ShowToast("error", "Failed to fetch business data");
+        } catch (error: any) {
+          ShowToast("error", error.message);
           router.back();
         } finally {
           setIsLoading(false);
@@ -58,44 +65,44 @@ const BusinessProfileScreen = () => {
   );
 
   const handleCall = () => {
-    Linking.openURL(`tel:${businessData.business.phone}`);
+    if (businessData) Linking.openURL(`tel:${businessData.business.phone}`);
   };
 
   const handleNavigate = () => {
-    const [lng, lat] = businessData.business.location?.coordinates || [
-      34.792611, 32.074983,
-    ];
-    console.log("lat", lat, "lng", lng);
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
-
-    Linking.canOpenURL(url).then((supported) => {
-      supported
-        ? Linking.openURL(url)
-        : ShowToast("error", "Google Maps is not available");
-    });
+    if (businessData) {
+      const [lng, lat] = businessData.business.location?.coordinates || [
+        34.792611, 32.074983,
+      ];
+      const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+      Linking.canOpenURL(url).then((supported) => {
+        supported
+          ? Linking.openURL(url)
+          : ShowToast("error", "Google Maps is not available");
+      });
+    }
   };
 
-  const handleEdit = (item) => {
+  const handleEdit = (item: any) => {
     ShowToast("success", `${item.description} edited successfully`);
   };
 
-  const handleDelete = async (item) => {
+  const handleDelete = async (item: any) => {
     try {
       await deleteItem(item._id);
       ShowToast("success", `${item.description} deleted successfully`);
-      setBusinessData((prev) => ({
+      setBusinessData((prev: any) => ({
         ...prev,
-        items: prev.items.filter((i) => i._id !== item._id),
+        items: prev.items.filter((i: any) => i._id !== item._id),
       }));
     } catch {
       ShowToast("error", "Failed to delete item");
     }
   };
 
-  const handleQRCode = (item) => {
+  const handleQRCode = (item: any) => {
     router.push({
       pathname: "/business/QRCodeScreen",
-      params: { id: item._id },
+      params: { id: item._id, from: "ProfilePage" },
     });
   };
 
@@ -250,7 +257,10 @@ const BusinessProfileScreen = () => {
                           className="text-green-600"
                           darkColor="black"
                         >
-                          {item.price} {business.currency}
+                          {item.price}{" "}
+                          {currencies.find(
+                            (currency) => currency.code === item.currency
+                          )?.symbol || "₪"}
                         </ThemedText>
                         <View className="flex-row items-center mt-1">
                           <Ionicons
@@ -318,29 +328,48 @@ const BusinessProfileScreen = () => {
             <ThemedText className="text-gray-500 mb-4" darkColor="black">
               {business.reviewSummary || "No reviews yet..."}
             </ThemedText>
-            {reviews.map((review: any) => (
-              <View
-                key={review._id}
-                className="bg-white rounded-lg p-4 mb-4 shadow"
-              >
-                <View className="flex-row items-center mb-2">
-                  <UserImage
-                    image={review.customer.image}
-                    name={review.customer.name}
-                    size={10}
-                  />
-                  <ThemedText
-                    className="ml-3 font-semibold text-black"
-                    darkColor="black"
-                  >
-                    {review.customer.name}
+            {reviews.map((review: any) => {
+              const createdAt = new Date(review.createdAt).toLocaleDateString(
+                "en-GB",
+                {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                }
+              );
+
+              return (
+                <View
+                  key={review._id}
+                  className="bg-white rounded-lg p-4 mb-4 shadow"
+                >
+                  <View className="flex-row justify-between items-center mb-2">
+                    <View className="flex-row items-center">
+                      <UserImage
+                        image={review.customer.image}
+                        name={review.customer.name}
+                        size={10}
+                      />
+                      <ThemedText
+                        className="ml-3 font-semibold text-black"
+                        darkColor="black"
+                      >
+                        {review.customer.name}
+                      </ThemedText>
+                    </View>
+                    <ThemedText
+                      className="text-xs text-gray-400"
+                      darkColor="gray"
+                    >
+                      {createdAt}
+                    </ThemedText>
+                  </View>
+                  <ThemedText className="text-gray-700" darkColor="black">
+                    {review.content}
                   </ThemedText>
                 </View>
-                <ThemedText className="text-gray-700" darkColor="black">
-                  {review.content}
-                </ThemedText>
-              </View>
-            ))}
+              );
+            })}
           </View>
         )}
       </ScrollView>

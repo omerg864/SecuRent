@@ -102,6 +102,7 @@ interface Business {
 	isEmailValid: boolean;
 	isBankValid: boolean;
 	companyNumber: string;
+	reviewSummary: string;
 	isCompanyNumberVerified: boolean;
 	bank: {
 		accountNumber: string;
@@ -232,6 +233,30 @@ interface LocationDetails {
 	location: { lat: number; lng: number };
 }
 
+interface Review {
+	_id: string;
+	transaction: string;
+	business: string;
+	customer: string;
+	images?: string[];
+	rating: {
+		overall: number;
+		reliability: number;
+		price: number;
+		quality: number;
+	};
+	content?: string;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+interface BusinessDetails {
+	business: Business;
+	items: Item[];
+	reviews: Review[];
+}
+
+
 export type {
 	AuthData,
 	LoginCredentials,
@@ -252,4 +277,6 @@ export type {
 	ClientStripeParamsResponse,
 	ValidResponse,
 	TransactionIntentResponse,
+	Review,
+	BusinessDetails,
 };

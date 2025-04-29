@@ -4,6 +4,7 @@ import {
 	AuthData,
 	AuthResponse,
 	Business,
+	BusinessDetails,
 	StepResponse,
 	ValidResponse,
 } from './interfaceService';
@@ -153,15 +154,15 @@ const getNearestBusinesses = async (
 const getBusinessProfile = async (businessId: string) => {
 	try {
 		const accessToken = await checkToken();
-		const response : any = await client.get<Business>(
+		const response : any = await client.get<BusinessDetails>(
 			`business/business-profile/${businessId}`,
 
 			{
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
 		);
-		console.log('Business profile:', response.data.businessProfile);
-		return response.data.businessProfile;
+		console.log('Business profile:', response.data);
+		return response.data;
 	} catch (error) {
 		throw error || 'Failed to get business profile.';
 	}
