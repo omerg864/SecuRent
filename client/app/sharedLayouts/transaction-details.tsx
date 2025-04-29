@@ -143,12 +143,12 @@ export default function TransactionDetails() {
 				userName: transaction?.customer?.name,
 				userImage: transaction?.customer?.image,
 				reviewText: transaction?.review?.content,
-				reviewImages: transaction?.review?.images
-					? JSON.stringify(transaction.review.images)
+				reviewImages: transaction?.review?.image
+					? JSON.stringify(transaction.review.image)
 					: JSON.stringify([]),
 				businessName: transaction?.business?.name,
 				businessImage: transaction?.business?.image,
-				createdAt: transaction?.review?.createdAt?.toISOString(),
+				createdAt: transaction?.review?.createdAt?.toString(),
 			},
 		});
 	};
