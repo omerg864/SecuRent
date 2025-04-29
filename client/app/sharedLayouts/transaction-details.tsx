@@ -3,14 +3,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
 	View,
-	TouchableOpacity,
 	StatusBar,
 	SafeAreaView,
 	ScrollView,
 	ActivityIndicator,
 	Text,
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
 import {
 	useRouter,
 	useLocalSearchParams,
@@ -23,10 +21,10 @@ import HapticButton from '@/components/ui/HapticButton';
 import {
 	getTransactionById,
 	closeTransaction,
-	chargeDeposit,
 } from '@/services/transactionService';
 import { Transaction } from '@/services/interfaceService';
 import UserImage from '@/components/UserImage';
+import FloatingBackArrowButton from '@/components/ui/FloatingBackArrowButton';
 
 export default function TransactionDetails() {
 	const router = useRouter();
@@ -36,6 +34,7 @@ export default function TransactionDetails() {
 	const [isOpen, setIsOpen] = useState(true);
 	const [loading, setLoading] = useState(true);
 	const [accountType, setAccountType] = useState<string | null>(null);
+	const [hasReviewed, setHasReviewed] = useState(false);
 
 	const userImage =
 		accountType === 'business'
@@ -65,6 +64,11 @@ export default function TransactionDetails() {
 
 					const data = await getTransactionById(id);
 					setTransaction(data);
+					console.log(
+						'Transaction review content: ',
+						data.review?.content
+					);
+					setHasReviewed(!!data.review?.content);
 					setIsOpen(data.status === 'open');
 				} catch (error: any) {
 					Toast.show({
@@ -105,6 +109,7 @@ export default function TransactionDetails() {
 
 				const data = await getTransactionById(id);
 				setTransaction(data);
+				console.log('transaction data: ', data);
 				setIsOpen(data.status === 'open');
 			} catch (error: any) {
 				Toast.show({
@@ -127,6 +132,23 @@ export default function TransactionDetails() {
 				businessName: transaction?.business?.name,
 				businessImage: transaction?.business?.image,
 				transactionId: id,
+			},
+		});
+	};
+
+	const handleWatchMyReview = () => {
+		router.push({
+			pathname: '/customer/display-review',
+			params: {
+				userName: transaction?.customer?.name,
+				userImage: transaction?.customer?.image,
+				reviewText: transaction?.review?.content,
+				reviewImages: transaction?.review?.images
+					? JSON.stringify(transaction.review.images)
+					: JSON.stringify([]),
+				businessName: transaction?.business?.name,
+				businessImage: transaction?.business?.image,
+				createdAt: transaction?.review?.createdAt?.toISOString(),
 			},
 		});
 	};
@@ -185,17 +207,7 @@ export default function TransactionDetails() {
 		<SafeAreaView className="flex-1 bg-white">
 			<StatusBar barStyle="dark-content" />
 
-			{/* Floating Back Button + Title */}
-			<View className="absolute top-20 left-5 z-10">
-				<HapticButton
-					onPress={() =>
-						router.replace({ pathname: from as RelativePathString })
-					}
-					className="bg-white p-2 rounded-full shadow-md"
-				>
-					<Feather name="arrow-left" size={24} color="black" />
-				</HapticButton>
-			</View>
+			<FloatingBackArrowButton from={from as RelativePathString} />
 
 			<View className="mt-20 mb-6 items-center">
 				<Text className="text-2xl font-semibold text-gray-900">
@@ -277,7 +289,6 @@ export default function TransactionDetails() {
 				</View>
 
 				<View className="mb-4 bg-gray-50 rounded-lg py-4">
-					{/* Status */}
 					<Row
 						label="Status"
 						value={
@@ -325,11 +336,15 @@ export default function TransactionDetails() {
 			{!isOpen && accountType === 'personal' && (
 				<View className="absolute bottom-4 left-0 right-0 px-6 pb-6 bg-white">
 					<HapticButton
-						className="bg-green-500 rounded-full py-4 items-center mb-3"
-						onPress={handleAddReview}
+						className={`rounded-full py-4 items-center mb-3 ${
+							hasReviewed ? 'bg-yellow-500' : 'bg-green-500'
+						}`}
+						onPress={
+							hasReviewed ? handleWatchMyReview : handleAddReview
+						}
 					>
 						<Text className="text-white font-semibold text-lg">
-							Add review!
+							{hasReviewed ? 'Watch my review' : 'Add Review'}
 						</Text>
 					</HapticButton>
 				</View>

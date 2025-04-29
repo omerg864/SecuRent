@@ -221,6 +221,7 @@ interface Transaction {
         _id?: string;
         image?: string[];
         content?: string;
+        createdAt: string;
     };
 }
 
