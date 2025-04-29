@@ -25,8 +25,7 @@ import HapticButton from "@/components/ui/HapticButton";
 import ItemForm from "@/components/forms/ItemForm";
 
 export default function EditItem() {
-    // const { id } = useLocalSearchParams<{ id: string }>();
-    const id = "6810b5fa4bfa65508311aae2"; // temporary id till we connect to a real one
+    const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
 
     const [desc, setDesc] = useState("");

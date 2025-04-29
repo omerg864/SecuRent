@@ -160,7 +160,7 @@ export default function ProfileImageInput({
           <Text className="text-lg text-center">Choose from Library</Text>
         </TouchableOpacity>
 
-        {/* Remove Image — מוצג רק אם uri קיים */}
+        {/* Remove Image */}
         {uri && (
           <TouchableOpacity
             onPress={handleRemove}
