@@ -65,6 +65,15 @@ export default function Layout() {
             }}
           />
           <Drawer.Screen
+            name="BusinessProfileScreen"
+            options={{
+              drawerLabel: "Business Profile",
+              title: "Business Profile",
+              drawerItemStyle: { display: "none" },
+              headerShown: true,
+            }}
+          />
+          <Drawer.Screen
             name="BusinessesMap"
             options={{
               drawerLabel: "Businesses Map",
@@ -104,16 +113,15 @@ export default function Layout() {
             }}
           />
           <Drawer.Screen
-            name="BusinessProfileScreen"
+            name="add-review"
             options={{
-              drawerLabel: "Business Profile",
-              title: "Business Profile",
+              drawerLabel: "Add Review",
+              headerShown: false,
               drawerItemStyle: { display: "none" },
-              headerShown: true,
             }}
           />
           <Drawer.Screen
-            name="add-review"
+            name="display-review"
             options={{
               drawerLabel: "Add Review",
               headerShown: false,
