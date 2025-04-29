@@ -54,9 +54,9 @@ const LoginScreen = () => {
         await AsyncStorage.multiSet([
           ["current_account_type", "personal"],
           ["Customer_Data", JSON.stringify(response.user)],
+          ["UserID", response.user._id],
         ]);
         if (!response.user.isValid) {
-          AsyncStorage.setItem("UserID", response.user._id);
           AsyncStorage.setItem("Account_setup", "true");
           AsyncStorage.setItem("current_account_type", "personal");
           let completedSteps = [];
@@ -88,11 +88,11 @@ const LoginScreen = () => {
         await AsyncStorage.multiSet([
           ["current_account_type", "business"],
           ["Business_Data", JSON.stringify(response.user)],
+          ["UserID", response.user._id],
         ]);
 
         if (!response.user.isValid) {
           console.log("Id" + response.user._id);
-          AsyncStorage.setItem("UserID", response.user._id);
           AsyncStorage.setItem("Account_setup", "true");
           let completedSteps = [];
           if (response.user.isEmailValid) {

@@ -73,42 +73,43 @@ interface BusinessLoginResponse {
 }
 
 interface Business {
-    _id: string;
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    location: {
-        type: string;
-        coordinates: [number, number]; // [longitude, latitude]
-    };
-    distance?: number;
-    createdAt: Date;
-    updatedAt: Date;
-    image: string;
-    rating: {
-        overall: number;
-        reviewOverall: number;
-        reliability: number;
-        quality: number;
-        price: number;
-        charged: number;
-    };
-    role: string;
-    category: string[];
-    currency: string;
-    verificationCode: string;
-    isValid: boolean;
-    isEmailValid: boolean;
-    isBankValid: boolean;
-    companyNumber: string;
-    isCompanyNumberVerified: boolean;
-    bank: {
-        accountNumber: string;
-        sortCode: string;
-        accountHolderName: string;
-        bankName: string;
-    };
+	_id: string;
+	name: string;
+	email: string;
+	phone: string;
+	address: string;
+	location: {
+		type: string;
+		coordinates: [number, number]; // [longitude, latitude]
+	};
+	distance?: number;
+	createdAt: Date;
+	updatedAt: Date;
+	image: string;
+	rating: {
+		overall: number;
+		reviewOverall: number;
+		reliability: number;
+		quality: number;
+		price: number;
+		charged: number;
+	};
+	role: string;
+	category: string[];
+	currency: string;
+	verificationCode: string;
+	isValid: boolean;
+	isEmailValid: boolean;
+	isBankValid: boolean;
+	companyNumber: string;
+	reviewSummary: string;
+	isCompanyNumberVerified: boolean;
+	bank: {
+		accountNumber: string;
+		sortCode: string;
+		accountHolderName: string;
+		bankName: string;
+	};
 }
 
 interface CustomerLoginResponse {
@@ -235,24 +236,50 @@ interface LocationDetails {
     location: { lat: number; lng: number };
 }
 
+interface Review {
+	_id: string;
+	transaction: string;
+	business: string;
+	customer: string;
+	images?: string[];
+	rating: {
+		overall: number;
+		reliability: number;
+		price: number;
+		quality: number;
+	};
+	content?: string;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+interface BusinessDetails {
+	business: Business;
+	items: Item[];
+	reviews: Review[];
+}
+
+
 export type {
-    AuthData,
-    LoginCredentials,
-    AuthResponse,
-    BusinessLoginResponse,
-    CustomerLoginResponse,
-    CreditCardData,
-    LoginResponse,
-    BankDetails,
-    Item,
-    ChargeDepositPayload,
-    TransactionResponse,
-    Transaction,
-    LocationPrediction,
-    LocationDetails,
-    Business,
-    StepResponse,
-    ClientStripeParamsResponse,
-    ValidResponse,
-    TransactionIntentResponse
+	AuthData,
+	LoginCredentials,
+	AuthResponse,
+	BusinessLoginResponse,
+	CustomerLoginResponse,
+	CreditCardData,
+	LoginResponse,
+	BankDetails,
+	Item,
+	ChargeDepositPayload,
+	TransactionResponse,
+	Transaction,
+	LocationPrediction,
+	LocationDetails,
+	Business,
+	StepResponse,
+	ClientStripeParamsResponse,
+	ValidResponse,
+	TransactionIntentResponse,
+	Review,
+	BusinessDetails,
 };
