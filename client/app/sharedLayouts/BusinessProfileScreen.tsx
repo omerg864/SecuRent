@@ -56,23 +56,22 @@ const BusinessProfileScreen = () => {
 					setAccountType(
 						typeOfAccount === 'business' ? 'business' : 'personal'
 					);
-					setMyFrom(
-						typeOfAccount === 'business'
-							? `/business/BusinessProfileScreen?id=${params.id}`
-							: `/customer/BusinessProfileScreen?id=${params.id}`
-					);
 					const id: any = params.id || storedUserId;
 					setIsBusiness(!params.id);
 					if (params.id == storedUserId) {
 						setIsBusiness(true);
 					}
+					setMyFrom(
+						typeOfAccount === 'business'
+							? `/business/BusinessProfileScreen?id=${id}`
+							: `/customer/BusinessProfileScreen?id=${id}`
+					);
 					const data = await getBusinessProfile(id);
 					setBusinessData(data);
 				} catch (error: any) {
 					ShowToast('error', error.message);
 					router.back();
 				} finally {
-					console.log('BusinessProfileScreen from: ', params.from);
 					setIsLoading(false);
 				}
 			};
@@ -147,6 +146,7 @@ const BusinessProfileScreen = () => {
 			router.push({
 				pathname: '/customer/item-profile',
 				params: {
+					businessId: params.id,
 					id: item._id,
 					from: myFrom as RelativePathString,
 				},

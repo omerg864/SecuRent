@@ -25,7 +25,11 @@ import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import { formatCurrencySymbol } from '@/utils/functions';
 
 const ItemProfileScreen = () => {
-	const { id, from } = useLocalSearchParams<{ id: string; from: string }>();
+	const { businessId, id, from } = useLocalSearchParams<{
+		businessId: string;
+		id: string;
+		from: string;
+	}>();
 	const router = useRouter();
 
 	const [item, setItem] = useState<any>(null);
@@ -48,7 +52,6 @@ const ItemProfileScreen = () => {
 			} catch (error) {
 				Toast.show({ type: 'error', text1: 'Failed to load item' });
 			} finally {
-				console.log('item-profile from: ', from);
 				setLoading(false);
 			}
 		};
