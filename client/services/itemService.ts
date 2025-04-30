@@ -116,6 +116,22 @@ const getItemByIdForTransaction = async (itemId: string) => {
     }
 };
 
+const deleteItem = async (itemId: string) => {
+	try {
+		const accessToken = await checkToken();
+		const response = await client.delete<{ success: boolean }>(
+			`item/${itemId}`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		console.log(response.data);
+		return response.data;
+	} catch (error) {
+		throw error || 'Item deletion failed.';
+	}
+}
+
 const getItemByIdForBusiness = async (itemId: string) => {
     const accessToken = await checkToken();
     const response = await client.get<{ item: Item; success: boolean }>(
@@ -176,5 +192,6 @@ export {
     updateItemById,
     getItemByIdForBusiness,
     deleteItemById,
-    getItemByIdForTransaction
+    getItemByIdForTransaction,
+    deleteItem
 };

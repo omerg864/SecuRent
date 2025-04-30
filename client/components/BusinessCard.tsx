@@ -2,16 +2,22 @@ import { Image, Text, View } from 'react-native';
 import StarRating from './StarRating';
 import HapticButton from '@/components/ui/HapticButton';
 import { Business } from '@/services/interfaceService';
+import * as Haptics from "expo-haptics";
 
 interface BusinessCardProps {
 	business: Business;
+	onPress: () => void;
 }
 
-const BusinessCard: React.FC<BusinessCardProps> = ({ business }) => {
+const BusinessCard: React.FC<BusinessCardProps> = ({   onPress, business }) => {
+	  const handlePress = () => {
+		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+		onPress();
+	  };
 	return (
 		<HapticButton
 			className="bg-indigo-700 rounded-lg p-4 mb-4"
-			onPress={() => {}}
+			onPress={handlePress}
 		>
 			<View className="flex-row items-center">
 				<View className="w-12 h-12 bg-white rounded-full items-center justify-center mr-3">

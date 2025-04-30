@@ -120,6 +120,13 @@ export default function Layout() {
                             title: "New Item"
                         }}
                     />
+					<Drawer.Screen
+						name="BusinessProfileScreen"
+						options={{
+							drawerLabel: 'Profile Page',
+							title: 'Profile Page',
+						}}
+					/>
                     <Drawer.Screen
                         name='edit-item'
                         options={{
