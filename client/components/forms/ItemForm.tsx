@@ -109,7 +109,7 @@ export default function ItemForm({
                             keyboardType='numeric'
                             value={duration || ""}
                             onChangeText={handleSafeDurationChange}
-                            placeholder='e.g. 5'
+                            placeholder='Enter duration'
                             placeholderTextColor='#9CA3AF'
                         />
                     </View>
