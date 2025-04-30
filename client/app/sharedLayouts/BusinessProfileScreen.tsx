@@ -377,10 +377,10 @@ const BusinessProfileScreen = () => {
                       <UserImage
                         image={review.customer.image}
                         name={review.customer.name}
-                        size={10}
+                        size={12}
                       />
                       <ThemedText
-                        className="ml-3 font-semibold text-black"
+                        className="ml-2 font-semibold text-black"
                         darkColor="black"
                       >
                         {review.customer.name}
