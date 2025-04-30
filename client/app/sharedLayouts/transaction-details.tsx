@@ -25,6 +25,7 @@ import {
 import { Transaction } from "@/services/interfaceService";
 import UserImage from "@/components/UserImage";
 import FloatingBackArrowButton from "@/components/ui/FloatingBackArrowButton";
+import { formatCurrencySymbol } from "@/utils/functions";
 
 export default function TransactionDetails() {
   const router = useRouter();
@@ -283,7 +284,7 @@ export default function TransactionDetails() {
           <Row label="Description" value={transaction.description || "-"} />
           <Row
             label="Amount"
-            value={`${transaction.amount} ${transaction.currency}`}
+            value={`${transaction.amount} ${formatCurrencySymbol(transaction.currency)}`}
           />
         </View>
 
