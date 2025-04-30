@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
-
 import {
 	View,
 	Image,
@@ -39,6 +38,8 @@ const BusinessProfileScreen = () => {
 	);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isBusiness, setIsBusiness] = useState(false);
+	const [accountType, setAccountType] = useState('');
+	const [myFrom, setMyFrom] = useState('');
 
 	const router = useRouter();
 	const params = useLocalSearchParams();
@@ -49,6 +50,17 @@ const BusinessProfileScreen = () => {
 				try {
 					setIsLoading(true);
 					const storedUserId = await AsyncStorage.getItem('UserID');
+					const typeOfAccount = await AsyncStorage.getItem(
+						'current_account_type'
+					);
+					setAccountType(
+						typeOfAccount === 'business' ? 'business' : 'personal'
+					);
+					setMyFrom(
+						typeOfAccount === 'business'
+							? `/business/BusinessProfileScreen?id=${params.id}`
+							: `/customer/BusinessProfileScreen?id=${params.id}`
+					);
 					const id: any = params.id || storedUserId;
 					setIsBusiness(!params.id);
 					if (params.id == storedUserId) {
@@ -60,12 +72,13 @@ const BusinessProfileScreen = () => {
 					ShowToast('error', error.message);
 					router.back();
 				} finally {
+					console.log('BusinessProfileScreen from: ', params.from);
 					setIsLoading(false);
 				}
 			};
 
 			fetchBusinessData();
-		}, [params.id])
+		}, [params.id, params.from])
 	);
 
 	const handleCall = () => {
@@ -117,6 +130,7 @@ const BusinessProfileScreen = () => {
 		router.push({
 			pathname: '/customer/display-review',
 			params: {
+				from: myFrom as RelativePathString,
 				userName: review.customer.name,
 				userImage: review.customer.image,
 				reviewText: review.content,
@@ -129,16 +143,21 @@ const BusinessProfileScreen = () => {
 	};
 
 	const handleItemPress = async (item: any) => {
-		const accountType = await AsyncStorage.getItem('current_account_type');
 		if (accountType === 'personal') {
 			router.push({
 				pathname: '/customer/item-profile',
-				params: { id: item._id },
+				params: {
+					id: item._id,
+					from: myFrom as RelativePathString,
+				},
 			});
 		} else {
 			router.push({
 				pathname: '/business/item-profile',
-				params: { id: item._id },
+				params: {
+					id: item._id,
+					from: myFrom as RelativePathString,
+				},
 			});
 		}
 	};
@@ -176,11 +195,15 @@ const BusinessProfileScreen = () => {
 				)
 			}
 			headerBackgroundColor={{ light: '#ffffff', dark: '#ffffff' }}
-			onBack={() =>
-				router.replace({
-					pathname: params.from as RelativePathString,
-				})
-			}
+			onBack={() => {
+				if (typeof params.from === 'string') {
+					router.replace({
+						pathname: params.from as RelativePathString,
+					});
+				} else {
+					router.back();
+				}
+			}}
 		>
 			<ScrollView className="bg-white">
 				<ThemedView className="px-4 py-6" darkColor="white">
