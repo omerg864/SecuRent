@@ -38,9 +38,7 @@ export default function EditItem() {
     const [initialLoading, setInitialLoading] = useState(true);
     const [originalImageExists, setOriginalImageExists] = useState(false);
     const [itemNotFound, setItemNotFound] = useState(false);
-    const [loadingAction, setLoadingAction] = useState<
-        "edit" | "delete" | null
-    >(null);
+    const [loadingAction, setLoadingAction] = useState<"edit" | null>(null);
 
     useEffect(() => {
         const fetchItem = async () => {
@@ -106,6 +104,14 @@ export default function EditItem() {
 
             formData.append("description", desc);
             formData.append("price", String(price));
+
+            const parsedDuration = parseInt(duration);
+            if (isNaN(parsedDuration)) {
+                Toast.show({ type: "error", text1: "Invalid duration" });
+                setLoadingAction(null);
+                return;
+            }
+
             formData.append("duration", String(parseInt(duration)));
             formData.append("timeUnit", timeUnit);
 
@@ -148,40 +154,6 @@ export default function EditItem() {
         setLoadingAction(null);
     };
 
-    const handleDelete = () => {
-        Alert.alert(
-            "Delete Item",
-            "Are you sure you want to delete this item?",
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Delete",
-                    style: "destructive",
-                    onPress: async () => {
-                        setLoadingAction("delete");
-                        try {
-                            await deleteItemById(id);
-                            Toast.show({
-                                type: "success",
-                                text1: "Item deleted successfully"
-                            });
-                            router.replace("/business/business-home");
-                        } catch (error: any) {
-                            Toast.show({
-                                type: "error",
-                                text1:
-                                    error.response?.data.message ||
-                                    "Delete failed"
-                            });
-                        } finally {
-                            setLoadingAction(null);
-                        }
-                    }
-                }
-            ]
-        );
-    };
-
     const onDurationChange = (val: string) => {
         setDuration(val);
         const num = parseInt(val);
@@ -222,7 +194,6 @@ export default function EditItem() {
 
     return (
         <ScrollView className='flex-1 p-4 bg-white'>
-            <Text className='text-xl font-bold mb-2'>Edit Item</Text>
             <Text className='text-xl mb-8'>
                 Update details of your business item
             </Text>
@@ -246,27 +217,13 @@ export default function EditItem() {
             <HapticButton
                 onPress={handleSubmit}
                 disabled={loadingAction !== null}
-                className='rounded-full py-4 items-center mt-1 bg-indigo-700'
+                className='rounded-full py-4 items-center mt-0 bg-indigo-700'
             >
                 {loadingAction === "edit" ? (
                     <ActivityIndicator color='#fff' />
                 ) : (
                     <ThemedText className='text-white font-semibold text-lg'>
                         Edit Item
-                    </ThemedText>
-                )}
-            </HapticButton>
-
-            <HapticButton
-                onPress={handleDelete}
-                disabled={loadingAction !== null}
-                className='rounded-full py-3 items-center mt-2 bg-red-500 w-64 self-center'
-            >
-                {loadingAction === "delete" ? (
-                    <ActivityIndicator color='#fff' />
-                ) : (
-                    <ThemedText className='text-white font-semibold text-base'>
-                        Delete Item
                     </ThemedText>
                 )}
             </HapticButton>

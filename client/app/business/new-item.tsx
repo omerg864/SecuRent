@@ -160,7 +160,6 @@ export default function newItem() {
 
     return (
         <ScrollView className='flex-1 p-4 bg-white'>
-            <Text className='text-xl font-bold mb-2'>New Item</Text>
             <Text className='text-xl mb-8'>
                 Create a new item for your business
             </Text>

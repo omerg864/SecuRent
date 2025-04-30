@@ -5,15 +5,20 @@ import {
     ScrollView,
     ActivityIndicator,
     Text,
+    Alert
 } from "react-native";
-import { useRouter,useLocalSearchParams} from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import HapticButton from "@/components/ui/HapticButton";
-import { getItemById, getItemByIdForBusiness } from "@/services/itemService";
+import {
+    deleteItemById,
+    getItemById,
+    getItemByIdForBusiness
+} from "@/services/itemService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
-import{ formatCurrencySymbol } from "@/utils/functions";
+import { formatCurrencySymbol } from "@/utils/functions";
 
 const ItemProfileScreen = () => {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -22,6 +27,7 @@ const ItemProfileScreen = () => {
     const [item, setItem] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [accountType, setAccountType] = useState<string | null>(null);
+    const [loadingAction, setLoadingAction] = useState<"delete" | null>(null);
 
     useEffect(() => {
         const fetchItem = async () => {
@@ -52,6 +58,40 @@ const ItemProfileScreen = () => {
         } as const);
     };
 
+    const handleDelete = () => {
+        Alert.alert(
+            "Delete Item",
+            "Are you sure you want to delete this item?",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        setLoadingAction("delete");
+                        try {
+                            await deleteItemById(id);
+                            Toast.show({
+                                type: "success",
+                                text1: "Item deleted successfully"
+                            });
+                            router.replace("/business/business-home");
+                        } catch (error: any) {
+                            Toast.show({
+                                type: "error",
+                                text1:
+                                    error.response?.data.message ||
+                                    "Delete failed"
+                            });
+                        } finally {
+                            setLoadingAction(null);
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
     if (loading) {
         return (
             <View className='flex-1 justify-center items-center bg-white'>
@@ -59,6 +99,9 @@ const ItemProfileScreen = () => {
                     size='large'
                     color='#000'
                 />
+                <Text className='mt-4 text-gray-600'>
+                    Loading item profile...
+                </Text>
             </View>
         );
     }
@@ -155,6 +198,23 @@ const ItemProfileScreen = () => {
                         <Text className='text-white text-lg font-bold'>
                             Start your secuRent
                         </Text>
+                    </HapticButton>
+                )}
+
+                {/*delete button */}
+                {accountType === "business" && (
+                    <HapticButton
+                        onPress={handleDelete}
+                        disabled={loadingAction === "delete"}
+                        className='w-full h-16 bg-red-600 rounded-full justify-center items-center shadow-lg'
+                    >
+                        {loadingAction === "delete" ? (
+                            <ActivityIndicator color='#fff' />
+                        ) : (
+                            <Text className='text-white text-lg font-bold'>
+                                Delete item
+                            </Text>
+                        )}
                     </HapticButton>
                 )}
             </ScrollView>
