@@ -78,6 +78,44 @@ const getItemById = async (itemId: string) => {
     }
 };
 
+const getItemByIdForTransaction = async (itemId: string) => {
+    try {
+        const accessToken = await checkToken();
+        const response = await client.get<{ item: Item; success: boolean }>(
+            `item/${itemId}`,
+            {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            }
+        );
+
+        const item = response.data.item;
+
+        if (!item.temporary && item.duration && item.timeUnit) {
+            const now = Date.now();
+            if (item.timeUnit === "days") {
+                item.return_date = new Date(
+                    now + item.duration * 24 * 60 * 60 * 1000
+                ).toISOString();
+            } else if (item.timeUnit === "hours") {
+                item.return_date = new Date(
+                    now + item.duration * 60 * 60 * 1000
+                ).toISOString();
+            } else if (item.timeUnit === "minutes") {
+                item.return_date = new Date(
+                    now + item.duration * 60 * 1000
+                ).toISOString();
+            }
+        }
+
+        return {
+            success: response.data.success,
+            item
+        };
+    } catch (error) {
+        throw error || "Item retrieval failed.";
+    }
+};
+
 const deleteItem = async (itemId: string) => {
 	try {
 		const accessToken = await checkToken();
@@ -133,20 +171,19 @@ const updateItemById = async (
 const deleteItemById = async (id: string) => {
     try {
         const accessToken = await checkToken();
-        const response = await client.delete<{ success: boolean; message?: string }>(
-            `item/${id}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`
-                }
+        const response = await client.delete<{
+            success: boolean;
+            message?: string;
+        }>(`item/${id}`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
             }
-        );
+        });
         return response.data;
     } catch (error) {
         throw error || "Item deletion failed.";
     }
 };
-
 
 export {
     createTemporaryItem,
@@ -155,5 +192,6 @@ export {
     updateItemById,
     getItemByIdForBusiness,
     deleteItemById,
+    getItemByIdForTransaction,
     deleteItem
 };

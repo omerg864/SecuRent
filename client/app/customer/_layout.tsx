@@ -14,20 +14,20 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function Layout() {
   const router = useRouter();
 
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem("Customer_Data");
-      await AsyncStorage.removeItem("Access_Token");
-      await AsyncStorage.removeItem("Refresh_Token");
-      await AsyncStorage.removeItem("Auth_Expiration");
-      await AsyncStorage.removeItem("current_account_type");
-      await AsyncStorage.removeItem("UserID");
-
-      router.replace("/login");
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
-  };
+    const handleLogout = async () => {
+      try {
+        await AsyncStorage.removeItem("Customer_Data");
+        await AsyncStorage.removeItem("Access_Token");
+        await AsyncStorage.removeItem("Refresh_Token");
+        await AsyncStorage.removeItem("Auth_Expiration");
+        await AsyncStorage.removeItem("current_account_type");
+        await AsyncStorage.removeItem("UserID");
+  
+        router.replace("/login");
+      } catch (error) {
+        console.error("Error during logout:", error);
+      }
+    };
 
   const CustomDrawerContent = (props: any) => (
     <View className="flex-1">
@@ -128,6 +128,15 @@ export default function Layout() {
               drawerItemStyle: { display: "none" },
             }}
           />
+          <Drawer.Screen
+            name='item-profile'
+            options={{
+                drawerLabel: "Item Profile",
+                title: "Item Profile",
+                drawerItemStyle: { display: 'none' },
+                headerShown: true
+            }}
+            />
         </Drawer>
       </GestureHandlerRootView>
     </WebSocketProvider>

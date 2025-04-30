@@ -34,6 +34,7 @@ interface TransactionIntentResponse {
     customer_stripe_id: string;
     ephemeralKey: string;
     transactionId: string;
+    return_date: any;
 }
 
 interface StepResponse {
