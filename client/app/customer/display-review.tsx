@@ -63,7 +63,7 @@ const DisplayReview = () => {
 					<View className="items-center justify-center mb-6">
 						<UserImage
 							image={NormalizedImage(businessImage)}
-							name={NormalizedImage(businessName)}
+							name={businessName as string}
 							size={16}
 							className="mb-2"
 						/>

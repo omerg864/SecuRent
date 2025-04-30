@@ -53,7 +53,9 @@ export default function GalleryImageInput({
 			<View className="items-center">
 				{themeText ? (
 					<ThemedText
-						className={`text-sm font-medium ${labelClassName}`}
+						className={`text-sm font-medium ${labelClassName}
+						`}
+						darkColor="black"
 					>
 						{label}
 					</ThemedText>
