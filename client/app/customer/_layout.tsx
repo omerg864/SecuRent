@@ -1,9 +1,6 @@
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Drawer } from "expo-router/drawer";
 import { WebSocketProvider } from "@/context/WebSocketContext";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { Drawer } from "expo-router/drawer";
-import { WebSocketProvider } from "@/context/WebSocketContext";
 import {
   DrawerContentScrollView,
   DrawerItemList,
@@ -15,7 +12,6 @@ import React from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Layout() {
-    const router = useRouter();
   const router = useRouter();
 
     const handleLogout = async () => {
@@ -145,6 +141,15 @@ export default function Layout() {
               drawerItemStyle: { display: "none" },
             }}
           />
+          <Drawer.Screen
+            name='item-profile'
+            options={{
+                drawerLabel: "Item Profile",
+                title: "Item Profile",
+                drawerItemStyle: { display: 'none' },
+                headerShown: true
+            }}
+            />
         </Drawer>
       </GestureHandlerRootView>
     </WebSocketProvider>
