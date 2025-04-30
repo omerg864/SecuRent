@@ -13,6 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
+import{ formatCurrencySymbol } from "@/utils/functions";
 
 const ItemProfileScreen = () => {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -135,7 +136,7 @@ const ItemProfileScreen = () => {
                             </Text>
                         </View>
                         <Text className='text-xl font-bold text-black'>
-                            {item.price} {item.currency}
+                            {item.price} {formatCurrencySymbol(item.currency)}
                         </Text>
                     </View>
                 </View>
