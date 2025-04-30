@@ -1,14 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import {
-	View,
-	StatusBar,
-	SafeAreaView,
-	ScrollView,
-	ActivityIndicator,
-	Text,
-} from 'react-native';
+import { View, StatusBar, SafeAreaView, ScrollView, Text } from 'react-native';
 import {
 	useRouter,
 	useLocalSearchParams,
@@ -16,7 +9,6 @@ import {
 	RelativePathString,
 } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Toast from 'react-native-toast-message';
 import HapticButton from '@/components/ui/HapticButton';
 import {
 	getTransactionById,
@@ -26,6 +18,8 @@ import { Transaction } from '@/services/interfaceService';
 import UserImage from '@/components/UserImage';
 import FloatingBackArrowButton from '@/components/ui/FloatingBackArrowButton';
 import { formatCurrencySymbol } from '@/utils/functions';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import ShowToast from '@/components/ui/ShowToast';
 
 export default function TransactionDetails() {
 	const router = useRouter();
@@ -56,10 +50,8 @@ export default function TransactionDetails() {
 					setAccountType(type);
 
 					if (!id || typeof id !== 'string') {
-						Toast.show({
-							type: 'error',
-							text1: 'Missing transaction ID',
-						});
+						ShowToast('error', 'Missing transaction ID');
+
 						return;
 					}
 
@@ -68,11 +60,11 @@ export default function TransactionDetails() {
 					setHasReviewed(!!data.review?.content);
 					setIsOpen(data.status === 'open');
 				} catch (error: any) {
-					Toast.show({
-						type: 'error',
-						text1: 'Failed to load transaction',
-						text2: error.message || 'Please try again later',
-					});
+					ShowToast(
+						'error',
+						'Failed to load transaction',
+						error.message || 'Please try again later'
+					);
 				} finally {
 					setLoading(false);
 				}
@@ -97,10 +89,8 @@ export default function TransactionDetails() {
 				setAccountType(type);
 
 				if (!id || typeof id !== 'string') {
-					Toast.show({
-						type: 'error',
-						text1: 'Missing transaction ID',
-					});
+					ShowToast('error', 'Missing transaction ID');
+
 					return;
 				}
 
@@ -108,13 +98,12 @@ export default function TransactionDetails() {
 				setTransaction(data);
 				setIsOpen(data.status === 'open');
 			} catch (error: any) {
-				Toast.show({
-					type: 'error',
-					text1: 'Failed to load transaction',
-					text2: error.message || 'Please try again later',
-				});
+				ShowToast(
+					'error',
+					'Failed to load transaction',
+					error.message || 'Please try again later'
+				);
 			} finally {
-				console.log('transaction-details from: ', from);
 				setLoading(false);
 			}
 		};
@@ -169,17 +158,14 @@ export default function TransactionDetails() {
 			const updated = await closeTransaction(id);
 			setTransaction(updated);
 			setIsOpen(false);
-			Toast.show({
-				type: 'success',
-				text1: 'Transaction closed successfully',
-			});
+			ShowToast('success', 'Transaction closed successfully');
 		} catch (error: any) {
 			console.error('Error closing transaction: ', error.response.data);
-			Toast.show({
-				type: 'error',
-				text1: 'Failed to close transaction',
-				text2: error.message || 'Try again',
-			});
+			ShowToast(
+				'error',
+				'Failed to close transaction',
+				error.message || 'Try again'
+			);
 		}
 		setLoading(false);
 	};
@@ -191,16 +177,7 @@ export default function TransactionDetails() {
 		});
 	};
 
-	if (loading) {
-		return (
-			<View className="flex-1 justify-center items-center bg-white">
-				<ActivityIndicator size="large" color="#000" />
-				<Text className="mt-4 text-gray-600">
-					Loading transaction...
-				</Text>
-			</View>
-		);
-	}
+	if (loading) return <LoadingSpinner label="loading transaction..." />;
 
 	if (!transaction) {
 		return (

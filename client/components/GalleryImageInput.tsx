@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { View, Text, Image, ScrollView } from 'react-native';
 import HapticButton from '@/components/ui/HapticButton';

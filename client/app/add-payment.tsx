@@ -9,11 +9,11 @@ import {
 	customerCardIntent,
 	updateCreditCard,
 } from '@/services/customerService';
-import Toast from 'react-native-toast-message';
 import {
 	CustomerSheet,
 	CustomerSheetResult,
 } from '@stripe/stripe-react-native';
+import ShowToast from '@/components/ui/ShowToast';
 
 const AddPaymentScreen = () => {
 	const router = useRouter();
@@ -29,38 +29,28 @@ const AddPaymentScreen = () => {
 		try {
 			const response = await customerCardIntent();
 			if (!response.data.success) {
-				Toast.show({
-					type: 'error',
-					text1: 'Internal Server Error',
-				});
+				ShowToast('error', 'Internal Server Error');
+
 				return;
 			}
 			return response.data!;
 		} catch (error: any) {
-			Toast.show({
-				type: 'error',
-				text1: error.response.data.message,
-			});
+			ShowToast('error', error.response.data.message);
 		}
 	};
 
 	const handleSavePayment = async (result: CustomerSheetResult) => {
 		if (result.error) {
+			ShowToast('error', result.error.code);
 			router.back();
-			Toast.show({
-				type: 'error',
-				text1: result.error.code,
-			});
 			return;
 		}
 		if (result.paymentMethod) {
 			try {
 				const response: any = await updateCreditCard();
 				if (!response.data.success) {
-					Toast.show({
-						type: 'error',
-						text1: 'Internal Server Error',
-					});
+					ShowToast('error', 'Internal Server Error');
+
 					return;
 				}
 
@@ -76,22 +66,17 @@ const AddPaymentScreen = () => {
 					);
 				}
 				await AsyncStorage.setItem('current_account_type', accountType);
-				Toast.show({
-					type: 'success',
-					text1: 'Payment method added successfully',
-				});
+				ShowToast('success', 'Payment method added successfully');
+
 				router.replace({
 					pathname: '/setup-screen',
 					params: {
 						accountType: accountType,
 					},
 				});
-        setLoading(false);
+				setLoading(false);
 			} catch (error: any) {
-				Toast.show({
-					type: 'error',
-					text1: error.response.data.message,
-				});
+				ShowToast('error', error.response.data.message);
 			}
 		}
 	};
@@ -101,10 +86,8 @@ const AddPaymentScreen = () => {
 		const data = await fetchSetupIntent();
 		console.log('Setup Intent Data:', data);
 		if (!data) {
-			Toast.show({
-				type: 'error',
-				text1: 'Internal Server Error',
-			});
+			ShowToast('error', 'Internal Server Error');
+
 			setLoading(false);
 			return;
 		}
@@ -123,10 +106,8 @@ const AddPaymentScreen = () => {
 
 		if (error) {
 			console.error('Error initializing CustomerSheet:', error);
-			Toast.show({
-				type: 'error',
-				text1: 'Failed to initialize payment method',
-			});
+			ShowToast('error', 'Failed to initialize payment method');
+
 			setLoading(false);
 			return;
 		}

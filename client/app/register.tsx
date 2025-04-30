@@ -8,7 +8,6 @@ import { ThemedTextInput } from '@/components/ui/ThemedTextInput';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import Toast from 'react-native-toast-message';
 import Header from '@/components/ui/Header';
 import { useLocalSearchParams } from 'expo-router';
 import { registerBusiness } from '@/services/businessService';
@@ -20,6 +19,7 @@ import { ActivityIndicator } from 'react-native';
 import ProfileImageInput from '@/components/ProfileImageInput';
 import { emailRegex, passwordRegex } from '@/utils/regex';
 import { FileObject } from '@/types/business';
+import ShowToast from '@/components/ui/ShowToast';
 
 const RegisterScreen = () => {
 	const [name, setName] = useState('');
@@ -39,32 +39,23 @@ const RegisterScreen = () => {
 
 	const handleRegister = async () => {
 		if (!name || !email || !password || !confirmPassword) {
-			Toast.show({
-				type: 'info',
-				text1: 'Please fill in all fields',
-			});
+			ShowToast('info', 'Please fill in all fields');
 			return;
 		}
 		if (password !== confirmPassword) {
-			Toast.show({
-				type: 'info',
-				text1: 'Passwords do not match',
-			});
+			ShowToast('info', 'Passwords do not match');
 			return;
 		}
 		if (!emailRegex.test(email)) {
-			Toast.show({
-				type: 'info',
-				text1: 'Email address is invalid',
-			});
+			ShowToast('info', 'Email address is invalid');
 			return;
 		}
 		//Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.
 		if (!passwordRegex.test(password)) {
-			Toast.show({
-				type: 'info',
-				text1: 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.',
-			});
+			ShowToast(
+				'info',
+				'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.'
+			);
 			return;
 		}
 		setLoading(true);
@@ -125,20 +116,14 @@ const RegisterScreen = () => {
 			expiration.setHours(expiration.getHours() + 23);
 			AsyncStorage.setItem('Auth_Expiration', expiration.toISOString());
 			AsyncStorage.setItem('Account_setup', 'true');
-			Toast.show({
-				type: 'success',
-				text1: 'Account created successfully',
-			});
+			ShowToast('success', 'Account created successfully');
 			router.dismissAll();
 			router.replace({
 				pathname: './setup-screen',
 				params: { accountType },
 			});
 		} catch (error: any) {
-			Toast.show({
-				type: 'error',
-				text1: error.response.data.message,
-			});
+			ShowToast('error', error.response.data.message);
 			setLoading(false);
 		} finally {
 			setLoading(false);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, ScrollView } from 'react-native';
 import HapticButton from '@/components/ui/HapticButton';
 import UserImage from '@/components/UserImage';
 import {
@@ -42,8 +42,8 @@ const AddReview = () => {
 			router.back();
 		} catch (error: any) {
 			console.error('Error submitting review:', error);
-			Alert.alert(
-				'Error',
+			ShowToast(
+				'error',
 				error.message || 'Failed to submit review. Please try again.'
 			);
 		} finally {

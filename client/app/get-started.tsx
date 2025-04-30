@@ -1,7 +1,5 @@
 import { View, StyleSheet } from 'react-native';
-import HapticButton from '@/components/ui/HapticButton';
 import { ThemedText } from '@/components/ui/ThemedText';
-import { Colors } from '@/constants/Colors';
 import { useRouter } from 'expo-router';
 import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import Entypo from '@expo/vector-icons/Entypo';
@@ -24,7 +22,7 @@ const GetStartedScreen = () => {
 	};
 
 	const handlePersonal = () => {
-		router.push({  
+		router.push({
 			pathname: '/register',
 			params: { accountType: 'personal' },
 		});

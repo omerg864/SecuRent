@@ -10,7 +10,6 @@ import HapticButton from '@/components/ui/HapticButton';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { updateBusinessDetails } from '@/services/businessService';
-import Toast from 'react-native-toast-message';
 import AddressAutocompleteInput from '@/components/AddressAutocompleteInput';
 import { StepResponse } from '@/services/interfaceService';
 import { TouchableOpacity } from '@/components/ui/touchable-opacity';
@@ -18,6 +17,7 @@ import ModalList from '@/components/ModalList';
 import { businessTypes, currencies, Currency } from '@/utils/constants';
 import MultiSelectInput from '@/components/ui/MultiSelectInput';
 import { phone_regex } from '@/utils/regex';
+import ShowToast from '@/components/ui/ShowToast';
 
 export default function VerifyBusinessNumberScreen() {
 	const router = useRouter();
@@ -38,31 +38,19 @@ export default function VerifyBusinessNumberScreen() {
 
 	const handleVerify = async () => {
 		if (!businessNumber || !phoneNumber || !selectedLocation || !currency) {
-			Toast.show({
-				type: 'info',
-				text1: 'Please fill in all fields',
-			});
+			ShowToast('info', 'Please fill in all fields');
 			return;
 		}
 		if (!selectedLocation.address) {
-			Toast.show({
-				type: 'info',
-				text1: 'Please select a valid address',
-			});
+			ShowToast('info', 'Please select a valid address');
 			return;
 		}
 		if (!phone_regex.test(phoneNumber.trim())) {
-			Toast.show({
-				type: 'info',
-				text1: 'Please enter a valid phone number',
-			});
+			ShowToast('info', 'Please enter a valid phone number');
 			return;
 		}
 		if (!/^\d{9}$/.test(businessNumber.trim())) {
-			Toast.show({
-				type: 'info',
-				text1: 'Please enter a valid 9-digit business number',
-			});
+			ShowToast('info', 'Please enter a valid 9-digit business number');
 			return;
 		}
 		setLoading(true);
@@ -98,10 +86,7 @@ export default function VerifyBusinessNumberScreen() {
 
 			if (!response.success) {
 				setLoading(false);
-				Toast.show({
-					type: 'error',
-					text1: 'Internal Server Error',
-				});
+				ShowToast('error', 'Internal Server Error');
 				return;
 			}
 
@@ -118,10 +103,7 @@ export default function VerifyBusinessNumberScreen() {
 			}
 
 			await AsyncStorage.setItem('current_account_type', accountType);
-			Toast.show({
-				type: 'success',
-				text1: 'Business verified successfully',
-			});
+			ShowToast('success', 'Business verified successfully');
 			router.replace({
 				pathname: './setup-screen',
 				params: {
@@ -129,10 +111,7 @@ export default function VerifyBusinessNumberScreen() {
 				},
 			});
 		} catch (error: any) {
-			Toast.show({
-				type: 'error',
-				text1: error.response.data.message,
-			});
+			ShowToast('error', error.response.data.message);
 		} finally {
 			setLoading(false);
 		}
