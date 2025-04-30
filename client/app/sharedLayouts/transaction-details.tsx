@@ -114,12 +114,13 @@ export default function TransactionDetails() {
 					text2: error.message || 'Please try again later',
 				});
 			} finally {
+				console.log('transaction-details from: ', from);
 				setLoading(false);
 			}
 		};
 
 		fetchData();
-	}, [id]);
+	}, [id, from]);
 
 	const handleAddReview = () => {
 		router.push({
@@ -136,7 +137,10 @@ export default function TransactionDetails() {
 	const handleGoToBusinessProfile = () => {
 		router.push({
 			pathname: '/customer/BusinessProfileScreen',
-			params: { id: transaction?.business?._id },
+			params: {
+				id: transaction?.business?._id,
+				from: `/customer/transaction-details?id=${id}`,
+			},
 		});
 	};
 
@@ -212,8 +216,17 @@ export default function TransactionDetails() {
 		<SafeAreaView className="flex-1 bg-white">
 			<StatusBar barStyle="dark-content" />
 
-			<FloatingBackArrowButton from={from as RelativePathString} />
-
+			<FloatingBackArrowButton
+				from={
+					typeof from === 'string'
+						? (from as RelativePathString)
+						: (`/${
+								accountType === 'personal'
+									? 'customer'
+									: 'business'
+						  }/transactions` as RelativePathString)
+				}
+			/>
 			<View className="mt-20 mb-6 items-center">
 				<Text className="text-2xl font-semibold text-gray-900">
 					Transaction Details
