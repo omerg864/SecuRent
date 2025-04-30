@@ -19,6 +19,8 @@ import { Feather } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import UserImage from '@/components/UserImage';
 import { currencies } from '@/utils/constants';
+import { formatCurrencySymbol } from '@/utils/functions';
+
 
 const PAGE_SIZE = 8;
 
@@ -135,8 +137,8 @@ const TransactionsPage = () => {
 				? item.customer?.name
 				: item.business?.name;
 
-		const currencySymbol = currencies.find(
-			(currency) => currency.code === item.currency)?.symbol || '₪';
+			const currencySymbol = formatCurrencySymbol(item.currency);
+
 
 		return (
 			<TouchableOpacity
@@ -177,7 +179,7 @@ const TransactionsPage = () => {
 				</View>
 				<Text className={`text-sm font-medium ${colorClass}`}>
 					{item.status === 'charged'
-						? `${item.charged}${currencySymbol}`
+						? `${item.charged} ${currencySymbol}`
 						: item.status.charAt(0).toUpperCase() + item.status.slice(1)}
 						</Text>
 			</TouchableOpacity>
