@@ -203,6 +203,7 @@ interface Transaction {
     currency: string;
     status: string;
     business?: {
+        _id?: string;
         name?: string;
         image?: string;
     };
