@@ -5,10 +5,8 @@ import {
     ScrollView,
     ActivityIndicator,
     Text,
-    TouchableOpacity
 } from "react-native";
-import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter,useLocalSearchParams} from "expo-router";
 import HapticButton from "@/components/ui/HapticButton";
 import { getItemById, getItemByIdForBusiness } from "@/services/itemService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -17,7 +15,7 @@ import Toast from "react-native-toast-message";
 import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
 
 const ItemProfileScreen = () => {
-    const id = "6811141b2063b90e2720c1e0"; // temp ID
+    const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
 
     const [item, setItem] = useState<any>(null);

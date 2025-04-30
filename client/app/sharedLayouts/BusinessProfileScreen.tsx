@@ -83,7 +83,10 @@ const BusinessProfileScreen = () => {
   };
 
   const handleEdit = (item: any) => {
-    ShowToast("success", `${item.description} edited successfully`);
+    router.push({
+      pathname: "/business/edit-item",
+      params: { id: item._id },
+    });
   };
 
   const handleDelete = async (item: any) => {
@@ -104,6 +107,36 @@ const BusinessProfileScreen = () => {
       pathname: "/business/QRCodeScreen",
       params: { id: item._id, from: "ProfilePage" },
     });
+  };
+
+  const handleReviewPress = (review: any) => {
+    router.push({
+      pathname: "/customer/display-review",
+      params: {
+        userName: review.customer.name,
+        userImage: review.customer.image,
+        reviewText: review.content,
+        reviewImages: JSON.stringify(review.images),
+        businessName: businessData?.business.name,
+        businessImage: businessData?.business.image,
+        createdAt: review.createdAt,
+      },
+    });
+  };
+
+  const handleItemPress = async (item: any) => {
+    const accountType = await AsyncStorage.getItem("current_account_type");
+    if (accountType === "personal") {
+      router.push({
+        pathname: "/customer/item-profile",
+        params: { id: item._id },
+      });
+    } else {
+      router.push({
+        pathname: "/business/item-profile",
+        params: { id: item._id },
+      });
+    }
   };
 
   if (isLoading) {
@@ -228,12 +261,7 @@ const BusinessProfileScreen = () => {
               items.map((item: any) => (
                 <HapticButton
                   key={item._id}
-                  onPress={() =>
-                    router.push({
-                      pathname: "./business/ItemDetails",
-                      params: { id: item._id },
-                    })
-                  }
+                  onPress={() => handleItemPress(item)}
                   className="flex-row mb-6 bg-white rounded-lg p-3 shadow items-center"
                 >
                   <View className="flex-row items-center flex-1">
@@ -339,8 +367,9 @@ const BusinessProfileScreen = () => {
               );
 
               return (
-                <View
+                <HapticButton
                   key={review._id}
+                  onPress={() => handleReviewPress(review)}
                   className="bg-white rounded-lg p-4 mb-4 shadow"
                 >
                   <View className="flex-row justify-between items-center mb-2">
@@ -367,7 +396,7 @@ const BusinessProfileScreen = () => {
                   <ThemedText className="text-gray-700" darkColor="black">
                     {review.content}
                   </ThemedText>
-                </View>
+                </HapticButton>
               );
             })}
           </View>
