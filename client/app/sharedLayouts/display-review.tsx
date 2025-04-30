@@ -8,7 +8,7 @@ import {
 	TouchableOpacity,
 	Dimensions,
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { RelativePathString, useLocalSearchParams } from 'expo-router';
 import UserImage from '@/components/UserImage';
 import FloatingBackArrowButton from '@/components/ui/FloatingBackArrowButton';
 import { BaseModal } from '@/components/BaseModal';
@@ -25,6 +25,7 @@ const DisplayReview = () => {
 		businessName,
 		businessImage,
 		createdAt,
+		from,
 	} = useLocalSearchParams();
 	const [modalVisible, setModalVisible] = useState(false);
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -54,7 +55,7 @@ const DisplayReview = () => {
 	};
 	return (
 		<SafeAreaView className="flex-1 bg-white">
-			<FloatingBackArrowButton />
+			<FloatingBackArrowButton from={from as RelativePathString} />
 			<ScrollView
 				contentContainerStyle={{ flexGrow: 1 }}
 				className="px-6 pt-20"
