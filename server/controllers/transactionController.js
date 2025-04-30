@@ -173,6 +173,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 		customer_stripe_id: req.customer.stripe_customer_id,
 		ephemeralKey: ephemeralKey.secret,
 		transactionId: transaction._id,
+		return_date: return_date ?? null
 	});
 });
 
