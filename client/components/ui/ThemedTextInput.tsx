@@ -6,7 +6,6 @@ import {
 } from 'react-native';
 
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { Colors } from '@/constants/Colors';
 import React from 'react';
 import { ThemedText } from './ThemedText';
 

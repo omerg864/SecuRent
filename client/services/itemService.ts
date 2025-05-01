@@ -71,7 +71,6 @@ const getItemById = async (itemId: string) => {
                 headers: { Authorization: `Bearer ${accessToken}` }
             }
         );
-        console.log(response.data.item);
         return response.data;
     } catch (error) {
         throw error || "Item retrieval failed.";

@@ -1,13 +1,13 @@
-import { View, Text, Image, StatusBar, SafeAreaView } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import Button from "@/components/ui/HapticButton";
-import { router, useLocalSearchParams } from "expo-router";
-import HapticButton from "@/components/ui/HapticButton";
-import StarRating from "@/components/StarRating";
-import { useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
-import { useCallback } from "react";
-import { getItemByIdForTransaction } from "@/services/itemService";
+import { View, Text, Image, StatusBar, SafeAreaView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import Button from '@/components/ui/HapticButton';
+import { useLocalSearchParams } from 'expo-router';
+import HapticButton from '@/components/ui/HapticButton';
+import StarRating from '@/components/StarRating';
+import { useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+import { getItemByIdForTransaction } from '@/services/itemService';
 import {
     confirmTransactionPayment,
     createTransactionFromItem

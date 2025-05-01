@@ -1,24 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
-    View,
-    Image,
-    ScrollView,
-    ActivityIndicator,
-    Text,
-    Alert
-} from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import HapticButton from "@/components/ui/HapticButton";
+	View,
+	Image,
+	ScrollView,
+	ActivityIndicator,
+	Text,
+	Alert,
+} from 'react-native';
 import {
-    deleteItemById,
-    getItemById,
-    getItemByIdForBusiness
-} from "@/services/itemService";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons";
-import Toast from "react-native-toast-message";
-import ParallaxScrollView from "@/components/ui/ParallaxScrollView";
-import { formatCurrencySymbol } from "@/utils/functions";
+	useRouter,
+	useLocalSearchParams,
+	RelativePathString,
+} from 'expo-router';
+import HapticButton from '@/components/ui/HapticButton';
+import {
+	deleteItemById,
+	getItemById,
+	getItemByIdForBusiness,
+} from '@/services/itemService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
+import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
+import { formatCurrencySymbol } from '@/utils/functions';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import ShowToast from '@/components/ui/ShowToast';
 
 const ItemProfileScreen = () => {
     const { id } = useLocalSearchParams<{ id: string }>();

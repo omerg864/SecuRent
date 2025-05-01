@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { router, RelativePathString } from 'expo-router';
-import HapticButton from './HapticButton'; // adjust path as needed
+import HapticButton from './HapticButton';
 
 type FloatingBackArrowButtonProps = {
 	from?: RelativePathString;
