@@ -7,10 +7,7 @@ import {
     ActivityIndicator,
     Alert
 } from "react-native";
-import ProfileImageInput from "@/components/ProfileImageInput";
 import { FileObject } from "@/types/business";
-import { Picker } from "@react-native-picker/picker";
-import PricePicker from "@/components/PricePicker";
 import Toast from "react-native-toast-message";
 import { ThemedText } from "@/components/ui/ThemedText";
 import {
@@ -35,13 +32,22 @@ export default function EditItem() {
     const [timeUnit, setTimeUnit] = useState("days");
     const [durationError, setDurationError] = useState("");
     const [currency, setCurrency] = useState("ILS");
-    const [initialLoading, setInitialLoading] = useState(true);
     const [originalImageExists, setOriginalImageExists] = useState(false);
     const [itemNotFound, setItemNotFound] = useState(false);
-    const [loadingAction, setLoadingAction] = useState<"edit" | null>(null);
+
+    const [loadingState, setLoadingState] = useState<"init" | "edit" | null>(
+        "init"
+    );
 
     useEffect(() => {
         const fetchItem = async () => {
+            setLoadingState("init");
+            setDesc("");
+            setPrice(0);
+            setDuration("");
+            setFile(null);
+            setItemNotFound(false);
+            setDurationError("");
             try {
                 const response = await getItemByIdForBusiness(id);
                 const item = response.item as Item;
@@ -76,7 +82,7 @@ export default function EditItem() {
                     router.back();
                 }
             } finally {
-                setInitialLoading(false);
+                setLoadingState(null);
             }
         };
 
@@ -98,7 +104,7 @@ export default function EditItem() {
             return;
         }
 
-        setLoadingAction("edit");
+        setLoadingState("edit");
         try {
             const formData = new FormData();
 
@@ -108,11 +114,11 @@ export default function EditItem() {
             const parsedDuration = parseInt(duration);
             if (isNaN(parsedDuration)) {
                 Toast.show({ type: "error", text1: "Invalid duration" });
-                setLoadingAction(null);
+                setLoadingState(null);
                 return;
             }
 
-            formData.append("duration", String(parseInt(duration)));
+            formData.append("duration", String(parsedDuration));
             formData.append("timeUnit", timeUnit);
 
             if (file) {
@@ -131,7 +137,7 @@ export default function EditItem() {
                 id,
                 desc,
                 price,
-                parseInt(duration),
+                parsedDuration,
                 timeUnit,
                 file,
                 formData
@@ -139,7 +145,7 @@ export default function EditItem() {
 
             if (!response) {
                 Toast.show({ type: "error", text1: "Internal Server Error" });
-                setLoadingAction(null);
+                setLoadingState(null);
                 return;
             }
 
@@ -151,7 +157,7 @@ export default function EditItem() {
                 text1: error.response?.data.message || "Update failed"
             });
         }
-        setLoadingAction(null);
+        setLoadingState(null);
     };
 
     const onDurationChange = (val: string) => {
@@ -173,13 +179,16 @@ export default function EditItem() {
         }
     };
 
-    if (initialLoading) {
+    if (loadingState === "init") {
         return (
             <View className='flex-1 justify-center items-center bg-white'>
                 <ActivityIndicator
                     size='large'
                     color='#4338CA'
                 />
+                <Text className='mt-4 text-gray-600 text-base'>
+                    Loading item data...
+                </Text>
             </View>
         );
     }
@@ -216,10 +225,10 @@ export default function EditItem() {
 
             <HapticButton
                 onPress={handleSubmit}
-                disabled={loadingAction !== null}
+                disabled={loadingState !== null}
                 className='rounded-full py-4 items-center mt-0 bg-indigo-700'
             >
-                {loadingAction === "edit" ? (
+                {loadingState === "edit" ? (
                     <ActivityIndicator color='#fff' />
                 ) : (
                     <ThemedText className='text-white font-semibold text-lg'>

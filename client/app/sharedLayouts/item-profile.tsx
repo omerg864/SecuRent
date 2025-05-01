@@ -32,6 +32,7 @@ const ItemProfileScreen = () => {
     useEffect(() => {
         const fetchItem = async () => {
             try {
+                setLoading(true);
                 const type = await AsyncStorage.getItem("current_account_type");
                 setAccountType(type);
 
