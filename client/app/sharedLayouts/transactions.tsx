@@ -20,6 +20,7 @@ import { useFocusEffect, usePathname, useRouter } from 'expo-router';
 import UserImage from '@/components/UserImage';
 import { currencies } from '@/utils/constants';
 import { formatCurrencySymbol } from '@/utils/functions';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 const PAGE_SIZE = 8;
 
@@ -193,6 +194,8 @@ const TransactionsPage = () => {
 		);
 	};
 
+	if (isLoading) return <LoadingSpinner label="loading transactions" />;
+
 	return (
 		<SafeAreaView
 			className="flex-1 bg-gray-50"
@@ -235,13 +238,7 @@ const TransactionsPage = () => {
 				))}
 			</View>
 
-			{isLoading ? (
-				<ActivityIndicator
-					size="large"
-					color="#4B5563"
-					className="mt-10"
-				/>
-			) : displayedTransactions.length === 0 ? (
+			{displayedTransactions.length === 0 ? (
 				<Text className="text-center text-gray-500 mt-10">
 					No transactions found.
 				</Text>

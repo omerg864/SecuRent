@@ -20,9 +20,10 @@ import {
 } from '@/services/itemService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import Toast from 'react-native-toast-message';
 import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import { formatCurrencySymbol } from '@/utils/functions';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import ShowToast from '@/components/ui/ShowToast';
 
 const ItemProfileScreen = () => {
 	const { businessId, id, from } = useLocalSearchParams<{
@@ -50,7 +51,7 @@ const ItemProfileScreen = () => {
 
 				setItem(data.item);
 			} catch (error) {
-				Toast.show({ type: 'error', text1: 'Failed to load item' });
+				ShowToast('error', 'Failed to load item');
 			} finally {
 				setLoading(false);
 			}
@@ -79,18 +80,13 @@ const ItemProfileScreen = () => {
 						setLoadingAction('delete');
 						try {
 							await deleteItemById(id);
-							Toast.show({
-								type: 'success',
-								text1: 'Item deleted successfully',
-							});
+							ShowToast('success', 'Item deleted successfully');
 							router.replace('/business/business-home');
 						} catch (error: any) {
-							Toast.show({
-								type: 'error',
-								text1:
-									error.response?.data.message ||
-									'Delete failed',
-							});
+							ShowToast(
+								'error',
+								error.response?.data.message || 'Delete failed'
+							);
 						} finally {
 							setLoadingAction(null);
 						}
@@ -100,16 +96,7 @@ const ItemProfileScreen = () => {
 		);
 	};
 
-	if (loading) {
-		return (
-			<View className="flex-1 justify-center items-center bg-white">
-				<ActivityIndicator size="large" color="#000" />
-				<Text className="mt-4 text-gray-600">
-					Loading item profile...
-				</Text>
-			</View>
-		);
-	}
+	if (loading) return <LoadingSpinner label="Loading item profile" />;
 
 	if (!item) {
 		return (

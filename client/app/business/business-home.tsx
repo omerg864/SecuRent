@@ -1,11 +1,5 @@
 'use client';
-import {
-	View,
-	TouchableOpacity,
-	ActivityIndicator,
-	FlatList,
-	ListRenderItem,
-} from 'react-native';
+import { View, TouchableOpacity, FlatList, ListRenderItem } from 'react-native';
 import HapticButton from '@/components/ui/HapticButton';
 import { ThemedText } from '@/components/ui/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,6 +9,7 @@ import { Transaction } from '@/services/interfaceService';
 import { getBusinessTransactions } from '@/services/transactionService';
 import { useWebSocketContext } from '@/context/WebSocketContext';
 import { currencies } from '@/utils/constants';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 const PAGE_SIZE = 5;
 
@@ -185,10 +180,7 @@ const BusinessHomePage = () => {
 								className="py-4 justify-center items-center align-middle"
 								style={{ height: 200 }}
 							>
-								<ActivityIndicator
-									size="large"
-									color="#4338CA"
-								/>
+								<LoadingSpinner />
 							</View>
 						)
 					}

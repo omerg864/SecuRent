@@ -13,10 +13,7 @@ import { View } from 'react-native';
 
 export default function Layout() {
 	const router = useRouter();
-	//<ActivityIndicator size="small" color="#4B5563"/>
-	// <Text className="text-2xl font-medium w-24 text-center text-[#2D2A2E]">
-	//   {amount > 0 ? `${amount}₪` : amount}
-	// </Text>
+
 	const handleLogout = async () => {
 		try {
 			await AsyncStorage.removeItem('Business_Data');

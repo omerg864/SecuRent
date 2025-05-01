@@ -1,15 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-	View,
-	Text,
-	TextInput,
-	ScrollView,
-	ActivityIndicator,
-} from 'react-native';
-import ProfileImageInput from '../../components/ProfileImageInput'; // adjust path as needed
+import { Text, ScrollView, ActivityIndicator } from 'react-native';
 import { FileObject } from '@/types/business';
-import { Picker } from '@react-native-picker/picker';
-import PricePicker from '@/components/PricePicker';
 import Toast from 'react-native-toast-message';
 import { ThemedText } from '@/components/ui/ThemedText';
 import HapticButton from '@/components/ui/HapticButton';

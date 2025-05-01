@@ -1,16 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
-import {
-	View,
-	Image,
-	Linking,
-	Text,
-	ActivityIndicator,
-	ScrollView,
-} from 'react-native';
+import { View, Image, Linking, ScrollView } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import {
 	useRouter,
@@ -18,7 +11,6 @@ import {
 	RelativePathString,
 } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import { ThemedText } from '@/components/ui/ThemedText';
 import { ThemedView } from '@/components/ui/ThemedView';
@@ -30,6 +22,7 @@ import { deleteItem } from '@/services/itemService';
 import UserImage from '@/components/UserImage';
 import { BusinessDetails } from '@/services/interfaceService';
 import { currencies } from '@/utils/constants';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 const BusinessProfileScreen = () => {
 	const [activeTab, setActiveTab] = useState('items');
@@ -162,14 +155,7 @@ const BusinessProfileScreen = () => {
 		}
 	};
 
-	if (isLoading) {
-		return (
-			<View className="flex-1 justify-center items-center bg-white">
-				<ActivityIndicator size="large" color="#000" />
-				<Text className="mt-4 text-gray-600">Loading Profile...</Text>
-			</View>
-		);
-	}
+	if (isLoading) return <LoadingSpinner label="loading profile..." />;
 
 	if (!businessData) return null;
 

@@ -1,3 +1,4 @@
+import ShowToast from '@/components/ui/ShowToast';
 import {
 	CameraView,
 	CameraType,
@@ -6,15 +7,7 @@ import {
 } from 'expo-camera';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import {
-	Button,
-	StyleSheet,
-	Text,
-	TouchableOpacity,
-	View,
-	Alert,
-} from 'react-native';
-import Toast from 'react-native-toast-message';
+import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function QRScannerScreen() {
 	const [facing, setFacing] = useState<CameraType>('back');
@@ -61,29 +54,29 @@ export default function QRScannerScreen() {
 			// extract id from the scanned data data is in the format of secuRent://id
 			const app_name = data.split('://')[0];
 			if (app_name !== 'secuRent') {
-				Toast.show({
-					type: 'error',
-					text1: 'Invalid QR Code',
-					text2: 'Please scan a valid QR code.',
-				});
+				ShowToast(
+					'error',
+					'Invalid QR Code',
+					'Please scan a valid QR code.'
+				);
+
 				setScanned(false);
 				return;
 			}
 			const id = data.split('://')[1];
 			// check if id is valid
 			if (!id) {
-				Toast.show({
-					type: 'error',
-					text1: 'Invalid QR Code',
-					text2: 'Please scan a valid QR code.',
-				});
+				ShowToast(
+					'error',
+					'Invalid QR Code',
+					'Please scan a valid QR code.'
+				);
+
 				setScanned(false);
 				return;
 			}
-			Toast.show({
-				type: 'success',
-				text1: 'QR Code',
-			});
+			ShowToast('success', 'QR Code');
+
 			router.push({
 				pathname: '/customer/approve-transaction',
 				params: { id },
