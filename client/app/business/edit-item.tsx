@@ -1,210 +1,241 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
-import { FileObject } from '@/types/business';
-import Toast from 'react-native-toast-message';
-import { ThemedText } from '@/components/ui/ThemedText';
-import { getItemByIdForBusiness, updateItemById } from '@/services/itemService';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { getBusinessCurrencySymbol } from '@/utils/functions';
-import { Item } from '@/services/interfaceService';
-import HapticButton from '@/components/ui/HapticButton';
-import ItemForm from '@/components/forms/ItemForm';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import React, { useEffect, useState } from "react";
+import {
+    View,
+    Text,
+    TextInput,
+    ScrollView,
+    ActivityIndicator,
+    Alert
+} from "react-native";
+import { FileObject } from "@/types/business";
+import Toast from "react-native-toast-message";
+import { ThemedText } from "@/components/ui/ThemedText";
+import {
+    deleteItemById,
+    getItemByIdForBusiness,
+    updateItemById
+} from "@/services/itemService";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { getBusinessCurrencySymbol } from "@/utils/functions";
+import { Item } from "@/services/interfaceService";
+import HapticButton from "@/components/ui/HapticButton";
+import ItemForm from "@/components/forms/ItemForm";
 
 export default function EditItem() {
-	const { id } = useLocalSearchParams<{ id: string }>();
-	const router = useRouter();
+    const { id } = useLocalSearchParams<{ id: string }>();
+    const router = useRouter();
 
-	const [desc, setDesc] = useState('');
-	const [price, setPrice] = useState(0);
-	const [file, setFile] = useState<FileObject | null>(null);
-	const [duration, setDuration] = useState('');
-	const [timeUnit, setTimeUnit] = useState('days');
-	const [durationError, setDurationError] = useState('');
-	const [currency, setCurrency] = useState('ILS');
-	const [initialLoading, setInitialLoading] = useState(true);
-	const [originalImageExists, setOriginalImageExists] = useState(false);
-	const [itemNotFound, setItemNotFound] = useState(false);
-	const [loadingAction, setLoadingAction] = useState<'edit' | null>(null);
+    const [desc, setDesc] = useState("");
+    const [price, setPrice] = useState(0);
+    const [file, setFile] = useState<FileObject | null>(null);
+    const [duration, setDuration] = useState("");
+    const [timeUnit, setTimeUnit] = useState("days");
+    const [durationError, setDurationError] = useState("");
+    const [currency, setCurrency] = useState("ILS");
+    const [originalImageExists, setOriginalImageExists] = useState(false);
+    const [itemNotFound, setItemNotFound] = useState(false);
 
-	useEffect(() => {
-		const fetchItem = async () => {
-			try {
-				const response = await getItemByIdForBusiness(id);
-				const item = response.item as Item;
+    const [loadingState, setLoadingState] = useState<"init" | "edit" | null>(
+        "init"
+    );
 
-				if (!item) {
-					setItemNotFound(true);
-					return;
-				}
+    useEffect(() => {
+        const fetchItem = async () => {
+            setLoadingState("init");
+            setDesc("");
+            setPrice(0);
+            setDuration("");
+            setFile(null);
+            setItemNotFound(false);
+            setDurationError("");
+            try {
+                const response = await getItemByIdForBusiness(id);
+                const item = response.item as Item;
 
-				setDesc(item.description);
-				setPrice(item.price);
-				setDuration(String(item.duration || ''));
-				setTimeUnit(item.timeUnit || 'days');
+                if (!item) {
+                    setItemNotFound(true);
+                    return;
+                }
 
-				if (item.image) {
-					setFile({
-						uri: item.image,
-						name: 'image.jpg',
-						type: 'image/jpeg',
-					});
-					setOriginalImageExists(true);
-				} else {
-					setFile(null);
-					setOriginalImageExists(false);
-				}
-			} catch (error: any) {
-				const status = error?.response?.status;
-				if (status === 404) {
-					setItemNotFound(true);
-				} else {
-					Toast.show({ type: 'error', text1: 'Error fetching item' });
-					router.back();
-				}
-			} finally {
-				setInitialLoading(false);
-			}
-		};
+                setDesc(item.description);
+                setPrice(item.price);
+                setDuration(String(item.duration || ""));
+                setTimeUnit(item.timeUnit || "days");
 
-		const getSymbol = async () => {
-			const symbol = await getBusinessCurrencySymbol();
-			setCurrency(symbol);
-		};
+                if (item.image) {
+                    setFile({
+                        uri: item.image,
+                        name: "image.jpg",
+                        type: "image/jpeg"
+                    });
+                    setOriginalImageExists(true);
+                } else {
+                    setFile(null);
+                    setOriginalImageExists(false);
+                }
+            } catch (error: any) {
+                const status = error?.response?.status;
+                if (status === 404) {
+                    setItemNotFound(true);
+                } else {
+                    Toast.show({ type: "error", text1: "Error fetching item" });
+                    router.back();
+                }
+            } finally {
+                setLoadingState(null);
+            }
+        };
 
-		fetchItem();
-		getSymbol();
-	}, [id]);
+        const getSymbol = async () => {
+            const symbol = await getBusinessCurrencySymbol();
+            setCurrency(symbol);
+        };
 
-	const handleSubmit = async () => {
-		if (durationError || !duration || !desc || !price) {
-			Toast.show({
-				type: 'error',
-				text1: 'Please fill all required fields correctly',
-			});
-			return;
-		}
+        fetchItem();
+        getSymbol();
+    }, [id]);
 
-		setLoadingAction('edit');
-		try {
-			const formData = new FormData();
+    const handleSubmit = async () => {
+        if (durationError || !duration || !desc || !price) {
+            Toast.show({
+                type: "error",
+                text1: "Please fill all required fields correctly"
+            });
+            return;
+        }
 
-			formData.append('description', desc);
-			formData.append('price', String(price));
+        setLoadingState("edit");
+        try {
+            const formData = new FormData();
 
-			const parsedDuration = parseInt(duration);
-			if (isNaN(parsedDuration)) {
-				Toast.show({ type: 'error', text1: 'Invalid duration' });
-				setLoadingAction(null);
-				return;
-			}
+            formData.append("description", desc);
+            formData.append("price", String(price));
 
-			formData.append('duration', String(parseInt(duration)));
-			formData.append('timeUnit', timeUnit);
+            const parsedDuration = parseInt(duration);
+            if (isNaN(parsedDuration)) {
+                Toast.show({ type: "error", text1: "Invalid duration" });
+                setLoadingState(null);
+                return;
+            }
 
-			if (file) {
-				if (file.uri.startsWith('file://')) {
-					formData.append('image', {
-						uri: file.uri,
-						name: file.name,
-						type: file.type,
-					} as any);
-				}
-			} else if (!file && originalImageExists) {
-				formData.append('imageDeleteFlag', 'true');
-			}
+            formData.append("duration", String(parsedDuration));
+            formData.append("timeUnit", timeUnit);
 
-			const response = await updateItemById(
-				id,
-				desc,
-				price,
-				parseInt(duration),
-				timeUnit,
-				file,
-				formData
-			);
+            if (file) {
+                if (file.uri.startsWith("file://")) {
+                    formData.append("image", {
+                        uri: file.uri,
+                        name: file.name,
+                        type: file.type
+                    } as any);
+                }
+            } else if (!file && originalImageExists) {
+                formData.append("imageDeleteFlag", "true");
+            }
 
-			if (!response) {
-				Toast.show({ type: 'error', text1: 'Internal Server Error' });
-				setLoadingAction(null);
-				return;
-			}
+            const response = await updateItemById(
+                id,
+                desc,
+                price,
+                parsedDuration,
+                timeUnit,
+                file,
+                formData
+            );
 
-			Toast.show({ type: 'success', text1: 'Item updated successfully' });
-			router.replace('/business/business-home');
-		} catch (error: any) {
-			Toast.show({
-				type: 'error',
-				text1: error.response?.data.message || 'Update failed',
-			});
-		}
-		setLoadingAction(null);
-	};
+            if (!response) {
+                Toast.show({ type: "error", text1: "Internal Server Error" });
+                setLoadingState(null);
+                return;
+            }
 
-	const onDurationChange = (val: string) => {
-		setDuration(val);
-		const num = parseInt(val);
-		if (!num || num <= 0) {
-			setDurationError('Duration must be a positive number');
-			return;
-		}
-		const limits = { days: 30, hours: 24, minutes: 60 };
-		if (num > limits[timeUnit as keyof typeof limits]) {
-			setDurationError(
-				`Duration must be between 1 and ${
-					limits[timeUnit as keyof typeof limits]
-				}`
-			);
-		} else {
-			setDurationError('');
-		}
-	};
+            Toast.show({ type: "success", text1: "Item updated successfully" });
+            router.replace("/business/business-home");
+        } catch (error: any) {
+            Toast.show({
+                type: "error",
+                text1: error.response?.data.message || "Update failed"
+            });
+        }
+        setLoadingState(null);
+    };
 
-	if (initialLoading) return <LoadingSpinner />;
+    const onDurationChange = (val: string) => {
+        setDuration(val);
+        const num = parseInt(val);
+        if (!num || num <= 0) {
+            setDurationError("Duration must be a positive number");
+            return;
+        }
+        const limits = { days: 30, hours: 24, minutes: 60 };
+        if (num > limits[timeUnit as keyof typeof limits]) {
+            setDurationError(
+                `Duration must be between 1 and ${
+                    limits[timeUnit as keyof typeof limits]
+                }`
+            );
+        } else {
+            setDurationError("");
+        }
+    };
 
-	if (itemNotFound) {
-		return (
-			<View className="flex-1 justify-center items-center bg-white">
-				<Text className="text-xl text-gray-600">Item not found</Text>
-			</View>
-		);
-	}
+    if (loadingState === "init") {
+        return (
+            <View className='flex-1 justify-center items-center bg-white'>
+                <ActivityIndicator
+                    size='large'
+                    color='#4338CA'
+                />
+                <Text className='mt-4 text-gray-600 text-base'>
+                    Loading item data...
+                </Text>
+            </View>
+        );
+    }
 
-	return (
-		<ScrollView className="flex-1 p-4 bg-white">
-			<Text className="text-xl mb-8">
-				Update details of your business item
-			</Text>
+    if (itemNotFound) {
+        return (
+            <View className='flex-1 justify-center items-center bg-white'>
+                <Text className='text-xl text-gray-600'>Item not found</Text>
+            </View>
+        );
+    }
 
-			<ItemForm
-				desc={desc}
-				setDesc={setDesc}
-				price={price}
-				setPrice={setPrice}
-				file={file}
-				setFile={setFile}
-				duration={duration}
-				setDuration={setDuration}
-				timeUnit={timeUnit}
-				setTimeUnit={setTimeUnit}
-				durationError={durationError}
-				onDurationChange={onDurationChange}
-				currency={currency}
-			/>
+    return (
+        <ScrollView className='flex-1 p-4 bg-white'>
+            <Text className='text-xl mb-8'>
+                Update details of your business item
+            </Text>
 
-			<HapticButton
-				onPress={handleSubmit}
-				disabled={loadingAction !== null}
-				className="rounded-full py-4 items-center mt-0 bg-indigo-700"
-			>
-				{loadingAction === 'edit' ? (
-					<ActivityIndicator color="#fff" />
-				) : (
-					<ThemedText className="text-white font-semibold text-lg">
-						Edit Item
-					</ThemedText>
-				)}
-			</HapticButton>
-		</ScrollView>
-	);
+            <ItemForm
+                desc={desc}
+                setDesc={setDesc}
+                price={price}
+                setPrice={setPrice}
+                file={file}
+                setFile={setFile}
+                duration={duration}
+                setDuration={setDuration}
+                timeUnit={timeUnit}
+                setTimeUnit={setTimeUnit}
+                durationError={durationError}
+                onDurationChange={onDurationChange}
+                currency={currency}
+            />
+
+            <HapticButton
+                onPress={handleSubmit}
+                disabled={loadingState !== null}
+                className='rounded-full py-4 items-center mt-0 bg-indigo-700'
+            >
+                {loadingState === "edit" ? (
+                    <ActivityIndicator color='#fff' />
+                ) : (
+                    <ThemedText className='text-white font-semibold text-lg'>
+                        Edit Item
+                    </ThemedText>
+                )}
+            </HapticButton>
+        </ScrollView>
+    );
 }
