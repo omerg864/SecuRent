@@ -173,7 +173,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 		customer_stripe_id: req.customer.stripe_customer_id,
 		ephemeralKey: ephemeralKey.secret,
 		transactionId: transaction._id,
-		return_date: return_date ?? null
+		return_date: return_date ?? null,
 	});
 });
 
@@ -236,10 +236,20 @@ const closeTransactionById = asyncHandler(async (req, res) => {
 
 	const chargedScore = 5 - (chargedTransactionCount / transactionCount) * 5;
 	const reviewOverallScore = business.rating.reviewOverall || 5;
+	const reviewScoreWeight = reviewOverallScore * REVIEW_WEIGHT;
+	const chargedScoreWeight = chargedScore * CHARGED_WEIGHT;
+	let overAllScore = reviewScoreWeight + chargedScoreWeight;
+	if (!reviewScoreWeight && !chargedScoreWeight) {
+		overAllScore = 5;
+	} else if (!reviewScoreWeight) {
+		overAllScore = chargedScore;
+	}
+	if (!chargedScoreWeight) {
+		overAllScore = reviewOverallScore;
+	}
 
 	business.rating.charged = chargedScore;
-	business.rating.overall =
-		reviewOverallScore * REVIEW_WEIGHT + chargedScore * CHARGED_WEIGHT;
+	business.rating.overall = overAllScore;
 
 	await business.save();
 
@@ -321,10 +331,20 @@ const captureDeposit = asyncHandler(async (req, res) => {
 
 	const chargedScore = 5 - (chargedTransactionCount / transactionCount) * 5;
 	const reviewOverallScore = business.rating.reviewOverall || 5;
+	const reviewScoreWeight = reviewOverallScore * REVIEW_WEIGHT;
+	const chargedScoreWeight = chargedScore * CHARGED_WEIGHT;
+	let overAllScore = reviewScoreWeight + chargedScoreWeight;
+	if (!reviewScoreWeight && !chargedScoreWeight) {
+		overAllScore = 5;
+	} else if (!reviewScoreWeight) {
+		overAllScore = chargedScore;
+	}
+	if (!chargedScoreWeight) {
+		overAllScore = reviewOverallScore;
+	}
 
 	business.rating.charged = chargedScore;
-	business.rating.overall =
-		reviewOverallScore * REVIEW_WEIGHT + chargedScore * CHARGED_WEIGHT;
+	business.rating.overall = overAllScore;
 
 	await business.save();
 

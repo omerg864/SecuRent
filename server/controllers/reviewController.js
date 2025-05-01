@@ -217,11 +217,19 @@ const createReview = asyncHandler(async (req, res) => {
 	);
 
 	const chargedScore = business.rating.charged ?? CHARGED_SCORE;
+	const reviewScoreWeight = newReviewOverallScore * REVIEW_WEIGHT;
+	const chargedScoreWeight = chargedScore * CHARGED_WEIGHT;
+	let overAllScore = reviewScoreWeight + chargedScoreWeight;
+	if (!reviewScoreWeight && !chargedScoreWeight) {
+		overAllScore = 5;
+	} else if (!reviewScoreWeight) {
+		overAllScore = chargedScore;
+	}
+	if (!chargedScoreWeight) {
+		overAllScore = newReviewOverallScore;
+	}
 
-	const newOverallScore =
-		newReviewOverallScore * REVIEW_WEIGHT + chargedScore * CHARGED_WEIGHT;
-
-	business.rating.overall = newOverallScore;
+	business.rating.overall = overAllScore;
 	business.rating.charged = chargedScore;
 	business.rating.reviewOverall = newReviewOverallScore;
 	business.rating.quality = addToAvg(
@@ -406,12 +414,19 @@ const updateReview = asyncHandler(async (req, res) => {
 		);
 
 		const chargedScore = business.rating.charged ?? CHARGED_SCORE;
+		const reviewScoreWeight = newReviewOverallScore * REVIEW_WEIGHT;
+		const chargedScoreWeight = chargedScore * CHARGED_WEIGHT;
+		let overAllScore = reviewScoreWeight + chargedScoreWeight;
+		if (!reviewScoreWeight && !chargedScoreWeight) {
+			overAllScore = 5;
+		} else if (!reviewScoreWeight) {
+			overAllScore = chargedScore;
+		}
+		if (!chargedScoreWeight) {
+			overAllScore = newReviewOverallScore;
+		}
 
-		const newOverallScore =
-			newReviewOverallScore * REVIEW_WEIGHT +
-			chargedScore * CHARGED_WEIGHT;
-
-		business.rating.overall = newOverallScore;
+		business.rating.overall = overAllScore;
 		business.rating.charged = chargedScore;
 		business.rating.reviewOverall = newReviewOverallScore;
 
@@ -499,11 +514,19 @@ const deleteReview = asyncHandler(async (req, res) => {
 		) ?? 0;
 
 	const chargedScore = business.rating.charged ?? CHARGED_SCORE;
+	const reviewScoreWeight = newReviewOverallScore * REVIEW_WEIGHT;
+	const chargedScoreWeight = chargedScore * CHARGED_WEIGHT;
+	let overAllScore = reviewScoreWeight + chargedScoreWeight;
+	if (!reviewScoreWeight && !chargedScoreWeight) {
+		overAllScore = 5;
+	} else if (!reviewScoreWeight) {
+		overAllScore = chargedScore;
+	}
+	if (!chargedScoreWeight) {
+		overAllScore = newReviewOverallScore;
+	}
 
-	const newOverallScore =
-		newReviewOverallScore * REVIEW_WEIGHT + chargedScore * CHARGED_WEIGHT;
-
-	business.rating.overall = newOverallScore;
+	business.rating.overall = overAllScore;
 	business.rating.charged = chargedScore;
 	business.rating.reviewOverall = newReviewOverallScore;
 
