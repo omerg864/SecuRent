@@ -238,9 +238,9 @@ export default function ApproveTransaction() {
 
                 {/* Payment Card */}
                 <View className='mx-6 mt-8 bg-indigo-800 rounded-3xl p-6'>
-                    {/* User Info */}
-                    <View className='flex-row items-center mb-4'>
-                        <View className='w-16 h-16 rounded-full bg-gray-300 items-center justify-center overflow-hidden'>
+                    {/* Business Info */}
+                    <View className='flex-row items-start pb-4 border-b border-white/20'>
+                        <View className='w-16 h-16 rounded-full bg-gray-300 items-center justify-center overflow-hidden mr-4'>
                             {item.business?.image ? (
                                 <Image
                                     source={{ uri: item.business.image }}
@@ -254,19 +254,24 @@ export default function ApproveTransaction() {
                                 />
                             )}
                         </View>
-                        <View className='ml-3'>
-                            <Text className='text-white/90 text-lg font-medium'>
+
+                        <View className='flex-1'>
+                            <Text className='text-white/90 text-lg font-semibold mb-1'>
                                 {businessName}
                             </Text>
-                            <StarRating rating={rating} />
-                            <HapticButton
-                                onPress={handleGoToBusinessProfile}
-                                className='mt-2 px-4 py-1 rounded-full bg-white/20'
-                            >
-                                <Text className='text-white text-sm font-medium'>
-                                    View Business Profile
-                                </Text>
-                            </HapticButton>
+
+                            <View className='flex-row items-center'>
+                                <StarRating rating={rating} />
+
+                                <HapticButton
+                                    onPress={handleGoToBusinessProfile}
+                                    className='ml-2 px-2 py-0.5 rounded-full bg-white/20'
+                                >
+                                    <Text className='text-white text-xs font-medium'>
+                                        View Profile
+                                    </Text>
+                                </HapticButton>
+                            </View>
                         </View>
                     </View>
 
@@ -282,7 +287,7 @@ export default function ApproveTransaction() {
 
                     {/* Additional Info */}
                     <View className='mb-6'>
-                        <Text className='text-white/70 text-md text-center mb-1'>
+                        <Text className='text-white text-xl font-semibold text-center'>
                             {item.description}
                         </Text>
                     </View>
