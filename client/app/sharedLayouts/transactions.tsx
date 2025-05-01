@@ -16,11 +16,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Transaction } from '@/services/interfaceService';
 import { Feather } from '@expo/vector-icons';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, usePathname, useRouter } from 'expo-router';
 import UserImage from '@/components/UserImage';
 import { currencies } from '@/utils/constants';
 import { formatCurrencySymbol } from '@/utils/functions';
-
 
 const PAGE_SIZE = 8;
 
@@ -41,6 +40,7 @@ const TransactionsPage = () => {
 	const [statusFilter, setStatusFilter] = useState<string>('all');
 	const [page, setPage] = useState(1);
 	const [isLoading, setIsLoading] = useState(false);
+	const pathName = usePathname();
 
 	useFocusEffect(
 		useCallback(() => {
@@ -67,6 +67,7 @@ const TransactionsPage = () => {
 				} catch (error) {
 					console.log('error fetching transactions: ', error);
 				} finally {
+					console.log(pathName);
 					setIsLoading(false);
 				}
 			};
@@ -78,7 +79,7 @@ const TransactionsPage = () => {
 				setAllTransactions([]);
 				setPage(1);
 			};
-		}, [])
+		}, [pathName])
 	);
 
 	const applyFilters = useCallback(() => {
@@ -137,8 +138,7 @@ const TransactionsPage = () => {
 				? item.customer?.name
 				: item.business?.name;
 
-			const currencySymbol = formatCurrencySymbol(item.currency);
-
+		const currencySymbol = formatCurrencySymbol(item.currency);
 
 		return (
 			<TouchableOpacity
@@ -149,7 +149,13 @@ const TransactionsPage = () => {
 							: '/customer/transaction-details';
 					router.push({
 						pathname: routePath,
-						params: { id: item._id, from: accountType === 'business' ? '/business/transactions' : '/customer/transactions' },
+						params: {
+							id: item._id,
+							from:
+								accountType === 'business'
+									? '/business/transactions'
+									: '/customer/transactions',
+						},
 					});
 				}}
 				className="flex-row justify-between items-center bg-white rounded-xl mb-4 px-4 py-3 shadow-sm border border-gray-200"
@@ -180,8 +186,9 @@ const TransactionsPage = () => {
 				<Text className={`text-sm font-medium ${colorClass}`}>
 					{item.status === 'charged'
 						? `${item.charged} ${currencySymbol}`
-						: item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-						</Text>
+						: item.status.charAt(0).toUpperCase() +
+						  item.status.slice(1)}
+				</Text>
 			</TouchableOpacity>
 		);
 	};
