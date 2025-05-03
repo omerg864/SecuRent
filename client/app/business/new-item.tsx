@@ -152,8 +152,7 @@ export default function newItem() {
 
 	return (
 		<ScrollView className="flex-1 p-4 bg-white">
-			<FloatingBackArrowButton />
-			<Text className="text-xl mb-8">
+			<Text className="text-xl text-bold mb-8">
 				Create a new item for your business
 			</Text>
 			<ItemForm

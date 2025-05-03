@@ -119,7 +119,7 @@ const BusinessHomePage = () => {
 				style={{ color: 'black' }}
 				className="text-base font-semibold"
 			>
-				{item.amount}{' '}
+				{item.amount}
 				{currencies.find((currency) => currency.code === item?.currency)
 					?.symbol || '₪'}
 			</ThemedText>
