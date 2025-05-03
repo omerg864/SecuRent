@@ -186,7 +186,7 @@ const TransactionsPage = () => {
 				</View>
 				<Text className={`text-sm font-medium ${colorClass}`}>
 					{item.status === 'charged'
-						? `${item.charged} ${currencySymbol}`
+						? `${item.charged}${currencySymbol}`
 						: item.status.charAt(0).toUpperCase() +
 						  item.status.slice(1)}
 				</Text>
