@@ -71,11 +71,13 @@ const RegisterScreen = () => {
 					setLoading(false);
 					return;
 				}
+				console.log('Business registration response:', response);
 				const loginResponse = await LoginUser(email, password);
 				if (!loginResponse.success) {
 					setLoading(false);
 					return;
 				}
+				console.log('Business login response:', loginResponse);
 				console.log('Business login response:', loginResponse);
 				AsyncStorage.setItem('UserID', loginResponse.user._id);
 				AsyncStorage.setItem('Access_Token', loginResponse.accessToken);
@@ -94,11 +96,13 @@ const RegisterScreen = () => {
 					setLoading(false);
 					return;
 				}
+				console.log('Customer registration response:', response);
 				const loginResponse = await LoginUser(email, password);
 				if (!loginResponse.success) {
 					setLoading(false);
 					return;
 				}
+				console.log('Customer login response:', loginResponse);
 				console.log('Customer login response:', loginResponse);
 				AsyncStorage.setItem('UserID', loginResponse.user._id);
 				AsyncStorage.setItem('Access_Token', loginResponse.accessToken);
@@ -123,6 +127,7 @@ const RegisterScreen = () => {
 				params: { accountType },
 			});
 		} catch (error: any) {
+			console.error('Error registering:', error.response.data.message);
 			ShowToast('error', error.response.data.message);
 			setLoading(false);
 		} finally {

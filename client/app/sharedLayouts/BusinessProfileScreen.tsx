@@ -454,7 +454,7 @@ const BusinessProfileScreen = () => {
 										className="text-gray-700"
 										darkColor="black"
 									>
-										{review.content}
+										{review.content.trim()}
 									</ThemedText>
 								</HapticButton>
 							);

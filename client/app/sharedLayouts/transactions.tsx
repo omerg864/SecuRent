@@ -165,9 +165,9 @@ const TransactionsPage = () => {
 					image={userImage}
 					name={userName}
 					size={12}
-					className="mr-4"
+					className="ml-4"
 				/>
-				<View className="flex-1">
+				<View className="flex-1 ml-2">
 					<Text className="text-sm font-medium text-gray-900">
 						{accountType === 'business'
 							? `${item.customer?.name}`

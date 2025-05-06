@@ -36,12 +36,21 @@ const businessScheme = mongoose.Schema({
 	],
 	rating: {
 		type: {
-			reviewOverall: { type: Number, default: 0 },
-			quality: { type: Number, default: 0 },
-			reliability: { type: Number, default: 0 },
-			price: { type: Number, default: 0 },
-			charged: { type: Number, default: 5 },
-			overall: { type: Number, default: 0 },
+			reviewOverall: { type: Number },
+			quality: { type: Number },
+			reliability: { type: Number },
+			price: { type: Number },
+			charged: { type: Number },
+			overall: { type: Number },
+		},
+		required: true,
+		default: {
+			reviewOverall: 0,
+			quality: 0,
+			reliability: 0,
+			price: 0,
+			charged: 0,
+			overall: 5,
 		},
 	},
 	address: {
@@ -52,10 +61,12 @@ const businessScheme = mongoose.Schema({
 			type: String, // This must be "Point"
 			enum: ['Point'],
 			required: true,
+			default: 'Point',
 		},
 		coordinates: {
 			type: [Number], // [longitude, latitude]
 			required: true,
+			default : [0, 0],
 		},
 	},
 	image: {

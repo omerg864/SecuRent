@@ -15,6 +15,7 @@ const registerBusiness = async (
 	file: FileObject | null
 ) => {
 	try {
+		console.log('Business data:', businessData);
 		const formData = buildFormData(businessData, file);
 		const response = await client.post<AuthResponse>(
 			'business/register',
@@ -25,6 +26,7 @@ const registerBusiness = async (
 				},
 			}
 		);
+		console.log('Business registration response:', response.data);
 		return response.data.success;
 	} catch (error) {
 		throw error || 'Registration failed.';
