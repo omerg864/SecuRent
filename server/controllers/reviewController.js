@@ -54,7 +54,7 @@ const generateReviewScores = async (content) => {
 	- Reliability
 	- Quality
 	
-	if the review does not mention a category, return 0 for that category.
+	If the review does not mention a category, do not assign a score for that category. Return null or leave it out.
 	`;
 
 	const reviewResult = await reviewModel.generateContent(reviewPrompt);
