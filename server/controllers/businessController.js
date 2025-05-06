@@ -38,17 +38,22 @@ const successFullLogin = async (res, business) => {
 const registerBusiness = asyncHandler(async (req, res) => {
 	const { name, email, password } = req.body;
 
+	console.log('req.body', req.body);
+
 	if (!name || !email || !password) {
+		console.log('Please fill in all fields');
 		res.status(400);
 		throw new Error('Please fill in all fields');
 	}
 
 	if (!email_regex.test(email)) {
+		console.log('Invalid email format');
 		res.status(401);
 		throw new Error('Invalid email format');
 	}
 
 	if (!password_regex.test(password)) {
+		console.log('Password is not strong enough');
 		res.status(402);
 		throw new Error('Password is not strong enough');
 	}
@@ -61,12 +66,15 @@ const registerBusiness = asyncHandler(async (req, res) => {
 	});
 
 	if (businessExists || customerExists) {
+		console.log('Email already in use');
 		res.status(403);
 		throw new Error('Email already in use');
 	}
 
 	const salt = await bcrypt.genSalt(10);
 	const hashedPassword = await bcrypt.hash(password, salt);
+
+	console.log('req.file', req.file);
 
 	let imageUrl = '';
 	if (req.file) {
@@ -78,12 +86,16 @@ const registerBusiness = asyncHandler(async (req, res) => {
 		);
 	}
 
+	console.log('imageUrl', imageUrl);
+
 	const business = await Business.create({
 		name,
 		email,
 		password: hashedPassword,
 		image: imageUrl || undefined,
 	});
+
+	console.log('business', business);
 
 	const stripeAccount = await stripe.accounts.create({
 		type: 'express',
@@ -94,6 +106,8 @@ const registerBusiness = asyncHandler(async (req, res) => {
 			transfers: { requested: true },
 		},
 	});
+
+	console.log('stripeAccount', stripeAccount);
 
 	business.stripe_account_id = stripeAccount.id;
 
@@ -115,7 +129,6 @@ const registerBusiness = asyncHandler(async (req, res) => {
 	const sent = await sendEmail(email, subject, text, html);
 
 	business.verificationCode = verificationCode;
-	business.rating = 5;
 	await business.save();
 
 	res.status(201).json({

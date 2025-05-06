@@ -78,7 +78,7 @@ const DisplayReview = () => {
 							name={NormalizedImage(userName)}
 							size={16}
 						/>
-						<View>
+						<View className="ml-2">
 							<Text className="text-lg font-semibold text-gray-800">
 								{userName}
 							</Text>
@@ -89,7 +89,7 @@ const DisplayReview = () => {
 					</View>
 					<View className="bg-gray-50 rounded-lg p-4 shadow-sm mb-8">
 						<Text className="text-base text-gray-700 leading-relaxed">
-							{reviewText}
+							{reviewText.toString().trim()}
 						</Text>
 					</View>
 					{parsedImages.length > 0 && (

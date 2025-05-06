@@ -50,7 +50,7 @@ const CustomerHome: React.FC = () => {
 
 	// Modal State
 	const [modalVisible, setModalVisible] = useState(false);
-	const [maxDistance, setMaxDistance] = useState(10);
+	const [maxDistance, setMaxDistance] = useState(50);
 	const [minRating, setMinRating] = useState(0);
 
 	const onBarcodeClick = () => {
@@ -58,7 +58,12 @@ const CustomerHome: React.FC = () => {
 	};
 
 	const onMapClick = () => {
-		router.push('/customer/BusinessesMap');
+		router.push({
+			pathname: '/customer/BusinessesMap',
+			params: {
+				businesses: JSON.stringify(businesses),
+			},
+		});
 	};
 
 	const debouncedSearch = useMemo(
@@ -278,8 +283,8 @@ const CustomerHome: React.FC = () => {
 							Max Distance: {maxDistance} km
 						</Text>
 						<Slider
-							minimumValue={1}
-							maximumValue={10000}
+							minimumValue={10}
+							maximumValue={500}
 							step={1}
 							value={maxDistance}
 							onValueChange={setMaxDistance}
