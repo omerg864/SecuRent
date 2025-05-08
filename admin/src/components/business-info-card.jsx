@@ -90,14 +90,14 @@ export function BusinessInfoCard({ business }) {
             <p className="font-medium">Rating</p>
             <div className="flex items-center">
               <p className="text-sm text-muted-foreground">
-                {business?.rating}
+                {business?.rating?.overall}
               </p>
               <div className="flex ml-2">
                 {[...Array(5)].map((_, i) => (
                   <svg
                     key={i}
                     className={`w-4 h-4 ${
-                      i < Number.parseInt(business?.rating)
+                      i < Number.parseInt(business?.rating?.overall)
                         ? "text-yellow-500"
                         : "text-gray-300"
                     }`}
