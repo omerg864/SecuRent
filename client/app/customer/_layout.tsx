@@ -147,6 +147,7 @@ export default function Layout() {
 						options={{
 							title: 'Report Page',
 							drawerItemStyle: { display: 'none' },
+							headerShown: false,
 						}}
 					/>
 				</Drawer>

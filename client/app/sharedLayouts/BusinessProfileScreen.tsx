@@ -94,7 +94,9 @@ const BusinessProfileScreen = () => {
 			pathname: '/customer/report-page',
 			params: {
 				businessName: business.name,
-				businessId: business._id,
+				businessImage: business.image,
+				businessId: business._id as string,
+				from: myFrom,
 			},
 		});
 		setReportModalVisible(false);
