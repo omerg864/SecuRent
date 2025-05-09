@@ -19,6 +19,8 @@ import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
 import { v4 as uuidv4 } from 'uuid';
 import { admins } from '../config/websocket.js';
 import jwt from 'jsonwebtoken';
+import Notification from '../models/notificationModel.js';
+import { businesses, customers } from '../config/websocket.js';
 
 const successFullLogin = async (res, admin) => {
 	const accessToken = generateAdminAccessToken(admin._id);
@@ -677,6 +679,92 @@ const getAllBusinesses = asyncHandler(async (req, res) => {
 	});
 });
 
+const toggleBusinessSuspension = asyncHandler(async (req, res) => {
+	const { id } = req.params;
+	const business = await Business.findById(id);
+	if (!business) {
+		res.status(404);
+		throw new Error('Business not found');
+	}
+
+	business.suspended = !business.suspended;
+	await business.save();
+
+	const notification = await Notification.create({
+		type: 'business',
+		title: 'Business Account Suspension',
+		content: `Your account has been ${
+			business.suspended ? 'suspended' : 'released from suspension'
+		}`,
+		business: business._id,
+	});
+
+	const associatedBusinesses = businesses.filter(
+		(ws) => ws.id === business._id.toString()
+	);
+
+	if (associatedBusinesses.length > 0) {
+		associatedBusinesses.forEach((ws) => {
+			ws.send(
+				JSON.stringify({
+					type: 'notification',
+					data: {
+						notification: notification,
+					},
+				})
+			);
+		});
+	}
+
+	res.status(200).json({
+		success: true,
+		suspended: business.suspended,
+	});
+});
+
+const toggleCustomerSuspension = asyncHandler(async (req, res) => {
+	const { id } = req.params;
+	const customer = await Customer.findById(id);
+	if (!customer) {
+		res.status(404);
+		throw new Error('Customer not found');
+	}
+
+	customer.suspended = !customer.suspended;
+	await customer.save();
+
+	const notification = await Notification.create({
+		type: 'customer',
+		title: 'Customer Account Suspension',
+		content: `Your account has been ${
+			customer.suspended ? 'suspended' : 'released from suspension'
+		}`,
+		customer: customer._id,
+	});
+
+	const associatedCustomers = customers.filter(
+		(ws) => ws.id === customer._id.toString()
+	);
+
+	if (associatedCustomers.length > 0) {
+		associatedCustomers.forEach((ws) => {
+			ws.send(
+				JSON.stringify({
+					type: 'notification',
+					data: {
+						notification: notification,
+					},
+				})
+			);
+		});
+	}
+
+	res.status(200).json({
+		success: true,
+		suspended: customer.suspended,
+	});
+});
+
 export {
 	login,
 	register,
@@ -689,4 +777,6 @@ export {
 	adminAnalytics,
 	refreshTokens,
 	getAllBusinesses,
+	toggleBusinessSuspension,
+	toggleCustomerSuspension,
 };

@@ -1,10 +1,16 @@
 import asyncHandler from 'express-async-handler';
 import Transaction from '../models/transactionModel.js';
 import Item from '../models/itemModel.js';
-import { businesses } from '../config/websocket.js';
+import { businesses, customers, admins } from '../config/websocket.js';
 import stripe from '../config/stripe.js';
-import { CHARGED_WEIGHT, REVIEW_WEIGHT } from '../utils/constants.js';
+import {
+	CHARGED_PERCENT_NOTIFICATION,
+	CHARGED_WEIGHT,
+	REVIEW_WEIGHT,
+} from '../utils/constants.js';
 import Business from '../models/businessModel.js';
+import Customer from '../models/customerModel.js';
+import Notification from '../models/notificationModel.js';
 
 const getBusinessTransactions = asyncHandler(async (req, res) => {
 	const transactions = await Transaction.find({
@@ -223,6 +229,30 @@ const closeTransactionById = asyncHandler(async (req, res) => {
 		status: 'charged',
 	});
 
+	const notification = await Notification.create({
+		title: 'transaction closed',
+		content: `Deposit of ${transaction.description} released successfully.`,
+		customer: transaction.customer,
+		type: 'customer',
+	});
+
+	const customerAssociated = customers.filter(
+		(ws) => ws.id === transaction.customer.toString()
+	);
+
+	if (customerAssociated.length > 0) {
+		for (const ws of customerAssociated) {
+			ws.send(
+				JSON.stringify({
+					type: 'notification',
+					data: {
+						notification: notification,
+					},
+				})
+			);
+		}
+	}
+
 	if (!business.rating) {
 		business.rating = {
 			reviewOverall: 5,
@@ -308,6 +338,30 @@ const captureDeposit = asyncHandler(async (req, res) => {
 
 	await transaction.save();
 
+	const notification = await Notification.create({
+		title: 'Deposit Charged',
+		content: `Deposit of ${chargedAmount} ${transaction.currency.toUpperCase()} charged successfully.`,
+		customer: transaction.customer,
+		type: 'customer',
+	});
+
+	const customerAssociated = customers.filter(
+		(ws) => ws.id === transaction.customer.toString()
+	);
+
+	if (customerAssociated.length > 0) {
+		for (const ws of customerAssociated) {
+			ws.send(
+				JSON.stringify({
+					type: 'notification',
+					data: {
+						notification: notification,
+					},
+				})
+			);
+		}
+	}
+
 	if (!business.rating) {
 		business.rating = {
 			reviewOverall: 5,
@@ -322,12 +376,38 @@ const captureDeposit = asyncHandler(async (req, res) => {
 	const transactionCount =
 		(await Transaction.countDocuments({
 			business: transaction.business._id,
-		})) || 0;
+		})) || 1;
 
 	const chargedTransactionCount = await Transaction.countDocuments({
 		business: transaction.business._id,
 		status: 'charged',
 	});
+
+	const customerTransactionChangePercent = Math.round(
+		(chargedTransactionCount / transactionCount) * 100
+	);
+	if (
+		customerTransactionChangePercent > CHARGED_PERCENT_NOTIFICATION &&
+		transactionCount > 6
+	) {
+		const adminNotification = await Notification.create({
+			title: 'Customer Charging Notification',
+			content: `Customer has been charged ${customerTransactionChangePercent}% of their ${transactionCount} deposits.`,
+			customer: transaction.customer,
+			type: 'admin',
+		});
+
+		for (const ws of admins) {
+			ws.send(
+				JSON.stringify({
+					type: 'notification',
+					data: {
+						notification: adminNotification,
+					},
+				})
+			);
+		}
+	}
 
 	const chargedScore = 5 - (chargedTransactionCount / transactionCount) * 5;
 	const reviewOverallScore = business.rating.reviewOverall || 5;

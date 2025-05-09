@@ -14,6 +14,7 @@ import itemRoutes from './routes/itemRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import locationRoutes from './routes/locationRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
+import notificationsRoutes from './routes/notificationsRoutes.js';
 import cors from 'cors';
 import http from 'http';
 import { setUpWebSocket } from './config/websocket.js';
@@ -60,6 +61,7 @@ app.use('/api/item', itemRoutes);
 app.use('/api/review', reviewRoutes);
 app.use('/api/location', locationRoutes);
 app.use('/api/report', reportRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 // Error handler middleware should be last
 app.use(errorHandler);
