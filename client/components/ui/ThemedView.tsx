@@ -1,5 +1,4 @@
 import { View, type ViewProps } from 'react-native';
-
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 

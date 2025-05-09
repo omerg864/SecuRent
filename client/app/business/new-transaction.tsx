@@ -16,7 +16,6 @@ import { createTemporaryItem } from '@/services/itemService';
 import ShowToast from '@/components/ui/ShowToast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { currencies } from '@/utils/constants';
-import Toast from 'react-native-toast-message';
 
 const format = {
 	date: (d: Date) => d.toLocaleDateString('en-GB'),
@@ -40,22 +39,19 @@ const CreateTransactionScreen = () => {
 	const handleContinue = async () => {
 		let error = '';
 		if (!desc) {
-			error = 'Please fill item description';
-			Toast.show({ type: 'error', text1: `${error}` });
+			ShowToast('error', 'Please fill item description');
 			return;
 		}
 		if (!price) {
-			error = 'Price must be set';
-			Toast.show({ type: 'error', text1: `${error}` });
+			ShowToast('error', 'Price must be set');
 			return;
 		}
 		if (date < startDate.current) {
-			error = 'Date is not valid';
-			Toast.show({ type: 'error', text1: `${error}` });
+			ShowToast('error', 'Date is not valid');
 			return;
 		}
 		if (error) {
-			Toast.show({ type: 'error', text1: `${error}` });
+			ShowToast('error', error);
 		} else {
 			// create temporary item
 			setIsLoading(true);
@@ -63,10 +59,7 @@ const CreateTransactionScreen = () => {
 				const response = await createTemporaryItem(desc, date, price);
 				if (!response) {
 					setIsLoading(false);
-					Toast.show({
-						type: 'error',
-						text1: 'Internal Server Error',
-					});
+					ShowToast('error', 'Internal Server Error');
 					return;
 				}
 				setDesc('');
@@ -81,10 +74,7 @@ const CreateTransactionScreen = () => {
 				});
 			} catch (error: any) {
 				console.log(error.response);
-				Toast.show({
-					type: 'error',
-					text1: error.response.data.message,
-				});
+				ShowToast('error', error.response.data.message);
 			}
 			setIsLoading(false);
 		}

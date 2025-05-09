@@ -1,21 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import {
-	View,
-	Text,
-	TextInput,
-	ScrollView,
-	ActivityIndicator,
-} from 'react-native';
-import ProfileImageInput from '../../components/ProfileImageInput'; // adjust path as needed
+import { Text, ScrollView, ActivityIndicator } from 'react-native';
 import { FileObject } from '@/types/business';
-import { Picker } from '@react-native-picker/picker';
-import PricePicker from '@/components/PricePicker';
 import Toast from 'react-native-toast-message';
 import { ThemedText } from '@/components/ui/ThemedText';
 import HapticButton from '@/components/ui/HapticButton';
 import { createBusinessItem } from '@/services/itemService';
 import { useRouter } from 'expo-router';
 import { getBusinessCurrencySymbol } from '@/utils/functions';
+import ItemForm from '@/components/forms/ItemForm';
+import FloatingBackArrowButton from '@/components/ui/FloatingBackArrowButton';
 
 export default function newItem() {
 	const [desc, setDesc] = useState('');
@@ -159,82 +152,24 @@ export default function newItem() {
 
 	return (
 		<ScrollView className="flex-1 p-4 bg-white">
-			<Text className="text-xl font-bold mb-2">New Item</Text>
-			<Text className="text-xl mb-8">
+			<Text className="text-xl text-bold mb-8">
 				Create a new item for your business
 			</Text>
-
-			{/* Image Upload */}
-			<ProfileImageInput
-				file={file}
-				containerClassName="mb-6"
-				themeText={false}
-				labelClassName="text-black"
-				label={`Item Image`}
-				setFile={setFile}
-			/>
-
-			<Text className="text-lg font-semibold mb-2">Description</Text>
-			<TextInput
-				className="border border-gray-300 rounded-lg p-3 text-lg bg-gray-100 mb-6"
-				value={desc}
-				onChangeText={setDesc}
-			/>
-
-			{/* Price Section */}
-			<PricePicker
-				label="Price"
+			<ItemForm
+				desc={desc}
+				setDesc={setDesc}
 				price={price}
 				setPrice={setPrice}
+				file={file}
+				setFile={setFile}
+				duration={duration}
+				setDuration={setDuration}
+				timeUnit={timeUnit}
+				setTimeUnit={setTimeUnit}
+				durationError={durationError}
+				onDurationChange={onDurationChange}
 				currency={currency}
 			/>
-
-			{/* Duration */}
-			<View className="mt-8">
-				<Text className="text-lg font-semibold mb-3">Duration</Text>
-
-				<View className="flex-row gap-4 items-center">
-					<View className="flex-1">
-						<TextInput
-							className={`border rounded-xl p-3 text-lg text-center bg-gray-100 ${
-								durationError
-									? 'border-red-500'
-									: 'border-gray-300'
-							}`}
-							keyboardType="numeric"
-							placeholder=""
-							value={duration}
-							onChangeText={onDurationChange}
-						/>
-					</View>
-
-					<View className="flex-1 border border-gray-300 rounded-xl bg-white overflow-hidden">
-						<Picker
-							selectedValue={timeUnit}
-							onValueChange={(itemValue) =>
-								setTimeUnit(itemValue)
-							}
-						>
-							{timeUnits.map((unit) => (
-								<Picker.Item
-									label={
-										unit.charAt(0).toUpperCase() +
-										unit.slice(1)
-									}
-									value={unit}
-									key={unit}
-								/>
-							))}
-						</Picker>
-					</View>
-				</View>
-
-				{durationError ? (
-					<Text className="text-red-500 mt-2 ml-1 text-sm">
-						{durationError}
-					</Text>
-				) : null}
-			</View>
 			{/* Submit Button */}
 			<HapticButton
 				className="bg-white rounded-full py-4 items-center mb-5 shadow-lg mt-5"

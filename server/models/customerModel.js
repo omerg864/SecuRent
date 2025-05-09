@@ -61,6 +61,10 @@ const customerScheme = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    suspended: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

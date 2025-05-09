@@ -54,7 +54,7 @@ const generateReviewScores = async (content) => {
 	- Reliability
 	- Quality
 	
-	if the review does not mention a category, return 0 for that category.
+	If the review does not mention a category, do not assign a score for that category. Return null or leave it out.
 	`;
 
 	const reviewResult = await reviewModel.generateContent(reviewPrompt);
@@ -217,11 +217,19 @@ const createReview = asyncHandler(async (req, res) => {
 	);
 
 	const chargedScore = business.rating.charged ?? CHARGED_SCORE;
+	const reviewScoreWeight = newReviewOverallScore * REVIEW_WEIGHT;
+	const chargedScoreWeight = chargedScore * CHARGED_WEIGHT;
+	let overAllScore = reviewScoreWeight + chargedScoreWeight;
+	if (!reviewScoreWeight && !chargedScoreWeight) {
+		overAllScore = 5;
+	} else if (!reviewScoreWeight) {
+		overAllScore = chargedScore;
+	}
+	if (!chargedScoreWeight) {
+		overAllScore = newReviewOverallScore;
+	}
 
-	const newOverallScore =
-		newReviewOverallScore * REVIEW_WEIGHT + chargedScore * CHARGED_WEIGHT;
-
-	business.rating.overall = newOverallScore;
+	business.rating.overall = overAllScore;
 	business.rating.charged = chargedScore;
 	business.rating.reviewOverall = newReviewOverallScore;
 	business.rating.quality = addToAvg(
@@ -406,12 +414,19 @@ const updateReview = asyncHandler(async (req, res) => {
 		);
 
 		const chargedScore = business.rating.charged ?? CHARGED_SCORE;
+		const reviewScoreWeight = newReviewOverallScore * REVIEW_WEIGHT;
+		const chargedScoreWeight = chargedScore * CHARGED_WEIGHT;
+		let overAllScore = reviewScoreWeight + chargedScoreWeight;
+		if (!reviewScoreWeight && !chargedScoreWeight) {
+			overAllScore = 5;
+		} else if (!reviewScoreWeight) {
+			overAllScore = chargedScore;
+		}
+		if (!chargedScoreWeight) {
+			overAllScore = newReviewOverallScore;
+		}
 
-		const newOverallScore =
-			newReviewOverallScore * REVIEW_WEIGHT +
-			chargedScore * CHARGED_WEIGHT;
-
-		business.rating.overall = newOverallScore;
+		business.rating.overall = overAllScore;
 		business.rating.charged = chargedScore;
 		business.rating.reviewOverall = newReviewOverallScore;
 
@@ -499,11 +514,19 @@ const deleteReview = asyncHandler(async (req, res) => {
 		) ?? 0;
 
 	const chargedScore = business.rating.charged ?? CHARGED_SCORE;
+	const reviewScoreWeight = newReviewOverallScore * REVIEW_WEIGHT;
+	const chargedScoreWeight = chargedScore * CHARGED_WEIGHT;
+	let overAllScore = reviewScoreWeight + chargedScoreWeight;
+	if (!reviewScoreWeight && !chargedScoreWeight) {
+		overAllScore = 5;
+	} else if (!reviewScoreWeight) {
+		overAllScore = chargedScore;
+	}
+	if (!chargedScoreWeight) {
+		overAllScore = newReviewOverallScore;
+	}
 
-	const newOverallScore =
-		newReviewOverallScore * REVIEW_WEIGHT + chargedScore * CHARGED_WEIGHT;
-
-	business.rating.overall = newOverallScore;
+	business.rating.overall = overAllScore;
 	business.rating.charged = chargedScore;
 	business.rating.reviewOverall = newReviewOverallScore;
 

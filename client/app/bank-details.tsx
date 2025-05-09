@@ -7,12 +7,12 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { Button, View, ActivityIndicator, Linking } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import Toast from 'react-native-toast-message';
 import { WebView, WebViewNavigation } from 'react-native-webview';
 import HapticButton from '@/components/ui/HapticButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ShowToast from '@/components/ui/ShowToast';
 
 export default function StripeOnboardingScreen() {
 	const params = useLocalSearchParams();
@@ -27,21 +27,22 @@ export default function StripeOnboardingScreen() {
 			const data = response.data;
 			console.log('Onboarding URL:', data.url);
 			if (!data || !data.url) {
-				Toast.show({
-					type: 'error',
-					text1: 'Error',
-					text2: 'Failed to get onboarding URL. Please try again.',
-				});
+				ShowToast(
+					'error',
+					'Error',
+					'Failed to get onboarding URL. Please try again.'
+				);
+
 				return;
 			}
 			setOnboardingUrl(data.url);
 		} catch (err: any) {
 			console.error('Error fetching onboarding URL:', err.response.data);
-			Toast.show({
-				type: 'error',
-				text1: 'Error',
-				text2: 'Failed to start onboarding. Please try again.',
-			});
+			ShowToast(
+				'error',
+				'Error',
+				'Failed to start onboarding. Please try again.'
+			);
 		}
 		setLoading(false);
 	};
@@ -57,10 +58,8 @@ export default function StripeOnboardingScreen() {
 
 				if (!response) {
 					setLoading(false);
-					Toast.show({
-						type: 'error',
-						text1: 'Internal Server Error',
-					});
+					ShowToast('error', 'Internal Server Error');
+
 					return;
 				}
 
@@ -75,10 +74,8 @@ export default function StripeOnboardingScreen() {
 					);
 				}
 				await AsyncStorage.setItem('current_account_type', accountType);
-				Toast.show({
-					type: 'success',
-					text1: 'Bank details saved successfully',
-				});
+				ShowToast('success', 'Bank details saved successfully');
+
 				router.replace({
 					pathname: './setup-screen',
 					params: {
@@ -90,10 +87,7 @@ export default function StripeOnboardingScreen() {
 					'Error verifying bank details:',
 					err.response.data
 				);
-				Toast.show({
-					type: 'error',
-					text1: err.response.data.message,
-				});
+				ShowToast('error', err.response.data.message);
 			}
 		}
 	};

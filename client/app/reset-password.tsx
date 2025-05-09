@@ -9,12 +9,12 @@ import { router } from 'expo-router';
 import { StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Colors } from '@/constants/Colors';
-import Toast from 'react-native-toast-message';
 import { updateBusinessPassword } from '@/services/businessService';
 import { ActivityIndicator } from 'react-native';
 import { updateCustomerPassword } from '@/services/customerService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { passwordRegex } from '@/utils/regex';
+import ShowToast from '@/components/ui/ShowToast';
 
 const ResetPasswordScreen = () => {
 	const [newPassword, setNewPassword] = useState('');
@@ -25,24 +25,18 @@ const ResetPasswordScreen = () => {
 
 	const handleResetPassword = async () => {
 		if (!newPassword || !confirmPassword) {
-			Toast.show({
-				type: 'info',
-				text1: 'Please fill in all fields',
-			});
+			ShowToast('info', 'Please fill in all fields');
 			return;
 		}
 		if (newPassword !== confirmPassword) {
-			Toast.show({
-				type: 'info',
-				text1: 'Passwords do not match',
-			});
+			ShowToast('info', 'Passwords do not match');
 			return;
 		}
 		if (!passwordRegex.test(newPassword)) {
-      Toast.show({
-        type: 'info',
-        text1: 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.',
-      });
+			ShowToast(
+				'info',
+				'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.'
+			);
 			return;
 		}
 		setLoading(true);
@@ -53,35 +47,23 @@ const ResetPasswordScreen = () => {
 				const response: any = await updateCustomerPassword(newPassword);
 				if (!response) {
 					setLoading(false);
-					Toast.show({
-						type: 'error',
-						text1: 'Internal Server Error',
-					});
+					ShowToast('error', 'Internal Server Error');
 					return;
 				}
 			} else {
 				const response: any = await updateBusinessPassword(newPassword);
 				if (!response) {
 					setLoading(false);
-					Toast.show({
-						type: 'error',
-						text1: 'Internal Server Error',
-					});
+					ShowToast('error', 'Internal Server Error');
 					return;
 				}
 			}
 			AsyncStorage.removeItem('Type');
-			Toast.show({
-				type: 'success',
-				text1: 'Password reset successfully',
-			});
+			ShowToast('success', 'Password reset successfully');
 			router.dismissAll();
 			router.replace('/login');
 		} catch (error: any) {
-			Toast.show({
-				type: 'error',
-				text1: error.response.data.message,
-			});
+			ShowToast('error', error.response.data.message);
 			setLoading(false);
 		} finally {
 			setLoading(false);

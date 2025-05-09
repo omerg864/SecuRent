@@ -40,3 +40,20 @@ export const getBusinessCurrencySymbol = async () => {
 	const parsedData = businessData ? JSON.parse(businessData) : null;
 	return parsedData?.currency || 'ILS';
 };
+
+export const NormalizedImage = (
+	value: string | string[] | undefined
+): string | undefined => (Array.isArray(value) ? value[0] : value);
+
+export const formatCurrencySymbol = (code: string): string => {
+	switch (code?.toUpperCase()) {
+	  case 'ILS':
+		return '₪';
+	  case 'USD':
+		return '$';
+	  case 'EUR':
+		return '€';
+	  default:
+		return code;
+	}
+  };  

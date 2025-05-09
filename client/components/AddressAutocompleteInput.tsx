@@ -1,30 +1,23 @@
 import React from 'react';
-import {
-	View,
-	TextInput,
-	FlatList,
-	TouchableOpacity,
-	Text,
-	StyleSheet,
-} from 'react-native';
+import { View, TouchableOpacity, Text } from 'react-native';
 import { useAddressAutocomplete } from '../hooks/useAddressAutocomplete';
-import Toast from 'react-native-toast-message';
 import { LocationPrediction } from '@/services/interfaceService';
 import { ThemedTextInput } from './ui/ThemedTextInput';
 import { ThemedText } from './ui/ThemedText';
+import ShowToast from './ui/ShowToast';
 
 export default function AddressAutocompleteInput({
 	onSelect,
-    labelClassName = '',
-    label = 'Address',
+	labelClassName = '',
+	label = 'Address',
 }: {
 	onSelect: (
 		address: string,
 		placeId: string,
 		location: { lat: number; lng: number }
 	) => void;
-    labelClassName?: string;
-    label?: string;
+	labelClassName?: string;
+	label?: string;
 }) {
 	const { query, suggestions, handleChange, handleSelect } =
 		useAddressAutocomplete();
@@ -39,10 +32,7 @@ export default function AddressAutocompleteInput({
 				selected?.location || { lat: 0, lng: 0 }
 			);
 		} else {
-			Toast.show({
-				type: 'error',
-				text1: 'Location not found',
-			});
+			ShowToast('error', ' Location not found');
 		}
 	};
 

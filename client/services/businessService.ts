@@ -4,6 +4,7 @@ import {
 	AuthData,
 	AuthResponse,
 	Business,
+	BusinessDetails,
 	StepResponse,
 	ValidResponse,
 } from './interfaceService';
@@ -14,6 +15,7 @@ const registerBusiness = async (
 	file: FileObject | null
 ) => {
 	try {
+		console.log('Business data:', businessData);
 		const formData = buildFormData(businessData, file);
 		const response = await client.post<AuthResponse>(
 			'business/register',
@@ -24,6 +26,7 @@ const registerBusiness = async (
 				},
 			}
 		);
+		console.log('Business registration response:', response.data);
 		return response.data.success;
 	} catch (error) {
 		throw error || 'Registration failed.';
@@ -150,6 +153,22 @@ const getNearestBusinesses = async (
 	}
 };
 
+const getBusinessProfile = async (businessId: string) => {
+	try {
+		const accessToken = await checkToken();
+		const response: any = await client.get<BusinessDetails>(
+			`business/business-profile/${businessId}`,
+
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response.data;
+	} catch (error) {
+		throw error || 'Failed to get business profile.';
+	}
+};
+
 export {
 	registerBusiness,
 	verifyEmailBusiness,
@@ -159,4 +178,5 @@ export {
 	updateBusinessDetails,
 	getStripeOnboardingLink,
 	getNearestBusinesses,
+	getBusinessProfile,
 };

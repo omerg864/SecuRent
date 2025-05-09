@@ -1,12 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-	View,
-	Text,
-	TextInput,
-	Image,
-	ActivityIndicator,
-	ScrollView,
-} from 'react-native';
+import { View, Text, TextInput, ActivityIndicator } from 'react-native';
 import HapticButton from '@/components/ui/HapticButton';
 import { ThemedText } from '@/components/ui/ThemedText';
 import {
@@ -18,10 +11,11 @@ import { useLocalSearchParams } from 'expo-router';
 import { Transaction } from '@/services/interfaceService';
 import PriceSelector from '@/components/PriceSelector';
 import Toast from 'react-native-toast-message';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { currencies } from '@/utils/constants';
 import UserImage from '@/components/UserImage';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 const ChargeDepositScreen = () => {
 	const router = useRouter();
@@ -111,16 +105,7 @@ const ChargeDepositScreen = () => {
 		setUpdateLoading(false);
 	};
 
-	if (fetchLoading) {
-		return (
-			<View className="flex-1 justify-center items-center bg-white">
-				<ActivityIndicator size="large" color="#000" />
-				<Text className="mt-4 text-gray-600">
-					Loading transaction...
-				</Text>
-			</View>
-		);
-	}
+	if (fetchLoading) return <LoadingSpinner label="Loading transaction" />;
 
 	return (
 		<SafeAreaView className="flex-1 flex flex-col bg-[#F4F5FF] px-6 justify-between">
@@ -138,7 +123,7 @@ const ChargeDepositScreen = () => {
 					<View className="w-12"></View>
 				</View>
 
-				<View className="bg-gray-100 bg-white rounded-2xl p-6 flex-row items-center justify-between mb-6 shadow-md">
+				<View className="bg-white rounded-2xl p-6 flex-row items-center justify-between mb-6 shadow-md">
 					<View className="flex-row items-center space-x-3">
 						<UserImage
 							image={customer?.image}

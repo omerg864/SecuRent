@@ -22,7 +22,7 @@ const UserImage = ({
 					src={image}
 					className={`w-${size || 16} h-${
 						size || 16
-					} rounded-full mr-4`}
+					} rounded-full`}
 				/>
 			) : (
 				<View

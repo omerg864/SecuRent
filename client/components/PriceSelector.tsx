@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import HapticButton from './ui/HapticButton';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
-import { currencies } from '@/utils/constants';
 
 interface PriceSelectorProps {
 	title?: string;

@@ -1,7 +1,5 @@
 import React from 'react';
 import { View } from 'react-native';
-import HapticButton from '@/components/ui/HapticButton';
-import { Ionicons } from '@expo/vector-icons';
 import { ThemedText } from './ThemedText';
 
 interface HeaderProps {

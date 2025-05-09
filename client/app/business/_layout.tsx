@@ -13,10 +13,7 @@ import { View } from 'react-native';
 
 export default function Layout() {
 	const router = useRouter();
-	//<ActivityIndicator size="small" color="#4B5563"/>
-	// <Text className="text-2xl font-medium w-24 text-center text-[#2D2A2E]">
-	//   {amount > 0 ? `${amount}₪` : amount}
-	// </Text>
+
 	const handleLogout = async () => {
 		try {
 			await AsyncStorage.removeItem('Business_Data');
@@ -118,6 +115,39 @@ export default function Layout() {
 						options={{
 							drawerLabel: 'New Item',
 							title: 'New Item',
+						}}
+					/>
+					<Drawer.Screen
+						name="BusinessProfileScreen"
+						options={{
+							drawerLabel: 'Profile Page',
+							title: 'Profile Page',
+						}}
+					/>
+					<Drawer.Screen
+						name="edit-item"
+						options={{
+							drawerLabel: 'Edit Item',
+							title: 'Edit Item',
+							drawerItemStyle: { display: 'none' },
+							headerShown: true,
+						}}
+					/>
+					<Drawer.Screen
+						name="display-review"
+						options={{
+							drawerLabel: 'Add Review',
+							headerShown: false,
+							drawerItemStyle: { display: 'none' },
+						}}
+					/>
+					<Drawer.Screen
+						name="item-profile"
+						options={{
+							drawerLabel: 'Item Profile',
+							title: 'Item Profile',
+							drawerItemStyle: { display: 'none' },
+							headerShown: true,
 						}}
 					/>
 				</Drawer>

@@ -7,12 +7,13 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import HapticButton from '@/components/ui/HapticButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useWebSocketContext } from '@/context/WebSocketContext';
-import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ShowToast from '@/components/ui/ShowToast';
 
 const QRCodeScreen = () => {
 	const router = useRouter();
 	// parameter to be passed in the QR code
-	const { id } = useLocalSearchParams();
+	const { id, from } = useLocalSearchParams();
 	const transactionUrl = `secuRent://${id}`;
 
 	const { lastMessage } = useWebSocketContext();
@@ -26,10 +27,7 @@ const QRCodeScreen = () => {
 				if (item._id === id) {
 					router.dismissAll();
 					router.replace('/business/business-home');
-					Toast.show({
-						type: 'success',
-						text1: 'Transaction Created',
-					});
+					ShowToast('success', 'Transaction Created');
 				}
 			}
 		}
@@ -40,8 +38,22 @@ const QRCodeScreen = () => {
 		router.replace('/business/business-home');
 	};
 
-	const onBack = () => {
-		router.back();
+	const onBack = async () => {
+		try {
+			if (from === 'ProfilePage') {
+				console.log('from ProfilePage');
+				const storedUserId = await AsyncStorage.getItem('UserID');
+				router.replace({
+					pathname: '/business/BusinessProfileScreen',
+					params: { id: storedUserId },
+				});
+				return;
+			}
+			router.back();
+		} catch (error) {
+			console.error('Error in onBack:', error);
+			ShowToast('error', 'Error', 'Failed to go back. Please try again.');
+		}
 	};
 
 	return (

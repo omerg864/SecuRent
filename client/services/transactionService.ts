@@ -17,7 +17,8 @@ const chargeDeposit = async (
 	try {
 		const response = await client.put(
 			`transaction/charge/${transactionId}`,
-			payload, {
+			payload,
+			{
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
 		);
@@ -36,7 +37,6 @@ const chargeDeposit = async (
 const createTransactionFromItem = async (itemId: string) => {
 	try {
 		const accessToken = await checkToken();
-		console.log('Access Token:', accessToken);
 		const response = await client.get<TransactionIntentResponse>(
 			`transaction/${itemId}`,
 			{

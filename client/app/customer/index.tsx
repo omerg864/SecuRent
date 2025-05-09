@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
 	View,
 	Text,
@@ -19,9 +19,10 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
-import Toast from 'react-native-toast-message';
 import { getNearestBusinesses } from '@/services/businessService';
 import { Business } from '@/services/interfaceService';
+import debounce from 'lodash/debounce';
+import ShowToast from '@/components/ui/ShowToast';
 
 const CustomerHome: React.FC = () => {
 	const [searchText, setSearchText] = useState<string>('');
@@ -45,9 +46,11 @@ const CustomerHome: React.FC = () => {
 		{ label: 'Car Rental', value: 'Car Rental' },
 	]);
 
+	const searchInputRef = useRef<TextInput>(null);
+
 	// Modal State
 	const [modalVisible, setModalVisible] = useState(false);
-	const [maxDistance, setMaxDistance] = useState(10);
+	const [maxDistance, setMaxDistance] = useState(50);
 	const [minRating, setMinRating] = useState(0);
 
 	const onBarcodeClick = () => {
@@ -55,26 +58,52 @@ const CustomerHome: React.FC = () => {
 	};
 
 	const onMapClick = () => {
-		router.push('/customer/BusinessesMap');
+		router.push({
+			pathname: '/customer/BusinessesMap',
+			params: {
+				businesses: JSON.stringify(businesses),
+			},
+		});
 	};
 
+	const debouncedSearch = useMemo(
+		() =>
+			debounce((text: string) => {
+				setSearchText(text);
+			}, 500), // 500 ms debounce
+		[]
+	);
+
 	const onSearch = (text: string) => {
-		setSearchText(text);
+		debouncedSearch(text);
 	};
+
+	// Make sure to cancel debounce when unmounting
+	useEffect(() => {
+		return () => {
+			debouncedSearch.cancel();
+		};
+	}, [debouncedSearch]);
 
 	const applyFilters = () => {
 		setModalVisible(false);
+		refetchBusinesses();
+	};
+
+	const refetchBusinesses = () => {
+		setLoading(true);
 		fetchBusinesses();
 	};
 
 	const fetchBusinesses = async () => {
 		const { status } = await Location.requestForegroundPermissionsAsync();
 		if (status !== 'granted') {
-			Toast.show({
-				type: 'error',
-				text1: 'Permission Denied',
-				text2: 'Location access is required to show your position.',
-			});
+			ShowToast(
+				'error',
+				'Permission Denied',
+				'Location access is required to show your position.'
+			);
+
 			setLoading(false);
 			return;
 		}
@@ -93,12 +122,7 @@ const CustomerHome: React.FC = () => {
 				selectedCategory,
 				searchText
 			);
-			console.log('userLocation', location);
-			console.log('maxDistance', maxDistance);
-			console.log('minRating', minRating);
-			console.log('selectedCategory', selectedCategory);
-			console.log('searchText', searchText);
-			console.log('businessResponse', businessResponse);
+			// console.log('Business Response:', businessResponse);
 			setBusinesses(businessResponse);
 		} catch (error) {
 			console.log('error fetching businesses: ', error);
@@ -109,7 +133,7 @@ const CustomerHome: React.FC = () => {
 
 	useFocusEffect(
 		useCallback(() => {
-			fetchBusinesses();
+			refetchBusinesses();
 
 			// Optional cleanup if you want to reset state
 			return () => {
@@ -120,19 +144,8 @@ const CustomerHome: React.FC = () => {
 	);
 
 	useEffect(() => {
-		fetchBusinesses();
+		refetchBusinesses();
 	}, [searchText]);
-
-	if (loading) {
-		return (
-			<View className="flex-1 justify-center items-center bg-white">
-				<ActivityIndicator size="large" color="#000" />
-				<Text className="mt-4 text-gray-600">
-					Loading businesses...
-				</Text>
-			</View>
-		);
-	}
 
 	return (
 		<ThemedView className="flex-1 bg-white">
@@ -159,11 +172,17 @@ const CustomerHome: React.FC = () => {
 							className="flex-1 text-white ml-2 mr-1"
 							placeholder="Search..."
 							placeholderTextColor="#CCCCCC"
-							value={searchText}
 							onChangeText={onSearch}
+							ref={searchInputRef}
 						/>
 						{searchText ? (
-							<HapticButton onPress={() => setSearchText('')}>
+							<HapticButton
+								onPress={() => {
+									searchInputRef.current?.blur();
+									searchInputRef.current?.clear();
+									setSearchText('');
+								}}
+							>
 								<Ionicons
 									name="close-circle"
 									size={20}
@@ -207,15 +226,40 @@ const CustomerHome: React.FC = () => {
 				</View>
 
 				{/* Business List */}
-				<ScrollView
-					className="flex-1"
-					showsVerticalScrollIndicator={false}
-				>
-					{businesses.map((business) => (
-						<BusinessCard key={business._id} business={business} />
-					))}
-					<View className="h-4" />
-				</ScrollView>
+				{loading ? (
+					<View className="text-center items-center">
+						<ActivityIndicator size="large" color="#000" />
+						<Text className="mt-4 text-gray-600">
+							Loading businesses...
+						</Text>
+					</View>
+				) : businesses.length > 0 ? (
+					<ScrollView
+						className="flex-1"
+						showsVerticalScrollIndicator={false}
+					>
+						{businesses.map((business) => (
+							<BusinessCard
+								key={business._id}
+								business={business}
+								onPress={() =>
+									router.push({
+										pathname:
+											'./customer/BusinessProfileScreen',
+										params: { id: business._id },
+									})
+								}
+							/>
+						))}
+						<View className="h-4" />
+					</ScrollView>
+				) : (
+					<View className="text-center items-center">
+						<Text className="text-gray-600 text-lg">
+							No nearby businesses found.
+						</Text>
+					</View>
+				)}
 			</View>
 
 			{/* Filter Modal */}
@@ -239,8 +283,8 @@ const CustomerHome: React.FC = () => {
 							Max Distance: {maxDistance} km
 						</Text>
 						<Slider
-							minimumValue={1}
-							maximumValue={50}
+							minimumValue={10}
+							maximumValue={500}
 							step={1}
 							value={maxDistance}
 							onValueChange={setMaxDistance}

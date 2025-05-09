@@ -35,21 +35,6 @@ export default function SingleBusiness() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           Business Details:
         </h1>
-        <div className="flex gap-3">
-          <button
-            className="min-w-[100px] text-center px-4 py-1.5 rounded-md text-sm font-medium transition
-                 border border-red-600 text-red-600 hover:bg-red-50
-                 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-900/20"
-          >
-            Delete
-          </button>
-          <button
-            className="min-w-[100px] text-center px-4 py-1.5 rounded-md text-sm font-medium transition
-                 border border-blue-600 text-blue-600 hover:bg-blue-50
-                 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-900/20"
-          >
-            Update
-          </button>
           <button
             className="min-w-[100px] text-center px-4 py-1.5 rounded-md text-sm font-medium transition
                  border border-yellow-600 text-yellow-600 hover:bg-yellow-50
@@ -57,7 +42,6 @@ export default function SingleBusiness() {
           >
             Suspend
           </button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
