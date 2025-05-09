@@ -23,12 +23,15 @@ import UserImage from '@/components/UserImage';
 import { BusinessDetails } from '@/services/interfaceService';
 import { currencies } from '@/utils/constants';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { BaseModal } from '@/components/BaseModal';
+import WarningPopupModal from '@/components/ui/WarningPopUpModal';
 
 const BusinessProfileScreen = () => {
 	const [activeTab, setActiveTab] = useState('items');
 	const [businessData, setBusinessData] = useState<BusinessDetails | null>(
 		null
 	);
+	const [reportModalVisible, setReportModalVisible] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isBusiness, setIsBusiness] = useState(false);
 	const [accountType, setAccountType] = useState('');
@@ -75,6 +78,26 @@ const BusinessProfileScreen = () => {
 
 	const handleCall = () => {
 		if (businessData) Linking.openURL(`tel:${businessData.business.phone}`);
+	};
+
+	const handleOpenReportModal = () => {
+		setReportModalVisible(true);
+	};
+
+	const handleCloseReportModal = () => {
+		setReportModalVisible(false);
+	};
+
+	const handleAcceptReporting = () => {
+		// Handle report submission logic here
+		router.push({
+			pathname: '/customer/report-page',
+			params: {
+				businessName: business.name,
+				businessId: business._id,
+			},
+		});
+		setReportModalVisible(false);
 	};
 
 	const handleNavigate = () => {
@@ -193,14 +216,24 @@ const BusinessProfileScreen = () => {
 		>
 			<ScrollView className="bg-white">
 				<ThemedView className="px-4 py-6" darkColor="white">
-					<ThemedText
-						type="title"
-						className="text-2xl font-bold text-black"
-						darkColor="black"
-					>
-						{business.name}
-					</ThemedText>
-
+					<View className="flex-row justify-between w-full">
+						<ThemedText
+							type="title"
+							className="text-2xl font-bold text-black"
+							darkColor="black"
+						>
+							{business.name}
+						</ThemedText>
+						{accountType === 'personal' && (
+							<HapticButton onPress={handleOpenReportModal}>
+								<Ionicons
+									name="warning-outline"
+									color="red"
+									size={32}
+								/>
+							</HapticButton>
+						)}
+					</View>
 					<View className="flex-row items-center my-3">
 						<StarRating
 							rating={business.rating.overall}
@@ -230,7 +263,7 @@ const BusinessProfileScreen = () => {
 						</View>
 					)}
 
-					<View className="flex-row items-start mb-4">
+					<View className="flex-row items-start justify-between mb-4">
 						<Ionicons
 							name="location-outline"
 							size={18}
@@ -250,7 +283,7 @@ const BusinessProfileScreen = () => {
 						</HapticButton>
 					</View>
 
-					<View className="flex-row items-center mb-4">
+					<View className="flex-row items-center justify-between mb-4">
 						<Ionicons name="call-outline" size={18} color="#666" />
 						<ThemedText
 							className="ml-2 flex-1 text-black"
@@ -462,6 +495,17 @@ const BusinessProfileScreen = () => {
 					</View>
 				)}
 			</ScrollView>
+			<WarningPopupModal
+				visible={reportModalVisible}
+				onClose={handleCloseReportModal}
+				onConfirm={handleAcceptReporting}
+				title="Report Business"
+				message={`Do you want to file a report for ${business.name}`}
+				confirmText="Yes"
+				cancelText="No"
+				iconName="warning"
+				iconColor="red"
+			/>
 		</ParallaxScrollView>
 	);
 };
