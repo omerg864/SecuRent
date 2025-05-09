@@ -20,15 +20,16 @@ import {
   authBusiness,
   authCustomer,
   authAny,
+  authSuspendedBusiness
 } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 // TODO: add middleware business to protect routes
-router.get("/business", authBusiness, getBusinessTransactions);
-router.get("/business/:id", authBusiness, getTransactionByBusiness);
-router.put("/close/:id", authBusiness, closeTransactionById);
-router.put("/charge/:id", authBusiness, captureDeposit);
+router.get("/business", authSuspendedBusiness, getBusinessTransactions);
+router.get("/business/:id", authSuspendedBusiness, getTransactionByBusiness);
+router.put("/close/:id", authSuspendedBusiness, closeTransactionById);
+router.put("/charge/:id", authSuspendedBusiness, captureDeposit);
 
 // TODO: add middleware customer to protect routes
 router.get("/customer", authCustomer, getCustomerTransactions);
