@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { REPORT_STATUS } from '../utils/constants.js';
 
 const reportSchema = mongoose.Schema(
     {
@@ -17,6 +18,21 @@ const reportSchema = mongoose.Schema(
         },
         content: {
             type: String,
+        },
+        status: {
+            type: String,
+            enum: REPORT_STATUS,
+            default: 'open',
+        },
+        resolution: {
+            type: String,
+        },
+        resolutionDate: {
+            type: Date,
+        },
+        resolutionBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Admin',
         },
     },
     { timestamps: true }

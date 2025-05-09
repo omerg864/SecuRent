@@ -27,7 +27,7 @@ const authAny = asyncHandler(async (req, res, next) => {
 	try {
 		decoded = jwt.verify(token, process.env.JWT_SECRET_ACCESS_BUSINESS);
 		const business = await Business.findById(decoded.id);
-		if (business && !business.suspended) {
+		if (business) {
 			req.business = business;
 			return next();
 		}
