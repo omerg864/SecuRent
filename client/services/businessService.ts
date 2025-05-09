@@ -169,6 +169,21 @@ const getBusinessProfile = async (businessId: string) => {
 	}
 };
 
+const getBusinessData = async () => {
+	try {
+		const accessToken = await checkToken();
+		const response = await client.get<{
+			success: boolean;
+			business: Business;
+		}>(`business/me`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
+		return response.data;
+	} catch (error) {
+		throw error || 'Fetching business data failed';
+	}
+};
+
 export {
 	registerBusiness,
 	verifyEmailBusiness,
@@ -179,4 +194,5 @@ export {
 	getStripeOnboardingLink,
 	getNearestBusinesses,
 	getBusinessProfile,
+	getBusinessData
 };

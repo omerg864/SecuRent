@@ -522,6 +522,24 @@ const resendVerificationCode = asyncHandler(async (req, res) => {
 	});
 });
 
+const getCustomerData = asyncHandler(async (req, res) => {
+	const customer = await Customer.findById(req.customer._id).select(
+		'-password -verificationCode -refreshTokens'
+	);
+	
+	if (!customer) {
+		res.status(404);
+		throw new Error('Customer not found');
+	}
+
+	res.status(200).json({
+		success: true,
+		customer,
+	});
+});
+
+
+
 export {
 	registerCustomer,
 	loginCustomer,
@@ -535,4 +553,5 @@ export {
 	verifyEmail,
 	resendVerificationCode,
 	setUpCustomerCard,
+	getCustomerData
 };

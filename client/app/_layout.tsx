@@ -31,18 +31,6 @@ export default function RootLayout() {
 		if (loaded) {
 			const checkStorage = async () => {
 				try {
-					// await AsyncStorage.multiRemove([
-					//   "Business_Data",
-					//   "Customer_Data",
-					//   "Account_setup",
-					//   "current_account_type",
-					//   "completedSteps_business",
-					//   "completedSteps_personal",
-					//   "Access_Token",
-					//   "Refresh_Token",
-					//   "Auth_Expiration",
-					//   "Account_setup",
-					// ]);
 					const businessData = await AsyncStorage.getItem(
 						'Business_Data'
 					);
