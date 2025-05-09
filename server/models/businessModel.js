@@ -66,7 +66,7 @@ const businessScheme = mongoose.Schema({
 		coordinates: {
 			type: [Number], // [longitude, latitude]
 			required: true,
-			default : [0, 0],
+			default: [0, 0],
 		},
 	},
 	image: {
@@ -110,6 +110,10 @@ const businessScheme = mongoose.Schema({
 	},
 	stripe_account_id: {
 		type: String,
+	},
+	suspended: {
+		type: Boolean,
+		default: false,
 	},
 });
 
