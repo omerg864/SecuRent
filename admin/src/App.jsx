@@ -9,6 +9,7 @@ import Businesses from "./pages/Businesses";
 import SingleBusiness from "./pages/SingleBusiness";
 import Reports from "./pages/Reports";
 import SingleReport from "./pages/SingleReport";
+import SingleCustomer from "./pages/SingleCustomer";
 
 function App() {
   return (
@@ -62,11 +63,19 @@ function App() {
             </ProtectedRoute>
           }
         />
-		<Route
+        <Route
           path="/report/:id"
           element={
             <ProtectedRoute>
               <SingleReport />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customer/:id"
+          element={
+            <ProtectedRoute>
+              <SingleCustomer />
             </ProtectedRoute>
           }
         />

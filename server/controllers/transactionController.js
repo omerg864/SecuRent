@@ -458,7 +458,9 @@ const getCustomerTransactionsAdmin = asyncHandler(async (req, res) => {
 	const transactions = await Transaction.find({
 		customer: id,
 		status: { $ne: 'intent' },
-	}).populate('business', 'name image rating category');
+	})
+	.populate('business', 'name image rating category')
+	.populate('customer', 'name image phone');
 	res.status(200).json({
 		success: true,
 		transactions,

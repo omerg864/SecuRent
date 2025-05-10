@@ -104,6 +104,7 @@ const getAllBusinesses = async (page, name = '') => {
 	}
 };
 
+
 const getBusinessTransactions = async (businessId) => {
 	try {
 		const accessToken = await checkToken();
@@ -116,11 +117,34 @@ const getBusinessTransactions = async (businessId) => {
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
 		);
+		console.log('Get business transactions response: ', response.data);
 		return response.data;
 	} catch (error) {
 		console.log('Get business transactions error: ', error);
 		throw new Error(
 			error.response?.data?.message || 'Get business transactions failed'
+		);
+	}
+}
+
+const getCustomerTransactions = async (customerId) => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken) {
+			throw new Error('Access token is missing or invalid.');
+		}
+		const response = await client.get(
+			`transaction/admin/customer/${customerId}`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		console.log('Get customer transactions response: ', response.data);
+		return response.data;
+	} catch (error) {
+		console.log('Get customer transactions error: ', error);
+		throw new Error(
+			error.response?.data?.message || 'Get customer transactions failed'
 		);
 	}
 }
@@ -143,6 +167,7 @@ const getAllCustomers = async(page, name='') => {
 		const response = await client.get(`admin/get-all-customers?page=${page}`, {
 			headers: { Authorization: `Bearer ${accessToken}` },
 		});
+		console.log('Get all customers response: ', response.data);
 		return response.data;
 	} catch (error) {
 		console.log('Get all customers error: ', error);
@@ -152,4 +177,4 @@ const getAllCustomers = async(page, name='') => {
 	}
 }
 
-export { register, login, googleLogin, analytics , getAllBusinesses , getBusinessTransactions };
+export { register, login, googleLogin, analytics , getAllBusinesses , getBusinessTransactions , getAllCustomers , getCustomerTransactions };
