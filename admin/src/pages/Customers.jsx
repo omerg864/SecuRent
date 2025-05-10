@@ -5,8 +5,7 @@ import { getAllCustomers } from "../services/adminServices";
 import Loader from "../components/Loader";
 import { Search } from "lucide-react";
 
-const Customers = () => {
-  const [customers, setCustomers] = useState([]);
+const Customers = () => {;
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -18,7 +17,6 @@ const Customers = () => {
     setIsLoading(true);
     try {
       const data = await getAllCustomers(page);
-      setCustomers(data.customers);
       setFilteredCustomers(data.customers);
       setTotalPages(data.totalPages);
     } catch (error) {
@@ -38,7 +36,6 @@ const Customers = () => {
     setPage(1);
     try {
       const data = await getAllCustomers(page, pendingSearch);
-      setCustomers(data.customers);
       setFilteredCustomers(data.customers);
       setTotalPages(data.totalPages);
     } catch (error) {

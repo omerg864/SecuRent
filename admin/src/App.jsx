@@ -12,6 +12,7 @@ import SingleReport from "./pages/SingleReport";
 import SingleCustomer from "./pages/SingleCustomer";
 import Customers from "./pages/Customers";
 import SingleTransaction from "./pages/SingleTransaction";
+import SingleReview from "./pages/SingleReview";
 
 function App() {
   return (
@@ -94,6 +95,14 @@ function App() {
           element={
             <ProtectedRoute>
               <SingleTransaction />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/review/:id"
+          element={
+            <ProtectedRoute>
+              <SingleReview />
             </ProtectedRoute>
           }
         />

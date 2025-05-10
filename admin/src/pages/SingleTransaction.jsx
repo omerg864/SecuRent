@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Loader from "../components/Loader";
 import { getTransactionById } from "../services/transactionService";
-import { useAuth } from "../context/AuthContext";
 import { getCurrencySymbol } from "../services/httpClient";
 
 const formatDate = (isoString) =>
@@ -15,7 +14,6 @@ export default function SingleTransaction() {
   const { id } = useParams();
   const [transaction, setTransaction] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
 
   useEffect(() => {
     const fetchTransaction = async () => {
