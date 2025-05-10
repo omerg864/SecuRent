@@ -437,12 +437,9 @@ const captureDeposit = asyncHandler(async (req, res) => {
 
 const getTransactionAdmin = asyncHandler(async (req, res) => {
 	const { id } = req.params;
-	const transaction = await Transaction.findById({
-		id,
-		status: { $ne: 'intent' },
-	})
-		.populate('business', 'name image rating category')
-		.populate('customer', 'name image phone');
+	const transaction = await Transaction.findById(id)
+		.populate('customer', 'name image phone')
+		.populate('business', 'name image rating category');
 	if (!transaction) {
 		res.status(404);
 		throw new Error('Transaction not found');

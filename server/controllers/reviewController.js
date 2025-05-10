@@ -292,7 +292,7 @@ const getReviews = asyncHandler(async (req, res) => {
 
 const getReviewById = asyncHandler(async (req, res) => {
 	const { id } = req.params;
-	const review = await Review.findById(id).populate('customer', 'name image');
+	const review = await Review.findById(id).populate('customer', 'name image').populate('business', 'name image');
 
 	if (!review) {
 		res.status(404);

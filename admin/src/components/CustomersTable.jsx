@@ -51,7 +51,7 @@ const CustomersTable = ({ customers }) => {
 									src={
 										customer.image
 											? customer.image
-											: './customer-icon.png'
+											: './avatar.png'
 									}
 									alt="Customer"
 								/>

@@ -5,6 +5,8 @@ import { FiUser } from 'react-icons/fi';
 import { RiSettings5Line } from 'react-icons/ri';
 import { GrGroup } from 'react-icons/gr';
 import { IoBusinessOutline } from 'react-icons/io5';
+import { HiOutlineDocumentReport } from "react-icons/hi";
+
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 	const location = useLocation();
 	const { pathname } = location;
@@ -71,6 +73,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 			name: 'Businesses',
 			to: '/businesses',
 			icon: <IoBusinessOutline />,
+		},
+		{
+			name: 'Reports',
+			to: '/reports',
+			icon: <HiOutlineDocumentReport />,
 		},
 		{
 			name: 'Profile',
