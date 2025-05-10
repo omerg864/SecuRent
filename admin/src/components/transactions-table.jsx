@@ -1,18 +1,25 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/table"
-import { Card } from "./card"
-
+import { Link } from "react-router-dom";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "../components/table";
+import { Card } from "./card";
 
 export function TransactionsTable({ transactions, currency }) {
-  // Format amount with currency
   if (!currency) {
-    currency = "ILS"
+    currency = "ILS";
   }
+
   const formatAmount = (amount) => {
     return new Intl.NumberFormat("he-IL", {
       style: "currency",
       currency: currency,
-    }).format(amount)
-  }
+    }).format(amount);
+  };
 
   return (
     <Card>
@@ -27,15 +34,27 @@ export function TransactionsTable({ transactions, currency }) {
           </TableHeader>
           <TableBody>
             {transactions.map((transaction) => (
-              <TableRow key={transaction.id}>
-                <TableCell className="font-medium">{transaction.business.name}</TableCell>
-                <TableCell>{transaction.customer.name}</TableCell>
-                <TableCell className="text-right">{formatAmount(transaction.amount)}</TableCell>
+              <TableRow
+                key={transaction.id}
+                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+              >
+                <Link
+                  to={`/transaction/${transaction._id}`}
+                  className="contents" // keeps table layout while making whole row clickable
+                >
+                  <TableCell className="font-medium">
+                    {transaction.business.name}
+                  </TableCell>
+                  <TableCell>{transaction.customer.name}</TableCell>
+                  <TableCell className="text-right">
+                    {formatAmount(transaction.amount)}
+                  </TableCell>
+                </Link>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
     </Card>
-  )
+  );
 }

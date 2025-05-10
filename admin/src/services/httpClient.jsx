@@ -59,4 +59,18 @@ const checkToken = async () => {
   return token;
 };
 
-export { client, refreshToken, checkToken, setAuthToken };
+const getCurrencySymbol = (currency) => {
+  switch (currency) {
+    case "ILS":
+      return "₪";
+    case "USD":
+      return "$";
+    case "EUR":
+      return "€";
+    default:
+      return "";
+  }
+};
+
+
+export { client, refreshToken, checkToken, setAuthToken, getCurrencySymbol };

@@ -16,7 +16,7 @@ export function CustomerInfoCard({ customer }) {
     <Card className="h-full">
       <CardHeader className="pb-2 flex flex-row items-center gap-4">
         <img
-          src={customer?.image || "../../public/customer-icon.png"}
+          src={customer?.image || "../../public/avatar.png"}
           alt="Customer Avatar"
           className="w-12 h-12 rounded-full object-cover"
         />

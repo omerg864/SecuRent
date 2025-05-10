@@ -10,6 +10,8 @@ import SingleBusiness from "./pages/SingleBusiness";
 import Reports from "./pages/Reports";
 import SingleReport from "./pages/SingleReport";
 import SingleCustomer from "./pages/SingleCustomer";
+import Customers from "./pages/Customers";
+import SingleTransaction from "./pages/SingleTransaction";
 
 function App() {
   return (
@@ -36,6 +38,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Businesses />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customers"
+          element={
+            <ProtectedRoute>
+              <Customers />
             </ProtectedRoute>
           }
         />
@@ -76,6 +86,14 @@ function App() {
           element={
             <ProtectedRoute>
               <SingleCustomer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/transaction/:id"
+          element={
+            <ProtectedRoute>
+              <SingleTransaction />
             </ProtectedRoute>
           }
         />
