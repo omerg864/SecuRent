@@ -3,36 +3,39 @@ import { client, checkToken } from './httpClient';
 
 const createReport = async (
 	businessId: string,
+	title: string,
 	content: string,
-	image?: File
+	images?: File[]
 ) => {
 	const accessToken = await checkToken();
 	if (!accessToken) {
 		throw new Error('No access token available');
 	}
-
 	try {
-		console.log('Creating a report ⚠️');
-		if (image) {
+		console.log('Creating review with transaction:', businessId);
+		if (images && images.length > 0) {
 			const formData = new FormData();
 			formData.append('businessId', businessId);
 			formData.append('content', content);
-			formData.append('image', image);
-
+			formData.append('title', title);
+			images.forEach((image) => {
+				formData.append('images', image);
+			});
 			const response = await client.post('/report', formData, {
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
 					'Content-Type': 'multipart/form-data',
 				},
 			});
-			ShowToast('success', 'Report has been sent!');
+			ShowToast('success', 'Report Submitted!');
 			return response.data;
 		} else {
 			const response = await client.post(
 				'/report',
 				{
 					businessId: businessId,
-					content: content,
+					content,
+					title,
 				},
 				{
 					headers: {
@@ -40,7 +43,7 @@ const createReport = async (
 					},
 				}
 			);
-			ShowToast('success', 'Report has been sent!');
+			ShowToast('success', 'Report Submitted!');
 			return response.data;
 		}
 	} catch (error: any) {

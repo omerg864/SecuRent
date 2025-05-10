@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView } from 'react-native';
-import HapticButton from '@/components/ui/HapticButton';
 import UserImage from '@/components/UserImage';
 import {
 	RelativePathString,
@@ -13,6 +12,7 @@ import { createReview } from '@/services/ReviewService';
 import ShowToast from '@/components/ui/ShowToast';
 import { NormalizedImage } from '@/utils/functions';
 import FloatingBackArrowButton from '@/components/ui/FloatingBackArrowButton';
+import SubmitButton from '@/components/ui/SubmitButton';
 
 const AddReview = () => {
 	const router = useRouter();
@@ -85,17 +85,14 @@ const AddReview = () => {
 					label="You can also add pictures"
 					maxImages={5}
 				/>
-				<HapticButton
+				<SubmitButton
 					onPress={handleSubmit}
 					disabled={isSubmitting}
+					loading={isSubmitting}
+					label="Submit Review"
+					color="bg-green-500"
 					className="mt-14"
-				>
-					<View className="bg-green-500 py-4 rounded-full">
-						<Text className="text-white font-semibold text-center text-base">
-							{isSubmitting ? 'Submitting...' : 'Submit Review'}
-						</Text>
-					</View>
-				</HapticButton>
+				/>
 			</View>
 		</ScrollView>
 	);
