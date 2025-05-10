@@ -11,6 +11,7 @@ import {
   adminAnalytics,
   refreshTokens,
   getAllBusinesses,
+  getAllCustomers,
   toggleCustomerSuspension,
   toggleBusinessSuspension,
 } from "../controllers/adminController.js";
@@ -33,6 +34,7 @@ router.delete("/:id", authAdmin, deleteAdmin);
 router.put("/verify/:id", authAdmin, verifyAdmin);
 router.get("/analytics", authAdmin, adminAnalytics);
 router.get("/get-all-businesses", authAdmin, getAllBusinesses); // Get all businesses
+router.get("/get-all-customers", authAdmin, getAllCustomers); // Get all customers
 router.put("/suspend/customer/:id", authAdmin, toggleCustomerSuspension); // Toggle customer suspension
 router.put("/suspend/business/:id", authAdmin, toggleBusinessSuspension); // Toggle business suspension
 
