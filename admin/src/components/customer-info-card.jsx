@@ -1,10 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
 import {
   Mail,
-  Phone,
-  MapPin,
-  CreditCard,
-  UserCircle2,
   CheckCircle,
   ShieldX,
 } from "lucide-react";
@@ -33,36 +29,6 @@ export function CustomerInfoCard({ customer }) {
           <div>
             <p className="font-medium">Email</p>
             <p className="text-sm text-muted-foreground">{customer.email}</p>
-          </div>
-        </div>
-
-        <div className="flex items-start gap-3">
-          <Phone className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-          <div>
-            <p className="font-medium">Phone</p>
-            <p className="text-sm text-muted-foreground">
-              {customer?.phone || "None"}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-start gap-3">
-          <MapPin className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-          <div>
-            <p className="font-medium">Address</p>
-            <p className="text-sm text-muted-foreground">
-              {customer?.address || "None"}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-start gap-3">
-          <CreditCard className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-          <div>
-            <p className="font-medium">Currency</p>
-            <p className="text-sm text-muted-foreground">
-              {customer?.currency || "None"}
-            </p>
           </div>
         </div>
 
