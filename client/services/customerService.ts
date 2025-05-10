@@ -4,6 +4,7 @@ import {
 	AuthResponse,
 	ClientStripeParamsResponse,
 	CreditCardData,
+	Customer,
 } from './interfaceService';
 import { checkToken } from './httpClient';
 import { buildFormData } from '@/utils/functions';
@@ -106,6 +107,21 @@ const resendCustomerVerificationCode = async (userId: string) => {
 	}
 };
 
+const getCustomerData = async () => {
+	try {
+		const accessToken = await checkToken();
+		const response = await client.get<{
+			success: boolean;
+			customer: Customer;
+		}>('customer/me', {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
+		return response.data;
+	} catch (error) {
+		throw error || 'Fetching customer data failed.';
+	}
+};
+
 export {
 	registerCustomer,
 	updateCreditCard,
@@ -113,4 +129,5 @@ export {
 	updateCustomerPassword,
 	resendCustomerVerificationCode,
 	customerCardIntent,
+	getCustomerData,
 };

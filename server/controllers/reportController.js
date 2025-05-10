@@ -10,10 +10,10 @@ import {
 } from '../utils/constants.js';
 
 const createReport = asyncHandler(async (req, res) => {
-	const { businessId, content } = req.body;
+	const { businessId, content, title } = req.body;
 	const customerId = req.customer._id;
 
-	if (!businessId || !content) {
+	if (!businessId || !content || !title) {
 		res.status(400);
 		throw new Error('Please add all fields');
 	}
@@ -42,22 +42,30 @@ const createReport = asyncHandler(async (req, res) => {
 		);
 	}
 
-	let imageUrl = '';
+	let images = [];
 
-	if (req.file) {
-		const imageID = uuidv4();
-		imageUrl = await uploadToCloudinary(
-			req.file.buffer,
-			`${process.env.CLOUDINARY_BASE_FOLDER}/reports`,
-			imageID
-		);
+	if (req.files) {
+		if (req.files.length > 5) {
+			res.status(400);
+			throw new Error('You can only upload up to 5 images');
+		}
+		for (const file of req.files) {
+			const imageID = uuidv4();
+			const imageUrl = await uploadToCloudinary(
+				file.buffer,
+				`${process.env.CLOUDINARY_BASE_FOLDER}/reports`,
+				imageID
+			);
+			images.push(imageUrl);
+		}
 	}
 
 	const report = await Report.create({
 		business: businessId,
 		customer: customerId,
 		content,
-		image: imageUrl,
+		images,
+		title,
 	});
 
 	res.status(201).json({

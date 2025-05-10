@@ -673,6 +673,17 @@ const getBusinessProfile = asyncHandler(async (req, res) => {
 	res.status(200).json({ success: true, business, items, reviews });
 });
 
+const getBusinessData = asyncHandler(async (req, res) => {
+	const business = await Business.findById(req.business._id).select(
+		'-password -refreshTokens -verificationCode'
+	);
+	if (!business) {
+		res.status(404);
+		throw new Error('Business not found');
+	}
+	res.status(200).json({ success: true, business });
+});
+
 export {
 	registerBusiness,
 	loginBusiness,
@@ -689,4 +700,5 @@ export {
 	getStripeOnboardingLink,
 	getNearbyBusinesses,
 	getBusinessProfile,
+	getBusinessData
 };

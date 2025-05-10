@@ -5,11 +5,14 @@ import { ThemedText } from '@/components/ui/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Transaction } from '@/services/interfaceService';
+import { Business, Transaction } from '@/services/interfaceService';
 import { getBusinessTransactions } from '@/services/transactionService';
 import { useWebSocketContext } from '@/context/WebSocketContext';
 import { currencies } from '@/utils/constants';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getBusinessData } from '@/services/businessService';
+import ShowToast from '@/components/ui/ShowToast';
 
 const PAGE_SIZE = 5;
 
@@ -19,6 +22,7 @@ const BusinessHomePage = () => {
 	const [page, setPage] = useState(1);
 	const [hasMore, setHasMore] = useState(true);
 	const router = useRouter();
+	const [businessData, setBusinessData] = useState<Business | null>(null); // Adjust type as needed
 
 	const { lastMessage } = useWebSocketContext();
 
@@ -60,10 +64,25 @@ const BusinessHomePage = () => {
 
 			setHasMore(paginated.length === PAGE_SIZE);
 			setPage(pageToLoad + 1);
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Error loading transactions:', error);
+			ShowToast('error', error.response.data.message);
 		} finally {
 			setIsLoading(false);
+		}
+	};
+
+	const getBusiness = async () => {
+		try {
+			const businessData = await getBusinessData();
+			setBusinessData(businessData.business);
+			await AsyncStorage.setItem(
+				'Business_Data',
+				JSON.stringify(businessData.business)
+			);
+		} catch (error: any) {
+			console.error('Error fetching business data:', error);
+			ShowToast('error', error.response.data.message);
 		}
 	};
 
@@ -71,11 +90,14 @@ const BusinessHomePage = () => {
 	useFocusEffect(
 		useCallback(() => {
 			loadTransaction(1, true); // true means reset the list
+			getBusiness(); // Fetch business data on focus
 
 			return () => {
 				setTransactions([]);
 				setPage(1);
 				setHasMore(true);
+				setIsLoading(false);
+				setBusinessData(null); // Clear business data on unfocus
 			};
 		}, [])
 	);
@@ -137,6 +159,37 @@ const BusinessHomePage = () => {
 					New Transaction
 				</ThemedText>
 			</HapticButton>
+
+			{businessData?.suspended && (
+				<View className="flex-row items-center bg-red-100 p-4 rounded-lg mb-4 shadow-sm">
+					<Ionicons
+						name="alert-circle"
+						size={24}
+						color="#DC2626"
+						className="mr-3"
+					/>
+					<View className="flex-1">
+						<ThemedText
+							style={{ color: '#DC2626' }}
+							className="text-base font-semibold mb-1"
+						>
+							Account Suspended
+						</ThemedText>
+						<ThemedText
+							style={{ color: '#991B1B' }}
+							className="text-sm"
+						>
+							Your account is currently suspended. You can only
+							close or charge existing transactions. For more
+							information, please contact{' '}
+							<ThemedText style={{ color: '#4338CA' }}>
+								support@securent.com
+							</ThemedText>
+							.
+						</ThemedText>
+					</View>
+				</View>
+			)}
 
 			<View
 				className="bg-white rounded-xl shadow-lg p-2"

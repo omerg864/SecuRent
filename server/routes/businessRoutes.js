@@ -15,8 +15,9 @@ import {
 	getStripeOnboardingLink,
 	getNearbyBusinesses,
 	getBusinessProfile,
+	getBusinessData
 } from '../controllers/businessController.js';
-import { authAny, authBusiness, authCustomer } from '../middleware/authMiddleware.js';
+import { authAny, authBusiness, authCustomer, authSuspendedBusiness } from '../middleware/authMiddleware.js';
 import { upload } from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
@@ -39,6 +40,7 @@ router.put('/update', authBusiness, upload.single('image'), updateBusiness);
 router.delete('/delete', authBusiness, deleteBusiness);
 router.put('/update-password', authBusiness, updateBusinessPassword);
 router.get('/stripe-onboarding', authBusiness, getStripeOnboardingLink);
+router.get('/me', authSuspendedBusiness, getBusinessData);
 router.get('/:id', authBusiness, getBusinessById);
 router.get('/business-profile/:id', authAny, getBusinessProfile);
 
