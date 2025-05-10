@@ -1,10 +1,10 @@
-import { checkToken, client } from './httpClient';
+import ShowToast from '@/components/ui/ShowToast';
+import { client, checkToken } from './httpClient';
 
-// In ReviewService.ts
-const createReview = async (
-	transactionId: string,
+const createReport = async (
+	businessId: string,
 	content: string,
-	images?: File[]
+	image?: File
 ) => {
 	const accessToken = await checkToken();
 	if (!accessToken) {
@@ -12,28 +12,27 @@ const createReview = async (
 	}
 
 	try {
-		console.log('Creating review with transaction:', transactionId);
-		if (images && images.length > 0) {
+		console.log('Creating a report ⚠️');
+		if (image) {
 			const formData = new FormData();
-			formData.append('transaction', transactionId);
+			formData.append('businessId', businessId);
 			formData.append('content', content);
-			images.forEach((image) => {
-				formData.append('images', image);
-			});
+			formData.append('image', image);
 
-			const response = await client.post('/review', formData, {
+			const response = await client.post('/report', formData, {
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
 					'Content-Type': 'multipart/form-data',
 				},
 			});
+			ShowToast('success', 'Report has been sent!');
 			return response.data;
 		} else {
 			const response = await client.post(
-				'/review',
+				'/report',
 				{
-					transaction: transactionId,
-					content,
+					businessId: businessId,
+					content: content,
 				},
 				{
 					headers: {
@@ -41,17 +40,18 @@ const createReview = async (
 					},
 				}
 			);
+			ShowToast('success', 'Report has been sent!');
 			return response.data;
 		}
 	} catch (error: any) {
 		console.error(
-			'Error creating review:',
+			'Error creating report:',
 			error.response?.data || error.message
 		);
 		throw new Error(
-			error.response?.data?.message || 'Failed to create review'
+			error.response?.data?.message || 'Failed to create report'
 		);
 	}
 };
 
-export { createReview };
+export { createReport };

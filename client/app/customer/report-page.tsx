@@ -1,35 +1,33 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
-import { z } from 'zod';
+import { useLocalSearchParams, router, RelativePathString } from 'expo-router';
 import FloatingBackArrowButton from '@/components/ui/FloatingBackArrowButton';
 import ShowToast from '@/components/ui/ShowToast';
 import LabeledInput from '@/components/ui/LabeledInput';
+import { NormalizedImage } from '@/utils/functions';
+import UserImage from '@/components/UserImage';
+import { createReport } from '@/services/reportService';
+import { FileObject } from '@/types/business';
+import GalleryImageInput from '@/components/GalleryImageInput';
 
-const schema = z.object({
-	title: z.string().min(1, 'Title is required'),
-	description: z.string().min(1, 'Description is required'),
-});
-
-type FormData = z.infer<typeof schema>;
-
-const AddReportPage = () => {
-	const { businessName, BusinessId } = useLocalSearchParams();
-	const [form, setForm] = useState<FormData>({ title: '', description: '' });
+export default function AddReportPage() {
+	const { businessName, businessId, businessImage, from } =
+		useLocalSearchParams();
+	const [description, setDescription] = useState('');
 	const [loading, setLoading] = useState(false);
+	const [files, setFiles] = useState<FileObject[]>([]);
 
 	const handleSubmit = async () => {
-		const result = schema.safeParse(form);
-		if (!result.success) {
-			const msg = Object.values(result.error.flatten().fieldErrors)
-				.flat()
-				.join('\n');
-			return ShowToast('error', 'Validation Error', msg);
+		if (!description.trim()) {
+			return ShowToast('error', 'Description is required');
 		}
+
 		setLoading(true);
 		try {
-			ShowToast('success', 'Report submitted successfully');
-			router.back();
+			const image = files[0];
+			await createReport(businessId as string, description, image as any);
+			router.replace({ pathname: from as RelativePathString });
+			setDescription('');
 		} catch {
 			ShowToast('error', 'Failed to submit report');
 		} finally {
@@ -39,32 +37,36 @@ const AddReportPage = () => {
 
 	return (
 		<>
-			<FloatingBackArrowButton />
+			<FloatingBackArrowButton from={from as RelativePathString} />
 			<ScrollView className="flex-1 bg-gray-100">
 				<View className="px-6 pt-20 pb-8">
-					<Text className="text-2xl font-bold text-gray-800 mb-6 text-center">
+					<View className="items-center mb-12 mt-2">
+						<UserImage
+							image={NormalizedImage(businessImage)}
+							className="items-center"
+							size={36}
+						/>
+					</View>
+
+					<Text className="text-2xl font-bold text-gray-800 mb-2 text-center">
 						New Report for {'\n'}
 						{businessName}
 					</Text>
 
-					<View className="space-y-5 mt-2">
-						<LabeledInput
-							label="Report Title"
-							value={form.title}
-							onChange={(text) =>
-								setForm((f) => ({ ...f, title: text }))
-							}
-						/>
+					<LabeledInput
+						label="Description"
+						value={description}
+						onChange={setDescription}
+						multiline
+					/>
 
-						<LabeledInput
-							label="Description"
-							value={form.description}
-							onChange={(text) =>
-								setForm((f) => ({ ...f, description: text }))
-							}
-							multiline
-						/>
-					</View>
+					<GalleryImageInput
+						labelClassName="mt-4"
+						files={files}
+						setFiles={setFiles}
+						maxImages={1}
+						label="Upload an optional image"
+					/>
 
 					<TouchableOpacity
 						className={`mt-8 py-4 rounded-xl items-center ${
@@ -81,6 +83,4 @@ const AddReportPage = () => {
 			</ScrollView>
 		</>
 	);
-};
-
-export default AddReportPage;
+}
