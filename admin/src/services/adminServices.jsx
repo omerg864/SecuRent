@@ -125,4 +125,31 @@ const getBusinessTransactions = async (businessId) => {
 	}
 }
 
+const getAllCustomers = async(page, name='') => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken) {
+			throw new Error('Access token is missing or invalid.');
+		}
+		if (name) {
+			const response = await client.get(
+				`admin/get-all-customers?page=${page}&name=${name}`,
+				{
+					headers: { Authorization: `Bearer ${accessToken}` },
+				}
+			);
+			return response.data;
+		}
+		const response = await client.get(`admin/get-all-customers?page=${page}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
+		return response.data;
+	} catch (error) {
+		console.log('Get all customers error: ', error);
+		throw new Error(
+			error.response?.data?.message || 'Get all customers failed'
+		);
+	}
+}
+
 export { register, login, googleLogin, analytics , getAllBusinesses , getBusinessTransactions };

@@ -630,6 +630,37 @@ const adminAnalytics = asyncHandler(async (req, res) => {
 	});
 });
 
+const getAllCustomers = asyncHandler(async (req, res) => {
+	const page = parseInt(req.query.page) || 1;
+	const name = req.query.name || '';
+	const limit = 10;
+	const skip = (page - 1) * limit;
+
+	const totalCustomers = await Customer.countDocuments();
+	const totalPages = Math.ceil(totalCustomers / limit);
+
+	// search by name or partial name
+	const customers = await Customer.find({
+		name: { $regex: new RegExp(name, 'i') }, // match anywhere, case-insensitive
+	})
+		.sort({ createdAt: -1 })
+		.skip(skip)
+		.limit(limit)
+		.select('-password -refreshTokens -verificationCode');
+
+	res.status(200).json({
+		success: true,
+		page,
+		totalPages,
+		totalCustomers,
+		customers,
+	});
+});
+
+
+
+
+
 const getAllBusinesses = asyncHandler(async (req, res) => {
 	const page = parseInt(req.query.page) || 1;
 	const name = req.query.name || '';
@@ -777,6 +808,7 @@ export {
 	adminAnalytics,
 	refreshTokens,
 	getAllBusinesses,
+	getAllCustomers,
 	toggleBusinessSuspension,
 	toggleCustomerSuspension,
 };
