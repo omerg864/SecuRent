@@ -1,32 +1,55 @@
 import { BusinessInfoCard } from "../components/business-info-card";
 import { TransactionsTable } from "../components/transactions-table";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getBusinessTransactions } from "../services/adminServices";
+import { getBusinessById } from "../services/businessService";
 import Loader from "../components/Loader";
 
 export default function SingleBusiness() {
   const location = useLocation();
-  const business = location.state;
+  const locationBusiness = location.state;
+  console.log("Location state:", locationBusiness);
+  const { id } = useParams();
+
+  const [business, setBusiness] = useState(locationBusiness || null);
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
 
+  // Fetch business if not in location state
   useEffect(() => {
-    const fetchTransactions = async () => {
-      setLoading(true);
-      try {
-        const data = await getBusinessTransactions(business._id);
-        setTransactions(data.transactions);
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
-      } finally {
-        setLoading(false);
+    const fetchBusiness = async () => {
+      if (!locationBusiness && id) {
+        try {
+          console.log("Fetching business by ID:", id);
+          const fetchedBusiness = await getBusinessById(id);
+          setBusiness(fetchedBusiness);
+        } catch (error) {
+          console.error("Error fetching business:", error);
+        }
       }
     };
 
-    if (business?._id) {
-      fetchTransactions();
-    }
+    fetchBusiness();
+  }, [locationBusiness, id]);
+
+  // Fetch transactions when business is available
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      if (business?._id) {
+        setLoading(true);
+        try {
+          const data = await getBusinessTransactions(business._id);
+          setTransactions(data.transactions);
+        } catch (error) {
+          console.error("Error fetching transactions:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchTransactions();
   }, [business]);
 
   return (
@@ -35,35 +58,39 @@ export default function SingleBusiness() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           Business Details:
         </h1>
-          <button
-            className="min-w-[100px] text-center px-4 py-1.5 rounded-md text-sm font-medium transition
+        <button
+          className="min-w-[100px] text-center px-4 py-1.5 rounded-md text-sm font-medium transition
                  border border-yellow-600 text-yellow-600 hover:bg-yellow-50
                  dark:border-yellow-400 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
-          >
-            Suspend
-          </button>
+        >
+          Suspend
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
-          <BusinessInfoCard business={business} />
-        </div>
+      {business ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1">
+            <BusinessInfoCard business={business} />
+          </div>
 
-        <div className="lg:col-span-2">
-          <h2 className="text-2xl font-semibold mb-4">Transactions</h2>
+          <div className="lg:col-span-2">
+            <h2 className="text-2xl font-semibold mb-4">Transactions</h2>
 
-          {loading ? (
-            <Loader />
-          ) : transactions.length > 0 ? (
-            <TransactionsTable
-              transactions={transactions}
-              currency={business.currency}
-            />
-          ) : (
-            <p className="text-muted-foreground">No transactions yet.</p>
-          )}
+            {loading ? (
+              <Loader />
+            ) : transactions.length > 0 ? (
+              <TransactionsTable
+                transactions={transactions}
+                currency={business.currency}
+              />
+            ) : (
+              <p className="text-muted-foreground">No transactions yet.</p>
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <Loader />
+      )}
     </main>
   );
 }

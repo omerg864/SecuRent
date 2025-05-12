@@ -41,7 +41,7 @@ router.delete('/delete', authBusiness, deleteBusiness);
 router.put('/update-password', authBusiness, updateBusinessPassword);
 router.get('/stripe-onboarding', authBusiness, getStripeOnboardingLink);
 router.get('/me', authSuspendedBusiness, getBusinessData);
-router.get('/:id', authBusiness, getBusinessById);
+router.get('/:id', authAny, getBusinessById);
 router.get('/business-profile/:id', authAny, getBusinessProfile);
 
 export default router;
