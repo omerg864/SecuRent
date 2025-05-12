@@ -72,7 +72,8 @@ export default function SingleReport() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-4">
-          <Link to={`/business/${report.business._id}`} className="block">
+          <Link to={`/business/${report.business._id}`} 
+          className="block">
             <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow hover:bg-gray-2 dark:hover:bg-meta-4 transition-shadow">
               <h2 className="text-xl font-semibold mb-2">Business</h2>
               <div className="flex items-center gap-3">

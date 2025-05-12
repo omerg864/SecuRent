@@ -14,7 +14,7 @@ import {
 	setUpCustomerCard,
 	getCustomerData
 } from '../controllers/customerController.js';
-import { authCustomer, authSuspendedCustomer } from '../middleware/authMiddleware.js';
+import { authCustomer, authSuspendedCustomer, authAny } from '../middleware/authMiddleware.js';
 import { upload } from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
@@ -32,7 +32,7 @@ router.put('/update-password', authCustomer, updateCustomerPassword); // Update 
 router.put('/update', authCustomer, upload.single('image'), updateCustomer); // Update Customer Profile
 router.delete('/delete', authCustomer, deleteCustomer); // Delete Customer Account
 router.get('/me', authSuspendedCustomer, getCustomerData); // Get Customer Data
-router.get('/:id', authCustomer, getCustomerById); // Get Customer by ID3
+router.get('/:id', authAny, getCustomerById); // Get Customer by ID3
 router.put('/update/credit-card', authCustomer, updateCustomerCreditCard); // Update Customer Credit Card
 router.put('/credit-card/intent', authCustomer, setUpCustomerCard); // Update Customer Credit Card
 

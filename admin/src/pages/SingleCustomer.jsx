@@ -1,32 +1,53 @@
 import { CustomerInfoCard } from "../components/customer-info-card";
 import { TransactionsTable } from "../components/transactions-table";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getCustomerTransactions } from "../services/adminServices";
+import { getCustomerById } from "../services/customerService";
 import Loader from "../components/Loader";
 
 export default function SingleCustomer() {
   const location = useLocation();
-  const customer = location.state;
+  const locationCustomer = location.state;
+  const { id } = useParams();
+
+  const [customer, setCustomer] = useState(locationCustomer || null);
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
 
+  // Fetch customer if not in location state
   useEffect(() => {
-    const fetchTransactions = async () => {
-      setLoading(true);
-      try {
-        const data = await getCustomerTransactions(customer._id);
-        setTransactions(data.transactions);
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
-      } finally {
-        setLoading(false);
+    const fetchCustomer = async () => {
+      if (!locationCustomer && id) {
+        try {
+          const fetchedCustomer = await getCustomerById(id);
+          setCustomer(fetchedCustomer);
+        } catch (error) {
+          console.error("Error fetching customer:", error);
+        }
       }
     };
 
-    if (customer?._id) {
-      fetchTransactions();
-    }
+    fetchCustomer();
+  }, [locationCustomer, id]);
+
+  // Fetch transactions when customer is available
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      if (customer?._id) {
+        setLoading(true);
+        try {
+          const data = await getCustomerTransactions(customer._id);
+          setTransactions(data.transactions);
+        } catch (error) {
+          console.error("Error fetching transactions:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchTransactions();
   }, [customer]);
 
   return (
@@ -44,26 +65,30 @@ export default function SingleCustomer() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
-          <CustomerInfoCard customer={customer} />
-        </div>
+      {customer ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1">
+            <CustomerInfoCard customer={customer} />
+          </div>
 
-        <div className="lg:col-span-2">
-          <h2 className="text-2xl font-semibold mb-4">Transactions</h2>
+          <div className="lg:col-span-2">
+            <h2 className="text-2xl font-semibold mb-4">Transactions</h2>
 
-          {loading ? (
-            <Loader />
-          ) : transactions.length > 0 ? (
-            <TransactionsTable
-              transactions={transactions}
-              currency={customer.currency}
-            />
-          ) : (
-            <p className="text-muted-foreground">No transactions yet.</p>
-          )}
+            {loading ? (
+              <Loader />
+            ) : transactions.length > 0 ? (
+              <TransactionsTable
+                transactions={transactions}
+                currency={customer.currency}
+              />
+            ) : (
+              <p className="text-muted-foreground">No transactions yet.</p>
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <Loader />
+      )}
     </main>
   );
 }
