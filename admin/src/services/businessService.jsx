@@ -6,7 +6,7 @@ const getBusinessById = async (id) => {
         if (!accessToken) {
             throw new Error('Access token is missing or invalid.');
         }
-        const response = await client.get(`business/business-profile/${id}`, {
+        const response = await client.get(`business/${id}`, {
             headers: { Authorization: `Bearer ${accessToken}` },
         });
         console.log('Get business by ID response: ', response.data.business);
