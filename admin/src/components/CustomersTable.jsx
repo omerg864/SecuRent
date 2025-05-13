@@ -32,19 +32,17 @@ const CustomersTable = ({ customers }) => {
 				</div>
 
 				{customers.map((customer, key) => (
-					<div
-						className={`grid grid-cols-2 sm:grid-cols-4 ${
-							key === customers.length - 1
-								? ''
-								: 'border-b border-stroke dark:border-strokedark'
-						}`}
+					<Link
+						to={`/customer/${customer._id}`}
+						state={customer}
 						key={customer._id}
+						className={`grid grid-cols-2 sm:grid-cols-4 cursor-pointer hover:bg-gray-2 dark:hover:bg-meta-4 ${
+							key !== customers.length - 1
+								? 'border-b border-stroke dark:border-strokedark'
+								: ''
+						}`}
 					>
-						<Link
-							to={`/customer/${customer._id}`}
-							state={customer}
-							className="flex items-center gap-3 p-2.5 xl:p-5 hover:bg-gray-2 dark:hover:bg-meta-4"
-						>
+						<div className="flex items-center gap-3 p-2.5 xl:p-5">
 							<div className="flex-shrink-0 hidden sm:block">
 								<img
 									className="h-8 w-8 rounded-full"
@@ -56,15 +54,11 @@ const CustomersTable = ({ customers }) => {
 									alt="Customer"
 								/>
 							</div>
-							<p className="text-black dark:text-white">
-								{customer.name}
-							</p>
-						</Link>
+							<p className="text-black dark:text-white">{customer.name}</p>
+						</div>
 
 						<div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
-							<p className="text-black dark:text-white">
-								{customer.email}
-							</p>
+							<p className="text-black dark:text-white">{customer.email}</p>
 						</div>
 
 						<div className="flex items-center justify-center p-2.5 xl:p-5">
@@ -78,7 +72,7 @@ const CustomersTable = ({ customers }) => {
 								{customer.isValid ? "Valid" : "Invalid"}
 							</p>
 						</div>
-					</div>
+					</Link>
 				))}
 			</div>
 		</div>
