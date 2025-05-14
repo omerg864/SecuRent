@@ -21,6 +21,8 @@ import { ScrollView } from "react-native-gesture-handler";
 import { formatCurrencySymbol } from "@/utils/functions";
 import ShowToast from "@/components/ui/ShowToast";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { Animated } from "react-native";
+import { useRef } from "react";
 
 export default function ApproveTransaction() {
     const router = useRouter();
@@ -33,6 +35,7 @@ export default function ApproveTransaction() {
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
     const [hasReadTerms, setHasReadTerms] = useState(false);
     const [transaction, setTransaction] = useState<any>(null);
+    const shakeAnim = useRef(new Animated.Value(0)).current;
 
     useFocusEffect(
         useCallback(() => {
@@ -152,6 +155,36 @@ export default function ApproveTransaction() {
             pathname: "/customer/BusinessProfileScreen",
             params: { id: item.business?._id }
         });
+    };
+
+    const triggerShake = () => {
+        Animated.sequence([
+            Animated.timing(shakeAnim, {
+                toValue: 8,
+                duration: 50,
+                useNativeDriver: true
+            }),
+            Animated.timing(shakeAnim, {
+                toValue: -8,
+                duration: 50,
+                useNativeDriver: true
+            }),
+            Animated.timing(shakeAnim, {
+                toValue: 6,
+                duration: 50,
+                useNativeDriver: true
+            }),
+            Animated.timing(shakeAnim, {
+                toValue: -6,
+                duration: 50,
+                useNativeDriver: true
+            }),
+            Animated.timing(shakeAnim, {
+                toValue: 0,
+                duration: 50,
+                useNativeDriver: true
+            })
+        ]).start();
     };
 
     if (loading || !item)
@@ -276,8 +309,11 @@ export default function ApproveTransaction() {
                         </View>
                     </View>
                 </View>
+            </View>
 
-                {/* Highlighted terms message */}
+            {/* Terms and Conditions Section */}
+            <View>
+                {/* Highlight */}
                 <Text className='text-white/80 text-md text-center font-semibold mb-2 mt-6'>
                     Please read and approve before proceeding
                 </Text>
@@ -295,27 +331,39 @@ export default function ApproveTransaction() {
                 </ScrollView>
 
                 {/* Checkbox centered below */}
-                <View className='flex-row items-center mt-4 px-10'>
-                    <TouchableOpacity
-                        onPress={() => setHasReadTerms(!hasReadTerms)}
-                        className='w-5 h-5 border border-white/60 mr-3 items-center justify-center'
-                    >
-                        {hasReadTerms && <View className='w-3 h-3 bg-white' />}
-                    </TouchableOpacity>
-                    <Text className='text-white/80 text-md font-semibold'>
-                        I have read and understood the terms
-                    </Text>
-                </View>
+                <Animated.View
+                    style={{ transform: [{ translateX: shakeAnim }] }}
+                >
+                    <View className='flex-row items-center mt-4 px-10'>
+                        <TouchableOpacity
+                            onPress={() => setHasReadTerms(!hasReadTerms)}
+                            className='w-5 h-5 border border-white/60 mr-3 items-center justify-center'
+                        >
+                            {hasReadTerms && (
+                                <View className='w-3 h-3 bg-white' />
+                            )}
+                        </TouchableOpacity>
+                        <Text className='text-white/80 text-md font-semibold'>
+                            I have read and understood the terms
+                        </Text>
+                    </View>
+                </Animated.View>
             </View>
 
             {/* Approve Button */}
             <View className='absolute bottom-10 left-0 right-0 px-6'>
                 <Button
-                    onPress={handleApproveDeposit}
+                    onPress={() => {
+                        if (!hasReadTerms) {
+                            triggerShake();
+                            return;
+                        }
+                        handleApproveDeposit();
+                    }}
                     className={`py-4 rounded-full items-center justify-center ${
                         hasReadTerms ? "bg-white" : "bg-white/40"
                     }`}
-                    disabled={!hasReadTerms || loadingApprove}
+                    disabled={loadingApprove}
                 >
                     {loadingApprove ? (
                         <ActivityIndicator
