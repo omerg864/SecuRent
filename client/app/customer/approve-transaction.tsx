@@ -91,15 +91,17 @@ export default function ApproveTransaction() {
 
         if (initError) {
             console.log("Init error:", initError);
+            ShowToast("error", initError.message);
+            setLoadingApprove(false);
             return;
         }
 
-        const { error: sheetError, paymentOption } =
-            await presentPaymentSheet();
+        const { error: sheetError } = await presentPaymentSheet();
 
         if (sheetError) {
             console.log("Payment sheet error:", sheetError);
             ShowToast("error", sheetError.code);
+            setLoadingApprove(false);
             return;
         }
 
@@ -108,6 +110,7 @@ export default function ApproveTransaction() {
 
             if (!response.success) {
                 ShowToast("error", "Failed to confirm payment");
+                setLoadingApprove(false);
                 return;
             }
 
@@ -118,9 +121,13 @@ export default function ApproveTransaction() {
         } catch (error: any) {
             console.log(
                 "Error confirming payment:",
-                error.response.data.message
+                error.response?.data?.message || error.message
             );
-            ShowToast("error", error.response.data.message);
+            ShowToast(
+                "error",
+                error.response?.data?.message || "An unexpected error occurred"
+            );
+            setLoadingApprove(false);
             return;
         }
 
@@ -130,22 +137,32 @@ export default function ApproveTransaction() {
     const handleApproveDeposit = async () => {
         try {
             setLoadingApprove(true);
+
             const response = await createTransactionFromItem(id);
-            if (response) {
-                setTransaction({ return_date: response.data.return_date });
-                openStripePaymentSheet(
-                    response.data.customer_stripe_id,
-                    response.data.ephemeralKey,
-                    response.data.clientSecret,
-                    response.data.transactionId
-                );
-            } else {
+
+            if (!response || !response.data?.success) {
                 ShowToast("error", "Failed to approve deposit");
                 setLoadingApprove(false);
+                return;
             }
+
+            setTransaction({ return_date: response.data.return_date });
+
+            await openStripePaymentSheet(
+                response.data.customer_stripe_id,
+                response.data.ephemeralKey,
+                response.data.clientSecret,
+                response.data.transactionId
+            );
         } catch (error: any) {
-            console.log("Error response:", error.response.data.message);
-            ShowToast("error", error.response.data.message);
+            console.log(
+                "Error response:",
+                error?.response?.data?.message || error.message
+            );
+            ShowToast(
+                "error",
+                error?.response?.data?.message || "An unexpected error occurred"
+            );
             setLoadingApprove(false);
         }
     };
