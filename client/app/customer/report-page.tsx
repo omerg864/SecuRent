@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useLocalSearchParams, router, RelativePathString } from 'expo-router';
 import FloatingBackArrowButton from '@/components/ui/FloatingBackArrowButton';
 import ShowToast from '@/components/ui/ShowToast';
