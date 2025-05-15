@@ -567,4 +567,22 @@ const deleteReview = asyncHandler(async (req, res) => {
 		message: 'Review deleted successfully',
 	});
 });
-export { createReview, getReviews, getReviewById, updateReview, deleteReview };
+
+
+const getAllReviewsByCustomerId = asyncHandler(async (req, res) => {
+	const { id } = req.params;
+	const reviews = await Review.find({
+		customer: id,
+	}).populate('customer', 'name image email ').populate('business', 'name image');
+
+	if (!reviews) {
+		res.status(404);
+		throw new Error('Reviews not found');
+	}
+
+	res.status(200).json({
+		success: true,
+		reviews,
+	});
+});
+export { createReview, getReviews, getReviewById, updateReview, deleteReview, getAllReviewsByCustomerId };

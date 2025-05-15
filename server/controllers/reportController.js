@@ -177,6 +177,24 @@ const resolveReport = asyncHandler(async (req, res) => {
 	});
 });
 
+const getAllReportsByCustomerId = asyncHandler(async (req, res) => {
+	const customerId = req.params.id;
+	const reports = await Report.find({ customer: customerId })
+		.populate('business', 'name email rating image suspended')
+		.populate('resolutionBy', 'name')
+		.sort({ createdAt: -1 });
+
+	if (!reports) {
+		res.status(404);
+		throw new Error('No reports found for this customer');
+	}
+
+	res.status(200).json({
+		reports,
+		success: true,
+	});
+});
+
 export {
 	createReport,
 	getReports,
@@ -184,4 +202,5 @@ export {
 	resolveReport,
 	getCustomerReports,
 	getCustomerReportById,
+	getAllReportsByCustomerId,
 };
