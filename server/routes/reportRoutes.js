@@ -19,6 +19,6 @@ router.get('/:id', authAdmin, getReportById);
 router.get('/:id/customer', authCustomer, getCustomerReportById);
 router.post('/', authCustomer, upload.array('images'), createReport);
 router.put('/:id', authAdmin, resolveReport);
-router.get('/customer/:id', authCustomer, getAllReportsByCustomerId);
+router.get('/customer/:id', authAdmin, getAllReportsByCustomerId);
 
 export default router;

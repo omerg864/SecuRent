@@ -177,4 +177,49 @@ const getAllCustomers = async(page, name='') => {
 	}
 }
 
-export { register, login, googleLogin, analytics , getAllBusinesses , getBusinessTransactions , getAllCustomers , getCustomerTransactions };
+const getCustomerReviews = async (customerId) => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken) {
+			throw new Error('Access token is missing or invalid.');
+		}
+		const response = await client.get(
+			`review/customer/${customerId}`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		console.log('Get customer reviews response: ', response.data);
+		return response.data;
+	} catch (error) {
+		console.log('Get customer reviews error: ', error);
+		throw new Error(
+			error.response?.data?.message || 'Get customer reviews failed'
+		);
+	}
+}
+const getCustomerReports = async (customerId) => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken) {
+			throw new Error('Access token is missing or invalid.');
+		}
+		const response = await client.get(
+			`report/customer/${customerId}`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		console.log('Get customer reports response: ', response.data);
+		return response.data;
+	} catch (error) {
+		console.log('Get customer reports error: ', error);
+		throw new Error(
+			error.response?.data?.message || 'Get customer reports failed'
+		);
+	}
+}
+
+export { register, login, googleLogin, analytics , getAllBusinesses , getBusinessTransactions , getAllCustomers , getCustomerTransactions ,
+	getCustomerReviews , getCustomerReports
+ };
