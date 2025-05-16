@@ -1,9 +1,15 @@
+import { useEffect, useState } from "react";
+import { useLocation, useParams } from "react-router-dom";
 import { CustomerInfoCard } from "../components/customer-info-card";
 import { TransactionsTable } from "../components/transactions-table";
-import { useLocation, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { getCustomerTransactions } from "../services/adminServices";
+import { ReviewsTable } from "../components/customerReviewsTable ";
+import { ReportsTable } from "../components/customerReportsTable";
 import { getCustomerById } from "../services/customerService";
+import {
+  getCustomerTransactions,
+  getCustomerReviews,
+  getCustomerReports,
+} from "../services/adminServices";
 import Loader from "../components/Loader";
 
 export default function SingleCustomer() {
@@ -14,8 +20,10 @@ export default function SingleCustomer() {
   const [customer, setCustomer] = useState(locationCustomer || null);
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [reports, setReports] = useState([]);
 
-  // Fetch customer if not in location state
+  // Fetch customer if not passed via location
   useEffect(() => {
     const fetchCustomer = async () => {
       if (!locationCustomer && id) {
@@ -27,27 +35,32 @@ export default function SingleCustomer() {
         }
       }
     };
-
     fetchCustomer();
   }, [locationCustomer, id]);
 
-  // Fetch transactions when customer is available
+  // Fetch all related data once customer is ready
   useEffect(() => {
-    const fetchTransactions = async () => {
+    const fetchData = async () => {
       if (customer?._id) {
         setLoading(true);
         try {
-          const data = await getCustomerTransactions(customer._id);
-          setTransactions(data.transactions);
-        } catch (error) {
-          console.error("Error fetching transactions:", error);
+          const [txRes, revRes, repRes] = await Promise.all([
+            getCustomerTransactions(customer._id),
+            getCustomerReviews(customer._id),
+            getCustomerReports(customer._id),
+          ]);
+          setTransactions(txRes.transactions);
+          setReviews(revRes.reviews);
+          setReports(repRes.reports);
+        } catch (err) {
+          console.error("Error fetching customer data:", err);
         } finally {
           setLoading(false);
         }
       }
     };
 
-    fetchTransactions();
+    fetchData();
   }, [customer]);
 
   return (
@@ -58,8 +71,8 @@ export default function SingleCustomer() {
         </h1>
         <button
           className="min-w-[100px] text-center px-4 py-1.5 rounded-md text-sm font-medium transition
-                 border border-yellow-600 text-yellow-600 hover:bg-yellow-50
-                 dark:border-yellow-400 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
+                   border border-yellow-600 text-yellow-600 hover:bg-yellow-50
+                   dark:border-yellow-400 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
         >
           Suspend
         </button>
@@ -71,19 +84,38 @@ export default function SingleCustomer() {
             <CustomerInfoCard customer={customer} />
           </div>
 
-          <div className="lg:col-span-2">
-            <h2 className="text-2xl font-semibold mb-4">Transactions</h2>
+          <div className="lg:col-span-2 space-y-8">
+            <section>
+              <h2 className="text-2xl font-semibold mb-4">Transactions</h2>
+              {loading ? (
+                <Loader />
+              ) : transactions.length > 0 ? (
+                <TransactionsTable
+                  transactions={transactions}
+                  currency={customer.currency}
+                />
+              ) : (
+                <p className="text-muted-foreground">No transactions yet.</p>
+              )}
+            </section>
 
-            {loading ? (
-              <Loader />
-            ) : transactions.length > 0 ? (
-              <TransactionsTable
-                transactions={transactions}
-                currency={customer.currency}
-              />
-            ) : (
-              <p className="text-muted-foreground">No transactions yet.</p>
-            )}
+            <section>
+              <h2 className="text-2xl font-semibold mb-4">Reviews</h2>
+              {loading ? (
+                <Loader />
+              ) : (
+                <ReviewsTable reviews={reviews} />
+              )}
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-semibold mb-4">Reports</h2>
+              {loading ? (
+                <Loader />
+              ) : (
+                <ReportsTable reports={reports} />
+              )}
+            </section>
           </div>
         </div>
       ) : (
