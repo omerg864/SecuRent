@@ -3,7 +3,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { CustomerInfoCard } from "../components/customer-info-card";
 import { TransactionsTable } from "../components/transactions-table";
 import { ReviewsTable } from "../components/customerReviewsTable ";
-import { ReportsTable } from "../components/customerReportsTable";
+import { ReportsTable } from "../components/customerReportsTable.jsx";
 import { getCustomerById } from "../services/customerService";
 import {
   getCustomerTransactions,
@@ -23,7 +23,6 @@ export default function SingleCustomer() {
   const [reviews, setReviews] = useState([]);
   const [reports, setReports] = useState([]);
 
-  // Fetch customer if not passed via location
   useEffect(() => {
     const fetchCustomer = async () => {
       if (!locationCustomer && id) {
@@ -38,7 +37,6 @@ export default function SingleCustomer() {
     fetchCustomer();
   }, [locationCustomer, id]);
 
-  // Fetch all related data once customer is ready
   useEffect(() => {
     const fetchData = async () => {
       if (customer?._id) {
@@ -78,43 +76,37 @@ export default function SingleCustomer() {
         </button>
       </div>
 
-      {customer ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader />
+        </div>
+      ) : customer ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          {/* שמאל */}
           <div className="lg:col-span-1">
-            <CustomerInfoCard customer={customer} />
+            <div className="h-full min-h-[400px] max-h-[500px] overflow-auto">
+              <CustomerInfoCard customer={customer} />
+            </div>
           </div>
 
+          {/* ימין */}
           <div className="lg:col-span-2 space-y-8">
             <section>
               <h2 className="text-2xl font-semibold mb-4">Transactions</h2>
-              {loading ? (
-                <Loader />
-              ) : transactions.length > 0 ? (
-                <TransactionsTable
-                  transactions={transactions}
-                  currency={customer.currency}
-                />
-              ) : (
-                <p className="text-muted-foreground">No transactions yet.</p>
-              )}
+              <TransactionsTable
+                transactions={transactions}
+                currency={customer.currency}
+              />
             </section>
 
             <section>
               <h2 className="text-2xl font-semibold mb-4">Reviews</h2>
-              {loading ? (
-                <Loader />
-              ) : (
-                <ReviewsTable reviews={reviews} />
-              )}
+              <ReviewsTable reviews={reviews} />
             </section>
 
             <section>
               <h2 className="text-2xl font-semibold mb-4">Reports</h2>
-              {loading ? (
-                <Loader />
-              ) : (
-                <ReportsTable reports={reports} />
-              )}
+              <ReportsTable reports={reports} />
             </section>
           </div>
         </div>

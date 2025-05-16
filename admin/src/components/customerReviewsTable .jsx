@@ -1,36 +1,61 @@
-import React from "react";
+import { Link } from "react-router-dom";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "./table";
+import { Card } from "./card";
 
-export const ReviewsTable = ({ reviews }) => {
+export function ReviewsTable({ reviews }) {
   if (!reviews || reviews.length === 0) {
     return <p className="text-muted-foreground">No reviews yet.</p>;
   }
 
   return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">Reviews</h4>
-      <div className="flex flex-col">
-        <div className="grid grid-cols-4 bg-gray-2 dark:bg-meta-4 rounded-sm">
-          <div className="p-2.5 xl:p-5 font-medium">Business</div>
-          <div className="p-2.5 xl:p-5 font-medium">Rating</div>
-          <div className="p-2.5 xl:p-5 font-medium">Comment</div>
-          <div className="p-2.5 xl:p-5 font-medium">Date</div>
-        </div>
-
-        {reviews.map((review) => (
-          <div
-            key={review._id}
-            className="grid grid-cols-4 border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4"
-          >
-            <div className="p-2.5 xl:p-5 flex items-center gap-3">
-              <img src={review.business.image} alt="" className="w-8 h-8 rounded-full" />
-              <span>{review.business.name}</span>
-            </div>
-            <div className="p-2.5 xl:p-5">{review.rating.overall ?? 0}</div>
-            <div className="p-2.5 xl:p-5 truncate">{review.content}</div>
-            <div className="p-2.5 xl:p-5">{new Date(review.createdAt).toLocaleDateString()}</div>
-          </div>
-        ))}
+    <Card>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Business</TableHead>
+              <TableHead>Rating</TableHead>
+              <TableHead>Comment</TableHead>
+              <TableHead className="text-right">Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {reviews.map((review) => (
+              <TableRow
+                key={review._id}
+                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+              >
+                <Link
+                  to={`/review/${review._id}`}
+                  state={review}
+                  className="contents"
+                >
+                  <TableCell className="font-medium flex items-center gap-2">
+                    <img
+                      src={review.business.image}
+                      alt={review.business.name}
+                      className="w-6 h-6 rounded-full"
+                    />
+                    {review.business.name}
+                  </TableCell>
+                  <TableCell>{review.rating.overall ?? 0}</TableCell>
+                  <TableCell className="truncate">{review.content}</TableCell>
+                  <TableCell className="text-right">
+                    {new Date(review.createdAt).toLocaleDateString()}
+                  </TableCell>
+                </Link>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
-    </div>
+    </Card>
   );
-};
+}
