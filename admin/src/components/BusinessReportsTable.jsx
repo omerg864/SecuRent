@@ -39,15 +39,30 @@ export function ReportsTable({ reports }) {
                                     className='contents'
                                 >
                                     <TableCell className='font-medium flex items-center gap-2'>
-                                        {report.customer?.image && (
-                                            <img
-                                                src={report.customer.image}
-                                                alt={report.customer.name}
-                                                className='w-6 h-6 rounded-full'
-                                            />
-                                        )}
+                                        <img
+                                            src={
+                                                report.customer?.image ||
+                                                "/avatar.png"
+                                            }
+                                            alt={
+                                                report.customer?.name ||
+                                                "Customer"
+                                            }
+                                            className='w-6 h-6 rounded-full'
+                                            onError={(e) => {
+                                                if (
+                                                    e.currentTarget.src !==
+                                                    window.location.origin +
+                                                        "/avatar.png"
+                                                ) {
+                                                    e.currentTarget.src =
+                                                        "/avatar.png";
+                                                }
+                                            }}
+                                        />
                                         {report.customer?.name || "—"}
                                     </TableCell>
+
                                     <TableCell>{report.title}</TableCell>
                                     <TableCell>
                                         <span
@@ -66,7 +81,7 @@ export function ReportsTable({ reports }) {
                                     <TableCell className='text-right'>
                                         {new Date(
                                             report.createdAt
-                                        ).toLocaleDateString('en-GB')}
+                                        ).toLocaleDateString("en-GB")}
                                     </TableCell>
                                 </Link>
                             </TableRow>

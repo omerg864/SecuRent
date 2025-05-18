@@ -38,13 +38,27 @@ export function ReviewsTable({ reviews }) {
                                     className='contents'
                                 >
                                     <TableCell className='font-medium flex items-center gap-2'>
-                                        {review.customer?.image && (
-                                            <img
-                                                src={review.customer.image}
-                                                alt={review.customer.name}
-                                                className='w-6 h-6 rounded-full'
-                                            />
-                                        )}
+                                        <img
+                                            src={
+                                                review.customer?.image ||
+                                                "/avatar.png"
+                                            }
+                                            alt={
+                                                review.customer?.name ||
+                                                "Customer"
+                                            }
+                                            className='w-6 h-6 rounded-full object-cover'
+                                            onError={(e) => {
+                                                if (
+                                                    e.currentTarget.src !==
+                                                    window.location.origin +
+                                                        "/avatar.png"
+                                                ) {
+                                                    e.currentTarget.src =
+                                                        "/avatar.png";
+                                                }
+                                            }}
+                                        />
                                         {review.customer?.name || "—"}
                                     </TableCell>
                                     <TableCell>
@@ -56,7 +70,7 @@ export function ReviewsTable({ reviews }) {
                                     <TableCell className='text-right'>
                                         {new Date(
                                             review.createdAt
-                                        ).toLocaleDateString("en-UK")}
+                                        ).toLocaleDateString("en-GB")}
                                     </TableCell>
                                 </Link>
                             </TableRow>
