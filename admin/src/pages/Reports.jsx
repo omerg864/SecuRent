@@ -16,7 +16,7 @@ const Reports = () => {
     const fetchReports = async (page) => {
         setIsLoading(true);
         try {
-            const data = await getAllReports(page, "open");
+            const data = await getAllReports(page, "all");
             setReports(data.reports);
             setFilteredReports(data.reports);
             setTotalPages(data.total);

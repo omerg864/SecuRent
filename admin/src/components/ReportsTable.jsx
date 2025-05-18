@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { formatDate } from "../utils/functions";
 
 const ReportsTable = ({ reports }) => {
     return (
@@ -7,14 +8,24 @@ const ReportsTable = ({ reports }) => {
                 Reports
             </h4>
 
-            <div className='flex flex-col'>
-                <div className='grid grid-cols-6 rounded-sm bg-gray-2 dark:bg-meta-4'>
-                    <div className='p-2.5 xl:p-5'>Business</div>
-                    <div className='p-2.5 xl:p-5 text-center'>Customer</div>
-                    <div className='p-2.5 xl:p-5 text-center'>Title</div>
-                    <div className='p-2.5 xl:p-5 text-center'>Created At</div>
-                    <div className='p-2.5 xl:p-5 text-center'>Status</div>
-                    <div className='p-2.5 xl:p-5 text-center'>Action</div>
+            <div className='flex flex-col w-full'>
+                {/* Table Header */}
+                <div className='grid grid-cols-5 w-full rounded-sm bg-gray-2 dark:bg-meta-12'>
+                    <div className='p-2.5 xl:p-5 text-sm font-medium uppercase xsm:text-base'>
+                        Business
+                    </div>
+                    <div className='p-2.5 xl:p-5 text-sm font-medium uppercase xsm:text-base'>
+                        Customer
+                    </div>
+                    <div className='p-2.5 xl:p-5 text-sm font-medium uppercase xsm:text-base'>
+                        Title
+                    </div>
+                    <div className='p-2.5 xl:p-5 text-sm font-medium uppercase xsm:text-base'>
+                        Created At
+                    </div>
+                    <div className='p-2.5 xl:p-5 text-sm font-medium uppercase xsm:text-base'>
+                        Status
+                    </div>
                 </div>
 
                 {reports.length === 0 ? (
@@ -23,66 +34,61 @@ const ReportsTable = ({ reports }) => {
                     </div>
                 ) : (
                     reports.map((report, index) => (
-                        <div
+                        <Link
                             key={report._id}
-                            className={`grid grid-cols-6 items-center ${
+                            to={`/report/${report._id}`}
+                            state={report}
+                            className={`grid grid-cols-5 w-full items-center cursor-pointer ${
                                 index === reports.length - 1
                                     ? ""
                                     : "border-b border-stroke dark:border-strokedark"
-                            } hover:bg-gray-2 dark:hover:bg-meta-4 p-2.5 xl:p-5`}
+                            } hover:bg-gray-2 dark:hover:bg-meta-4`}
                         >
                             {/* Business */}
-                            <div className='flex items-center gap-3'>
-                                <div className='flex-shrink-0 hidden sm:block'>
-                                    <img
-                                        className='h-8 w-8 rounded-full'
-                                        src={
-                                            report.business.image ||
-                                            "./business-icon.png"
-                                        }
-                                        alt='Business'
-                                    />
-                                </div>
+                            <div className='flex items-center gap-3 p-2.5 xl:p-5'>
+                                <img
+                                    className='h-8 w-8 rounded-full object-cover'
+                                    src={
+                                        report.business.image ||
+                                        "./business-icon.png"
+                                    }
+                                    alt='Business'
+                                />
                                 <p className='text-black dark:text-white'>
                                     {report.business.name}
                                 </p>
                             </div>
 
                             {/* Customer */}
-                            <div className='flex items-center justify-center gap-3'>
-                                <div className='flex-shrink-0 hidden sm:block'>
-                                    <img
-                                        className='h-8 w-8 rounded-full'
-                                        src={
-                                            report.customer.image ||
-                                            "./avatar.png"
-                                        }
-                                        alt='Customer'
-                                    />
-                                </div>
+                            <div className='flex items-center gap-3 p-2.5 xl:p-5'>
+                                <img
+                                    className='h-8 w-8 rounded-full object-cover'
+                                    src={
+                                        report.customer.image || "./avatar.png"
+                                    }
+                                    alt='Customer'
+                                />
                                 <p className='text-black dark:text-white'>
                                     {report.customer.name}
                                 </p>
                             </div>
 
                             {/* Title */}
-                            <div className='flex items-center justify-center'>
+                            <div className='flex items-center p-2.5 xl:p-5'>
                                 <p className='text-black dark:text-white'>
                                     {report.title}
                                 </p>
                             </div>
 
                             {/* Created At */}
-                            <div className='flex justify-center'>
-                                <p className='text-gray-600 dark:text-gray-300 text-sm'>
-                                    {new Date(
-                                        report.createdAt
-                                    ).toLocaleDateString()}
+                            <div className='flex items-center p-2.5 xl:p-5'>
+                                <p className='text-black dark:text-white'>
+                                    {formatDate(report.createdAt)}
                                 </p>
                             </div>
 
                             {/* Status */}
-                            <div className='flex justify-center'>
+                            <div className='flex items-center p-2.5 xl:p-5'>
                                 <span
                                     className={`text-sm font-medium px-2 py-1 rounded-full ${
                                         report.status === "open"
@@ -95,18 +101,7 @@ const ReportsTable = ({ reports }) => {
                                     {report.status}
                                 </span>
                             </div>
-
-                            {/* Action */}
-                            <div className='flex justify-center'>
-                                <Link
-                                    to={`/report/${report._id}`}
-                                    state={report}
-                                    className='text-sm text-blue-600 hover:underline'
-                                >
-                                    View
-                                </Link>
-                            </div>
-                        </div>
+                        </Link>
                     ))
                 )}
             </div>

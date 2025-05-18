@@ -77,22 +77,27 @@ const createReport = asyncHandler(async (req, res) => {
 const getReports = asyncHandler(async (req, res) => {
 	const status = req.query.status || REPORT_STATUS.OPEN;
 	const page = parseInt(req.query.page) || 1;
-	const reports = await Report.find({ status })
+	const filter = status === "all" ? {} : { status };
+
+	const reports = await Report.find(filter)
 		.skip((page - 1) * REPORT_LIMIT_PER_PAGE)
+		.limit(REPORT_LIMIT_PER_PAGE)
+		.sort({ createdAt: -1 })
 		.populate('business', 'name address phone email rating image suspended')
 		.populate('customer', 'name phone email image suspended')
-		.populate('resolutionBy', 'name')
-		.sort({ createdAt: -1 })
-		.limit(REPORT_LIMIT_PER_PAGE);
+		.populate('resolutionBy', 'name');
+
+	const total = await Report.countDocuments(filter);
 
 	res.status(200).json({
-		reports,
-		page: parseInt(page),
-		limit: REPORT_LIMIT_PER_PAGE,
-		total: await Report.countDocuments({ status }),
 		success: true,
+		reports,
+		page,
+		limit: REPORT_LIMIT_PER_PAGE,
+		total,
 	});
 });
+
 
 const getReportById = asyncHandler(async (req, res) => {
 	const report = await Report.findById(req.params.id)

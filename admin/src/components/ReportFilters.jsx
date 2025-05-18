@@ -8,9 +8,21 @@ const ReportFilters = ({ reports, onFilter }) => {
     const [endDate, setEndDate] = useState("");
 
     useEffect(() => {
+        console.log("Raw reports before filtering:", reports);
+
+        for (const r of reports) {
+            console.log("business name:", r.business?.name);
+            console.log("status:", r.status);
+            console.log("createdAt:", r.createdAt);
+        }
+
         const filtered = reports
-            .filter((r) =>
-                r.business.name.toLowerCase().includes(searchTerm.toLowerCase())
+            .filter(
+                (r) =>
+                    typeof r.business?.name === "string" &&
+                    r.business.name
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase())
             )
             .filter((r) => statusFilter === "all" || r.status === statusFilter)
             .filter((r) => {
@@ -21,9 +33,10 @@ const ReportFilters = ({ reports, onFilter }) => {
                 const beforeEnd = endDate ? created <= new Date(endDate) : true;
                 return afterStart && beforeEnd;
             })
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort descending
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         onFilter(filtered);
+        console.log("Filtered reports:", filtered);
     }, [searchTerm, statusFilter, startDate, endDate, reports]);
 
     return (
