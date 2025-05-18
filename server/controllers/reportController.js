@@ -195,6 +195,26 @@ const getAllReportsByCustomerId = asyncHandler(async (req, res) => {
 	});
 });
 
+const getAllReportsByBusinessId = asyncHandler(async (req, res) => {
+	const businessId = req.params.id;
+
+	const reports = await Report.find({ business: businessId })
+		.populate('customer', 'name email phone image suspended')
+		.populate('resolutionBy', 'name')
+		.sort({ createdAt: -1 });
+
+	if (!reports || reports.length === 0) {
+		res.status(404);
+		throw new Error('No reports found for this business');
+	}
+
+	res.status(200).json({
+		reports,
+		success: true,
+	});
+});
+
+
 export {
 	createReport,
 	getReports,
@@ -203,4 +223,5 @@ export {
 	getCustomerReports,
 	getCustomerReportById,
 	getAllReportsByCustomerId,
+	getAllReportsByBusinessId
 };
