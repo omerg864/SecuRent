@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { BusinessInfoCard } from "../components/business-info-card";
 import { TransactionsTable } from "../components/transactions-table";
-// import { ReviewsTable } from "../components/BusinessReviewsTable";
+import { ReviewsTable } from "../components/BusinessReviewsTable";
 import { ReportsTable } from "../components/BusinessReportsTable";
 import Loader from "../components/Loader";
 import {
     getBusinessTransactions,
-    // getBusinessReviews, 
+    getBusinessReviews,
     getBusinessReports
 } from "../services/adminServices";
 import { getBusinessById } from "../services/businessService";
@@ -20,7 +20,7 @@ export default function SingleBusiness() {
     const [business, setBusiness] = useState(locationBusiness || null);
     const [loading, setLoading] = useState(true);
     const [transactions, setTransactions] = useState([]);
-    // const [reviews, setReviews] = useState([]); 
+    const [reviews, setReviews] = useState([]);
     const [reports, setReports] = useState([]);
 
     // Fetch business if not in location state
@@ -44,13 +44,13 @@ export default function SingleBusiness() {
             if (business?._id) {
                 setLoading(true);
                 try {
-                    const [txRes, /* revRes, */ repRes] = await Promise.all([
+                    const [txRes, revRes, repRes] = await Promise.all([
                         getBusinessTransactions(business._id),
-                        // getBusinessReviews(business._id), 
+                        getBusinessReviews(business._id),
                         getBusinessReports(business._id)
                     ]);
                     setTransactions(txRes.transactions);
-                    // setReviews(revRes.reviews); 
+                    setReviews(revRes.reviews);
                     setReports(repRes.reports);
                 } catch (error) {
                     console.error("Error fetching business data:", error);
@@ -108,14 +108,14 @@ export default function SingleBusiness() {
                             )}
                         </section>
 
-                        {/*
-                        <section>
-                            <h2 className='text-2xl font-semibold mb-4'>
-                                Reviews
-                            </h2>
-                            <ReviewsTable reviews={reviews} />
-                        </section>
-                        */}
+                        {
+                            <section>
+                                <h2 className='text-2xl font-semibold mb-4'>
+                                    Reviews
+                                </h2>
+                                <ReviewsTable reviews={reviews} />
+                            </section>
+                        }
 
                         <section>
                             <h2 className='text-2xl font-semibold mb-4'>

@@ -242,7 +242,31 @@ const getBusinessReports = async (businessId) => {
 	}
 };
 
+const getBusinessReviews = async (businessId) => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken) {
+			throw new Error('Access token is missing or invalid.');
+		}
+		const response = await client.get(
+			`review/business/${businessId}`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		console.log('Get business reviews response: ', response.data);
+		return response.data;
+	} catch (error) {
+		console.log('Get business reviews error: ', error);
+		throw new Error(
+			error.response?.data?.message || 'Get business reviews failed'
+		);
+	}
+};
+
+
+
 
 export { register, login, googleLogin, analytics , getAllBusinesses , getBusinessTransactions , getAllCustomers , getCustomerTransactions ,
-	getCustomerReviews , getCustomerReports, getBusinessReports
+	getCustomerReviews , getCustomerReports, getBusinessReports, getBusinessReviews
  };
