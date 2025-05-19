@@ -7,6 +7,7 @@ import {
     getCustomerReports,
     getCustomerReportById,
    getAllReportsByCustomerId,
+   getAllReportsByBusinessId
 } from '../controllers/reportController.js';
 import { upload } from '../middleware/uploadMiddleware.js';
 import { authCustomer, authAdmin } from '../middleware/authMiddleware.js';
@@ -20,5 +21,7 @@ router.get('/:id/customer', authCustomer, getCustomerReportById);
 router.post('/', authCustomer, upload.array('images'), createReport);
 router.put('/:id', authAdmin, resolveReport);
 router.get('/customer/:id', authAdmin, getAllReportsByCustomerId);
+router.get('/business/:id', authAdmin, getAllReportsByBusinessId);
+
 
 export default router;

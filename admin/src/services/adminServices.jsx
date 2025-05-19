@@ -220,6 +220,53 @@ const getCustomerReports = async (customerId) => {
 	}
 }
 
+const getBusinessReports = async (businessId) => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken) {
+			throw new Error('Access token is missing or invalid.');
+		}
+		const response = await client.get(
+			`report/business/${businessId}`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		console.log('Get business reports response: ', response.data);
+		return response.data;
+	} catch (error) {
+		console.log('Get business reports error: ', error);
+		throw new Error(
+			error.response?.data?.message || 'Get business reports failed'
+		);
+	}
+};
+
+const getBusinessReviews = async (businessId) => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken) {
+			throw new Error('Access token is missing or invalid.');
+		}
+		const response = await client.get(
+			`review/business/${businessId}`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		console.log('Get business reviews response: ', response.data);
+		return response.data;
+	} catch (error) {
+		console.log('Get business reviews error: ', error);
+		throw new Error(
+			error.response?.data?.message || 'Get business reviews failed'
+		);
+	}
+};
+
+
+
+
 export { register, login, googleLogin, analytics , getAllBusinesses , getBusinessTransactions , getAllCustomers , getCustomerTransactions ,
-	getCustomerReviews , getCustomerReports
+	getCustomerReviews , getCustomerReports, getBusinessReports, getBusinessReviews
  };

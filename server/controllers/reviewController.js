@@ -585,4 +585,23 @@ const getAllReviewsByCustomerId = asyncHandler(async (req, res) => {
 		reviews,
 	});
 });
-export { createReview, getReviews, getReviewById, updateReview, deleteReview, getAllReviewsByCustomerId };
+
+const getAllReviewsByBusinessId = asyncHandler(async (req, res) => {
+	const { id } = req.params;
+
+	const reviews = await Review.find({ business: id })
+		.populate('customer', 'name image email')
+		.populate('business', 'name image');
+
+	if (!reviews || reviews.length === 0) {
+		res.status(404);
+		throw new Error('Reviews not found for this business');
+	}
+
+	res.status(200).json({
+		success: true,
+		reviews,
+	});
+});
+
+export { createReview, getReviews, getReviewById, updateReview, deleteReview, getAllReviewsByCustomerId, getAllReviewsByBusinessId };

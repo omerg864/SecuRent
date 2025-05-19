@@ -5,7 +5,8 @@ import {
 	getReviewById,
 	updateReview,
 	deleteReview,
-	getAllReviewsByCustomerId
+	getAllReviewsByCustomerId,
+	getAllReviewsByBusinessId
 } from '../controllers/reviewController.js';
 import { authAdmin, authCustomer } from '../middleware/authMiddleware.js';
 import { upload } from '../middleware/uploadMiddleware.js';
@@ -18,5 +19,7 @@ router.get('/:id', getReviewById);
 router.put('/:id', authCustomer,  upload.array('images'), updateReview);
 router.delete('/:id', authCustomer, deleteReview);
 router.get('/customer/:id',authAdmin, getAllReviewsByCustomerId);
+router.get('/business/:id', authAdmin, getAllReviewsByBusinessId);
+
 
 export default router;
