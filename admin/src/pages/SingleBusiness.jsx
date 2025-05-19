@@ -11,13 +11,12 @@ import {
     getBusinessReports
 } from "../services/adminServices";
 import { getBusinessById } from "../services/businessService";
+import BusinessSuspensionButton from "../components/BusinessSuspensionButton";
 
 export default function SingleBusiness() {
-    const location = useLocation();
-    const locationBusiness = location.state;
     const { id } = useParams();
 
-    const [business, setBusiness] = useState(locationBusiness || null);
+    const [business, setBusiness] = useState(null);
     const [loading, setLoading] = useState(true);
     const [transactions, setTransactions] = useState([]);
     const [reviews, setReviews] = useState([]);
@@ -26,7 +25,7 @@ export default function SingleBusiness() {
     // Fetch business if not in location state
     useEffect(() => {
         const fetchBusiness = async () => {
-            if (!locationBusiness && id) {
+            if (id) {
                 try {
                     const fetchedBusiness = await getBusinessById(id);
                     setBusiness(fetchedBusiness);
@@ -36,7 +35,7 @@ export default function SingleBusiness() {
             }
         };
         fetchBusiness();
-    }, [locationBusiness, id]);
+    }, [id]);
 
     // Fetch all business data once business is loaded
     useEffect(() => {
@@ -68,13 +67,10 @@ export default function SingleBusiness() {
                 <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
                     Business Details:
                 </h1>
-                <button
-                    className='min-w-[100px] text-center px-4 py-1.5 rounded-md text-sm font-medium transition
-                   border border-yellow-600 text-yellow-600 hover:bg-yellow-50
-                   dark:border-yellow-400 dark:text-yellow-400 dark:hover:bg-yellow-900/20'
-                >
-                    Suspend
-                </button>
+                <BusinessSuspensionButton
+                    business={business}
+                    onStatusChange={setBusiness}
+                />
             </div>
 
             {loading ? (
