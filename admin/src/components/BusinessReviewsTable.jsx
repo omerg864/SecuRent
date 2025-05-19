@@ -20,12 +20,12 @@ export function ReviewsTable({ reviews }) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className='w-1/3'>Customer</TableHead>
-                            <TableHead className='w-1/6 text-center'>
+                            <TableHead className='w-1/4'>Customer</TableHead>
+                            <TableHead className='w-1/4 text-center'>
                                 Rating
                             </TableHead>
-                            <TableHead className='w-1/3'>Comment</TableHead>
-                            <TableHead className='w-1/6'>Date</TableHead>
+                            <TableHead className='w-1/2'>Comment</TableHead>
+                            <TableHead className='w-1/8'>Date</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -66,9 +66,10 @@ export function ReviewsTable({ reviews }) {
                                     <TableCell className='text-center'>
                                         {review.rating?.overall ?? 0}
                                     </TableCell>
-                                    <TableCell className='truncate flex'>
+                                    <TableCell className='whitespace-normal break-words align-middle'>
                                         {review.content}
                                     </TableCell>
+
                                     <TableCell>
                                         {new Date(
                                             review.createdAt
