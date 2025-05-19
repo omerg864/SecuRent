@@ -95,7 +95,7 @@ export default function SingleBusiness() {
                 <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 items-start'>
                     {/* Left */}
                     <div className='lg:col-span-1'>
-                        <div className='h-full min-h-[400px] max-h-[500px] overflow-auto'>
+                        <div className='h-full'>
                             <BusinessInfoCard business={business} />
                         </div>
                     </div>
