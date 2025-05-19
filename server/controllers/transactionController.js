@@ -82,6 +82,12 @@ const createTransaction = asyncHandler(async (req, res) => {
 		throw new Error('Missing required fields');
 	}
 
+	const businessDoc = await Business.findById(business);
+	if (!businessDoc) {
+		res.status(404);
+		throw new Error('Business not found');
+	}
+
 	const paymentIntent = await stripe.paymentIntents.create({
 		amount: amount * 100, // Stripe expects amount in cents
 		currency,
@@ -115,6 +121,12 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 	if (!item) {
 		res.status(403);
 		throw new Error('Item details not found');
+	}
+
+	const business = await Business.findById(item.business);
+	if (business.suspended) {
+		res.status(403);
+		throw new Error('Business is suspended');
 	}
 
 	if (!req.customer.stripe_customer_id) {

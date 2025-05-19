@@ -256,6 +256,7 @@ const getBusinessReviews = async (businessId) => {
 		);
 		console.log('Get business reviews response: ', response.data);
 		return response.data;
+		
 	} catch (error) {
 		console.log('Get business reviews error: ', error);
 		throw new Error(
@@ -264,9 +265,29 @@ const getBusinessReviews = async (businessId) => {
 	}
 };
 
+const toggleBusinessSuspension = async (businessId) => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken) throw new Error('Access token is missing or invalid.');
+
+		const response = await client.put(
+			`admin/suspend/business/${businessId}`,
+			{},
+			{ headers: { Authorization: `Bearer ${accessToken}` } }
+		);
+		return response.data;
+
+	} catch (error) {
+		console.error('Toggle business suspension error: ', error);
+		throw new Error(
+			error.response?.data?.message || 'Failed to toggle suspension'
+		);
+	}
+};
+
 
 
 
 export { register, login, googleLogin, analytics , getAllBusinesses , getBusinessTransactions , getAllCustomers , getCustomerTransactions ,
-	getCustomerReviews , getCustomerReports, getBusinessReports, getBusinessReviews
+	getCustomerReviews , getCustomerReports, getBusinessReports, getBusinessReviews, toggleBusinessSuspension
  };

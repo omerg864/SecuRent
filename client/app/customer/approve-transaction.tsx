@@ -35,6 +35,7 @@ export default function ApproveTransaction() {
             const fetchItemDetails = async () => {
                 setHasReadTerms(false);
                 setTransaction(null);
+                setLoadingApprove(false);
                 setLoading(true);
                 try {
                     const customerData = await AsyncStorage.getItem(
