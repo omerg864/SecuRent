@@ -20,12 +20,9 @@ export function ReviewsTable({ reviews }) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className='w-1/4'>Customer</TableHead>
-                            <TableHead className='w-1/4 text-center'>
-                                Rating
-                            </TableHead>
-                            <TableHead className='w-1/2'>Comment</TableHead>
-                            <TableHead className='w-1/8'>Date</TableHead>
+                            <TableHead className='w-1/6'>Customer</TableHead>
+                            <TableHead className='w-5/6'>Comment</TableHead>
+                            <TableHead className='w-1/6'>Date</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -62,9 +59,6 @@ export function ReviewsTable({ reviews }) {
                                             }}
                                         />
                                         {review.customer?.name || "—"}
-                                    </TableCell>
-                                    <TableCell className='text-center'>
-                                        {review.rating?.overall ?? 0}
                                     </TableCell>
                                     <TableCell className='whitespace-normal break-words align-middle'>
                                         {review.content}
