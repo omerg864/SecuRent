@@ -63,14 +63,28 @@ export default function SingleBusiness() {
 
     return (
         <main className='container mx-auto px-4'>
-            <div className='flex justify-between items-center mb-8'>
-                <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
-                    Business Details:
-                </h1>
-                <BusinessSuspensionButton
-                    business={business}
-                    onStatusChange={setBusiness}
-                />
+            <div className='mb-6'>
+                <div className='flex justify-between items-center'>
+                    <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
+                        Business Details:
+                    </h1>
+                    <div className='flex items-center gap-4'>
+                        {business?.suspended && (
+                            <div className='flex items-center gap-2 text-red-600 dark:text-red-400'>
+                                <div className='text-4xl leading-none'>⚠️</div>
+                                <p className='text-sm font-bold leading-tight'>
+                                    This business is currently suspended.
+                                    <br />
+                                    New transactions are blocked.
+                                </p>
+                            </div>
+                        )}
+                        <BusinessSuspensionButton
+                            business={business}
+                            onStatusChange={setBusiness}
+                        />
+                    </div>
+                </div>
             </div>
 
             {loading ? (
