@@ -20,11 +20,11 @@ export function ReportsTable({ reports }) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Customer</TableHead>
-                            <TableHead>Title</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Resolved By</TableHead>
-                            <TableHead className='text-right'>Date</TableHead>
+                        <TableHead className='w-1/4'>Customer</TableHead>
+                            <TableHead className='w-1/4'>Title</TableHead>
+                            <TableHead className='w-1/5'>Status</TableHead>
+                            <TableHead className='w-1/5'>Resolved By</TableHead>
+                            <TableHead className='w-1/5'>Date</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -38,7 +38,7 @@ export function ReportsTable({ reports }) {
                                     state={report}
                                     className='contents'
                                 >
-                                    <TableCell className='font-medium flex items-center gap-2'>
+                                    <TableCell className='font-medium flex items-center gap-2 whitespace-nowrap'>
                                         <img
                                             src={
                                                 report.customer?.image ||
@@ -78,7 +78,7 @@ export function ReportsTable({ reports }) {
                                     <TableCell>
                                         {report.resolutionBy?.name || "—"}
                                     </TableCell>
-                                    <TableCell className='text-right'>
+                                    <TableCell >
                                         {new Date(
                                             report.createdAt
                                         ).toLocaleDateString("en-GB")}

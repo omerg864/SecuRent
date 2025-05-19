@@ -20,10 +20,12 @@ export function ReviewsTable({ reviews }) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Customer</TableHead>
-                            <TableHead>Rating</TableHead>
-                            <TableHead>Comment</TableHead>
-                            <TableHead className='text-right'>Date</TableHead>
+                            <TableHead className='w-1/3'>Customer</TableHead>
+                            <TableHead className='w-1/6 text-center'>
+                                Rating
+                            </TableHead>
+                            <TableHead className='w-1/3'>Comment</TableHead>
+                            <TableHead className='w-1/6'>Date</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -37,7 +39,7 @@ export function ReviewsTable({ reviews }) {
                                     state={review}
                                     className='contents'
                                 >
-                                    <TableCell className='font-medium flex items-center gap-2'>
+                                    <TableCell className='font-medium flex items-center gap-2 whitespace-nowrap'>
                                         <img
                                             src={
                                                 review.customer?.image ||
@@ -61,13 +63,13 @@ export function ReviewsTable({ reviews }) {
                                         />
                                         {review.customer?.name || "—"}
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className='text-center'>
                                         {review.rating?.overall ?? 0}
                                     </TableCell>
-                                    <TableCell className='truncate'>
+                                    <TableCell className='truncate flex'>
                                         {review.content}
                                     </TableCell>
-                                    <TableCell className='text-right'>
+                                    <TableCell>
                                         {new Date(
                                             review.createdAt
                                         ).toLocaleDateString("en-GB")}
