@@ -18,8 +18,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator } from 'react-native';
 import ProfileImageInput from '@/components/ProfileImageInput';
 import { emailRegex, passwordRegex } from '@/utils/regex';
-import { FileObject } from '@/types/business';
+import { Business, FileObject } from '@/types/business';
 import ShowToast from '@/components/ui/ShowToast';
+import {
+	ACCESS_TOKEN,
+	ACCOUNT_SETUP,
+	AUTH_EXPIRATION,
+	CURRENT_ACCOUNT_TYPE,
+	CUSTOMER_DATA,
+	REFRESH_TOKEN,
+	USER_ID,
+} from '@/utils/asyncStorageConstants';
+import { useCustomer } from '@/context/CustomerContext';
+import { Customer } from '@/types/customer';
+import { useBusiness } from '@/context/BusinessContext';
 
 const RegisterScreen = () => {
 	const [name, setName] = useState('');
@@ -32,6 +44,8 @@ const RegisterScreen = () => {
 	const router = useRouter();
 	const { accountType } = useLocalSearchParams();
 	const [file, setFile] = useState<FileObject | null>(null);
+	const { setCustomer } = useCustomer();
+	const { setBusiness } = useBusiness();
 
 	const goBack = () => {
 		router.back();
@@ -78,18 +92,11 @@ const RegisterScreen = () => {
 					return;
 				}
 				console.log('Business login response:', loginResponse);
-				console.log('Business login response:', loginResponse);
-				AsyncStorage.setItem('UserID', loginResponse.user._id);
-				AsyncStorage.setItem('Access_Token', loginResponse.accessToken);
-				AsyncStorage.setItem(
-					'Refresh_Token',
-					loginResponse.refreshToken
-				);
-				AsyncStorage.setItem('current_account_type', 'business');
-				AsyncStorage.setItem(
-					'Business_Data',
-					JSON.stringify(loginResponse.user)
-				);
+				AsyncStorage.setItem(USER_ID, loginResponse.user._id);
+				AsyncStorage.setItem(ACCESS_TOKEN, loginResponse.accessToken);
+				AsyncStorage.setItem(REFRESH_TOKEN, loginResponse.refreshToken);
+				AsyncStorage.setItem(CURRENT_ACCOUNT_TYPE, 'business');
+				setBusiness(loginResponse.user as Business);
 			} else {
 				const response = await registerCustomer(Data, file);
 				if (!response) {
@@ -103,23 +110,16 @@ const RegisterScreen = () => {
 					return;
 				}
 				console.log('Customer login response:', loginResponse);
-				console.log('Customer login response:', loginResponse);
-				AsyncStorage.setItem('UserID', loginResponse.user._id);
-				AsyncStorage.setItem('Access_Token', loginResponse.accessToken);
-				AsyncStorage.setItem(
-					'Refresh_Token',
-					loginResponse.refreshToken
-				);
-				AsyncStorage.setItem('current_account_type', 'personal');
-				AsyncStorage.setItem(
-					'Customer_Data',
-					JSON.stringify(loginResponse.user)
-				);
+				AsyncStorage.setItem(USER_ID, loginResponse.user._id);
+				AsyncStorage.setItem(ACCESS_TOKEN, loginResponse.accessToken);
+				AsyncStorage.setItem(REFRESH_TOKEN, loginResponse.refreshToken);
+				AsyncStorage.setItem(CURRENT_ACCOUNT_TYPE, 'personal');
+				setCustomer(loginResponse.user as Customer);
 			}
 			const expiration = new Date();
 			expiration.setHours(expiration.getHours() + 23);
-			AsyncStorage.setItem('Auth_Expiration', expiration.toISOString());
-			AsyncStorage.setItem('Account_setup', 'true');
+			AsyncStorage.setItem(AUTH_EXPIRATION, expiration.toISOString());
+			AsyncStorage.setItem(ACCOUNT_SETUP, 'true');
 			ShowToast('success', 'Account created successfully');
 			router.dismissAll();
 			router.replace({

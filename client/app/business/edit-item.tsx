@@ -4,12 +4,12 @@ import { FileObject } from '@/types/business';
 import { ThemedText } from '@/components/ui/ThemedText';
 import { getItemByIdForBusiness, updateItemById } from '@/services/itemService';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { getBusinessCurrencySymbol } from '@/utils/functions';
 import { Item } from '@/services/interfaceService';
 import HapticButton from '@/components/ui/HapticButton';
 import ItemForm from '@/components/forms/ItemForm';
 import ShowToast from '@/components/ui/ShowToast';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { useBusiness } from '@/context/BusinessContext';
 
 export default function EditItem() {
 	const { id } = useLocalSearchParams<{ id: string }>();
@@ -28,6 +28,7 @@ export default function EditItem() {
 	const [loadingState, setLoadingState] = useState<'init' | 'edit' | null>(
 		'init'
 	);
+	const { business } = useBusiness();
 
 	useEffect(() => {
 		const fetchItem = async () => {
@@ -76,13 +77,8 @@ export default function EditItem() {
 			}
 		};
 
-		const getSymbol = async () => {
-			const symbol = await getBusinessCurrencySymbol();
-			setCurrency(symbol);
-		};
-
+		setCurrency(business?.currency || 'ILS');
 		fetchItem();
-		getSymbol();
 	}, [id]);
 
 	const handleSubmit = async () => {

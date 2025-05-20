@@ -20,6 +20,7 @@ import FloatingBackArrowButton from '@/components/ui/FloatingBackArrowButton';
 import { formatCurrencySymbol } from '@/utils/functions';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ShowToast from '@/components/ui/ShowToast';
+import { CURRENT_ACCOUNT_TYPE } from '@/utils/asyncStorageConstants';
 
 export default function TransactionDetails() {
 	const router = useRouter();
@@ -45,7 +46,7 @@ export default function TransactionDetails() {
 			const fetchData = async () => {
 				try {
 					const type = await AsyncStorage.getItem(
-						'current_account_type'
+						CURRENT_ACCOUNT_TYPE
 					);
 					setAccountType(type);
 
@@ -85,7 +86,7 @@ export default function TransactionDetails() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const type = await AsyncStorage.getItem('current_account_type');
+				const type = await AsyncStorage.getItem(CURRENT_ACCOUNT_TYPE);
 				setAccountType(type);
 
 				if (!id || typeof id !== 'string') {

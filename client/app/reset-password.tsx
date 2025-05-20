@@ -15,6 +15,7 @@ import { updateCustomerPassword } from '@/services/customerService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { passwordRegex } from '@/utils/regex';
 import ShowToast from '@/components/ui/ShowToast';
+import { TYPE } from '@/utils/asyncStorageConstants';
 
 const ResetPasswordScreen = () => {
 	const [newPassword, setNewPassword] = useState('');
@@ -41,7 +42,7 @@ const ResetPasswordScreen = () => {
 		}
 		setLoading(true);
 		try {
-			const rawType = await AsyncStorage.getItem('Type');
+			const rawType = await AsyncStorage.getItem(TYPE);
 			const type = rawType ? JSON.parse(rawType) : null;
 			if (type === 'customer') {
 				const response: any = await updateCustomerPassword(newPassword);
@@ -58,7 +59,7 @@ const ResetPasswordScreen = () => {
 					return;
 				}
 			}
-			AsyncStorage.removeItem('Type');
+			AsyncStorage.removeItem(TYPE);
 			ShowToast('success', 'Password reset successfully');
 			router.dismissAll();
 			router.replace('/login');

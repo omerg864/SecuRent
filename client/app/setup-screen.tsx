@@ -1,7 +1,12 @@
 'use client';
 
 import { View, StyleSheet } from 'react-native';
-import { type Route, useRouter, useLocalSearchParams } from 'expo-router';
+import {
+	type Route,
+	useRouter,
+	useLocalSearchParams,
+	RelativePathString,
+} from 'expo-router';
 import { useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
@@ -13,6 +18,11 @@ import {
 	Entypo,
 } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import {
+	ACCOUNT_SETUP,
+	COMPLETED_STEPS,
+	CURRENT_ACCOUNT_TYPE,
+} from '@/utils/asyncStorageConstants';
 
 const BusinessSetupSteps = [
 	{
@@ -73,8 +83,6 @@ const CustomerSetupSteps = [
 	},
 ];
 
-const ACCOUNT_TYPE_KEY = 'current_account_type';
-
 export default function SetupScreen() {
 	const router = useRouter();
 	const params = useLocalSearchParams();
@@ -89,12 +97,12 @@ export default function SetupScreen() {
 
 					if (!currentAccountType) {
 						const savedAccountType = await AsyncStorage.getItem(
-							ACCOUNT_TYPE_KEY
+							CURRENT_ACCOUNT_TYPE
 						);
 						currentAccountType = savedAccountType || 'business';
 					} else {
 						await AsyncStorage.setItem(
-							ACCOUNT_TYPE_KEY,
+							CURRENT_ACCOUNT_TYPE,
 							currentAccountType
 						);
 					}
@@ -130,9 +138,9 @@ export default function SetupScreen() {
 	useFocusEffect(
 		useCallback(() => {
 			if (remainingSteps.length === 0 && completedSteps.length > 0) {
-				AsyncStorage.removeItem(`completedSteps_${accountType}`);
+				AsyncStorage.removeItem(`${COMPLETED_STEPS}_${accountType}`);
 				AsyncStorage.removeItem(accountType);
-				AsyncStorage.removeItem('Account_setup');
+				AsyncStorage.removeItem(ACCOUNT_SETUP);
 				const homeRoute =
 					accountType === 'personal'
 						? '/customer'
@@ -143,8 +151,8 @@ export default function SetupScreen() {
 		}, [remainingSteps.length, completedSteps.length, accountType])
 	);
 
-	const handleStepPress = async (route: Route) => {
-		await AsyncStorage.setItem(ACCOUNT_TYPE_KEY, accountType);
+	const handleStepPress = async (route: RelativePathString) => {
+		await AsyncStorage.setItem(CURRENT_ACCOUNT_TYPE, accountType);
 
 		router.push({
 			pathname: route,
@@ -181,7 +189,9 @@ export default function SetupScreen() {
 						<AccountButton
 							key={step.id}
 							handlePress={() =>
-								handleStepPress(step.route as Route)
+								handleStepPress(
+									step.route as RelativePathString
+								)
 							}
 							title={step.title}
 							subTitle={step.subTitle}

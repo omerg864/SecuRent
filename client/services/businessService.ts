@@ -3,12 +3,11 @@ import { checkToken, client } from './httpClient';
 import {
 	AuthData,
 	AuthResponse,
-	Business,
 	BusinessDetails,
 	StepResponse,
 	ValidResponse,
 } from './interfaceService';
-import { FileObject } from '@/types/business';
+import { FileObject, Business } from '@/types/business';
 
 const registerBusiness = async (
 	businessData: AuthData,

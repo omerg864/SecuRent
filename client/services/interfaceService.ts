@@ -1,4 +1,5 @@
-import { chargeDeposit } from '@/services/transactionService';
+import { Business } from '@/types/business';
+import { Customer } from '@/types/customer';
 interface AuthData {
 	name?: string;
 	email?: string;
@@ -47,108 +48,14 @@ interface BusinessLoginResponse {
 	success: boolean;
 	accessToken: string;
 	refreshToken: string;
-	user: {
-		_id: string;
-		name: string;
-		email: string;
-		phone: string;
-		address: string;
-		image: string;
-		rating: number;
-		role: string;
-		category: string[];
-		currency: string;
-		verificationCode: string;
-		isValid: boolean;
-		isEmailValid: boolean;
-		isBankValid: boolean;
-		companyNumber: string;
-		isCompanyNumberVerified: boolean;
-		bank: {
-			accountNumber: string;
-			sortCode: string;
-			accountHolderName: string;
-			bankName: string;
-		};
-	};
-}
-
-interface Business {
-	_id: string;
-	name: string;
-	email: string;
-	phone: string;
-	address: string;
-	location: {
-		type: string;
-		coordinates: [number, number]; // [longitude, latitude]
-	};
-	distance?: number;
-	createdAt: Date;
-	updatedAt: Date;
-	image: string;
-	rating: {
-		overall: number;
-		reviewOverall: number;
-		reliability: number;
-		quality: number;
-		price: number;
-		charged: number;
-	};
-	role: string;
-	category: string[];
-	currency: string;
-	verificationCode: string;
-	isValid: boolean;
-	isEmailValid: boolean;
-	isBankValid: boolean;
-	companyNumber: string;
-	reviewSummary: string;
-	isCompanyNumberVerified: boolean;
-	bank: {
-		accountNumber: string;
-		sortCode: string;
-		accountHolderName: string;
-		bankName: string;
-	};
-	suspended: boolean;
+	user: Business;
 }
 
 interface CustomerLoginResponse {
 	success: boolean;
 	accessToken: string;
 	refreshToken: string;
-	user: {
-		_id: string;
-		name: string;
-		email: string;
-		phone: string;
-		address: string;
-		image: string;
-		rating: number;
-		role: string;
-		currency: string;
-		verificationCode: string;
-		isValid: boolean;
-		isEmailValid: boolean;
-		isPaymentValid: boolean;
-		creditCard: {
-			number: string;
-			expiry: string;
-			cvv: string;
-			cardHolderName: string;
-		};
-	};
-}
-
-interface Customer {
-	_id: string;
-	name: string;
-	email: string;
-	phone: string;
-	address: string;
-	image: string;
-	suspended: boolean;
+	user: Customer;
 }
 
 type LoginResponse = CustomerLoginResponse | BusinessLoginResponse;
@@ -287,12 +194,10 @@ export type {
 	Transaction,
 	LocationPrediction,
 	LocationDetails,
-	Business,
 	StepResponse,
 	ClientStripeParamsResponse,
 	ValidResponse,
 	TransactionIntentResponse,
 	Review,
 	BusinessDetails,
-    Customer
 };

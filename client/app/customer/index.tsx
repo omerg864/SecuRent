@@ -20,11 +20,11 @@ import * as Location from 'expo-location';
 import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
 import { getNearestBusinesses } from '@/services/businessService';
-import { Business, Customer } from '@/services/interfaceService';
 import debounce from 'lodash/debounce';
 import ShowToast from '@/components/ui/ShowToast';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getCustomerData } from '@/services/customerService';
+import { logout } from '@/utils/functions';
+import { Business } from '@/types/business';
 
 const CustomerHome: React.FC = () => {
 	const [searchText, setSearchText] = useState<string>('');
@@ -142,13 +142,7 @@ const CustomerHome: React.FC = () => {
 					'Account Suspended',
 					'Your account has been suspended. Please contact support.'
 				);
-				await AsyncStorage.removeItem('Customer_Data');
-				await AsyncStorage.removeItem('Access_Token');
-				await AsyncStorage.removeItem('Refresh_Token');
-				await AsyncStorage.removeItem('Auth_Expiration');
-				await AsyncStorage.removeItem('current_account_type');
-				await AsyncStorage.removeItem('UserID');
-				router.replace('/login');
+				await logout(() => router.replace('/login'));
 			}
 		} catch (error: any) {
 			console.error('Error fetching customer data:', error);

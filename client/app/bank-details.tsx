@@ -13,6 +13,7 @@ import { WebView, WebViewNavigation } from 'react-native-webview';
 import HapticButton from '@/components/ui/HapticButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ShowToast from '@/components/ui/ShowToast';
+import { COMPLETED_STEPS, CURRENT_ACCOUNT_TYPE } from '@/utils/asyncStorageConstants';
 
 export default function StripeOnboardingScreen() {
 	const params = useLocalSearchParams();
@@ -63,7 +64,7 @@ export default function StripeOnboardingScreen() {
 					return;
 				}
 
-				const storageKey = `completedSteps_${accountType}`;
+				const storageKey = `${COMPLETED_STEPS}_${accountType}`;
 				const savedSteps = await AsyncStorage.getItem(storageKey);
 				const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
 				if (!completedSteps.includes('bank')) {
@@ -73,7 +74,7 @@ export default function StripeOnboardingScreen() {
 						JSON.stringify(completedSteps)
 					);
 				}
-				await AsyncStorage.setItem('current_account_type', accountType);
+				await AsyncStorage.setItem(CURRENT_ACCOUNT_TYPE, accountType);
 				ShowToast('success', 'Bank details saved successfully');
 
 				router.replace({

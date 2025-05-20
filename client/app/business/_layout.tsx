@@ -8,22 +8,17 @@ import {
 } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View } from 'react-native';
+import WebSocketBusinessNotifications from '@/components/WebSocketBusinessNotifications';
+import { logout } from '@/utils/functions';
+import { BusinessProvider } from '@/context/BusinessContext';
 
 export default function Layout() {
 	const router = useRouter();
 
 	const handleLogout = async () => {
 		try {
-			await AsyncStorage.removeItem('Business_Data');
-			await AsyncStorage.removeItem('Access_Token');
-			await AsyncStorage.removeItem('Refresh_Token');
-			await AsyncStorage.removeItem('Auth_Expiration');
-			await AsyncStorage.removeItem('current_account_type');
-			await AsyncStorage.removeItem('UserID');
-
-			router.replace('/login');
+			await logout(() => router.replace('/login'));
 		} catch (error) {
 			console.error('Error during logout:', error);
 		}
@@ -50,6 +45,7 @@ export default function Layout() {
 
 	return (
 		<WebSocketProvider>
+			<WebSocketBusinessNotifications />
 			<GestureHandlerRootView style={{ flex: 1 }}>
 				<Drawer
 					drawerContent={(props) => (
