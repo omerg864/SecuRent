@@ -478,16 +478,21 @@ const getCustomerTransactionsAdmin = asyncHandler(async (req, res) => {
 
 const getBusinessTransactionsAdmin = asyncHandler(async (req, res) => {
 	const { id } = req.params;
+
 	const transactions = await Transaction.find({
 		business: id,
+		status: { $ne: 'intent' },
 	})
+		.sort({ opened_at: -1 }) 
 		.populate('customer', 'name image phone')
 		.populate('business', 'name image rating category');
+
 	res.status(200).json({
 		success: true,
 		transactions,
 	});
 });
+
 
 const getTransactionById = asyncHandler(async (req, res) => {
 	const transaction = await Transaction.findById(req.params.id)

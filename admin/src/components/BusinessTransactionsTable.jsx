@@ -6,13 +6,26 @@ import {
     TableHead,
     TableHeader,
     TableRow
-} from "./table";
+} from "../components/table";
 import { Card } from "./card";
+import { formatCurrencySymbol } from "../utils/functions";
 
-export function ReportsTable({ reports }) {
-    if (!reports || reports.length === 0) {
-        return <p className='text-muted-foreground'>No reports yet.</p>;
+export function BusinessTransactionsTable({ transactions, currency }) {
+    if (!currency) {
+        currency = "ILS";
     }
+
+    const formatAmount = (amount) => {
+        const symbol = formatCurrencySymbol(currency);
+        const formatted = new Intl.NumberFormat("he-IL", {}).format(amount);
+
+        return `${formatted} ${symbol}`;
+    };
+
+    const formatDate = (isoString) => {
+        const date = new Date(isoString);
+        return date.toLocaleDateString("en-GB");
+    };
 
     return (
         <Card>
@@ -21,34 +34,36 @@ export function ReportsTable({ reports }) {
                     <TableHeader>
                         <TableRow>
                             <TableHead className='w-1/4'>Customer</TableHead>
-                            <TableHead className='w-1/4'>Title</TableHead>
-                            <TableHead className='w-1/5'>Status</TableHead>
-                            <TableHead className='w-1/5'>Resolved By</TableHead>
-                            <TableHead className='w-1/5'>Date</TableHead>
+                            <TableHead className='w-1/6'>Status</TableHead>
+                            <TableHead className='w-1/6 text-right'>
+                                Amount
+                            </TableHead>
+                            <TableHead className='w-1/6 text-right'>
+                                Opened At
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {reports.map((report) => (
+                        {transactions.map((tx) => (
                             <TableRow
-                                key={report._id}
+                                key={tx._id}
                                 className='cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition'
                             >
                                 <Link
-                                    to={`/report/${report._id}`}
-                                    state={report}
+                                    to={`/transaction/${tx._id}`}
                                     className='contents'
                                 >
+                                    {/* Customer with avatar */}
                                     <TableCell className='font-medium flex items-center gap-2 whitespace-nowrap'>
                                         <img
                                             src={
-                                                report.customer?.image ||
+                                                tx.customer?.image ||
                                                 "/avatar.png"
                                             }
                                             alt={
-                                                report.customer?.name ||
-                                                "Customer"
+                                                tx.customer?.name || "Customer"
                                             }
-                                            className='w-6 h-6 rounded-full'
+                                            className='w-6 h-6 rounded-full object-cover'
                                             onError={(e) => {
                                                 if (
                                                     e.currentTarget.src !==
@@ -60,30 +75,43 @@ export function ReportsTable({ reports }) {
                                                 }
                                             }}
                                         />
-                                        {report.customer?.name || "—"}
+
+                                        {tx.customer?.name || "—"}
                                     </TableCell>
 
-                                    <TableCell>{report.title}</TableCell>
+                                    {/* Status */}
                                     <TableCell>
                                         <span
                                             className={`inline-block px-2 py-1 text-xs font-semibold rounded-full
                                                 ${
-                                                    report.status === "resolved"
+                                                    tx.status === "open"
                                                         ? "bg-green-100 text-green-800"
+                                                        : tx.status === "closed"
+                                                        ? "bg-gray-200 text-gray-800"
+                                                        : tx.status ===
+                                                          "charged"
+                                                        ? "bg-red-100 text-red-800"
                                                         : "bg-yellow-100 text-yellow-800"
                                                 }
                                             `}
                                         >
-                                            {report.status}
+                                            {tx.status || "pending"}
                                         </span>
                                     </TableCell>
-                                    <TableCell>
-                                        {report.resolutionBy?.name || "—"}
+
+                                    {/* Amount or Actual Amount */}
+                                    <TableCell className='text-right'>
+                                        {formatAmount(
+                                            tx.status === "closed" &&
+                                                tx.actual_amount
+                                                ? tx.actual_amount
+                                                : tx.amount
+                                        )}
                                     </TableCell>
-                                    <TableCell>
-                                        {new Date(
-                                            report.createdAt
-                                        ).toLocaleDateString("en-GB")}
+
+                                    {/* Created At */}
+                                    <TableCell className='text-right'>
+                                        {formatDate(tx.createdAt)}
                                     </TableCell>
                                 </Link>
                             </TableRow>

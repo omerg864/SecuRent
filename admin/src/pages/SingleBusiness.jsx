@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { BusinessInfoCard } from "../components/business-info-card";
-import { TransactionsTable } from "../components/transactions-table";
+import { BusinessTransactionsTable } from "../components/BusinessTransactionsTable";
 import { ReviewsTable } from "../components/BusinessReviewsTable";
 import { ReportsTable } from "../components/BusinessReportsTable";
 import Loader from "../components/Loader";
@@ -107,7 +107,7 @@ export default function SingleBusiness() {
                                 Transactions
                             </h2>
                             {transactions.length > 0 ? (
-                                <TransactionsTable
+                                <BusinessTransactionsTable
                                     transactions={transactions}
                                     currency={business.currency}
                                 />
