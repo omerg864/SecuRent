@@ -48,6 +48,7 @@ export default function SingleBusiness() {
 						getBusinessReviews(business._id),
 						getBusinessReports(business._id),
 					]);
+					console.log('Transactions:', txRes);
 					setTransactions(txRes.transactions);
 					setReviews(revRes.reviews);
 					setReports(repRes.reports);

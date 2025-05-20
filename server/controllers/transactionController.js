@@ -17,6 +17,7 @@ const getBusinessTransactions = asyncHandler(async (req, res) => {
 		business: req.business._id,
 		status: { $ne: 'intent' },
 	}).populate('customer', 'name image phone');
+	console.log('Business transactions: ', transactions);
 	res.status(200).json({
 		success: true,
 		transactions,
@@ -486,6 +487,8 @@ const getBusinessTransactionsAdmin = asyncHandler(async (req, res) => {
 		.sort({ opened_at: -1 }) 
 		.populate('customer', 'name image phone')
 		.populate('business', 'name image rating category');
+
+	console.log('Business transactions count: ', transactions.length);
 
 	res.status(200).json({
 		success: true,

@@ -109,7 +109,7 @@ export function UserInfoCard({ accountType, account }) {
 						<div>
 							<p className="font-medium">Rating</p>
 							<div className="flex items-center">
-								<p className="text-sm text-muted-foreground">
+								<p className="text-sm text-muted-foreground mr-2">
 									{Number(
 										account?.rating?.overall ?? 0
 									).toFixed(1)}

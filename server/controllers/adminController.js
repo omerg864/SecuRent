@@ -687,6 +687,7 @@ const getAllBusinesses = asyncHandler(async (req, res) => {
 		// Total transactions
 		const transactionCount = await Transaction.countDocuments({
 			business: business._id,
+			status: { $in: ['open', 'closed', 'charged'] },
 		});
 
 		// Only "charged" transactions
