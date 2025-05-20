@@ -8,11 +8,23 @@ import {
 	TableRow,
 } from './table';
 import { Card } from './card';
+import { useEffect, useState } from 'react';
+import Paging from './Paging';
 
 const ReportsTable = ({ accountType, reports }) => {
+	const [currentPage, setCurrentPage] = useState(1);
+	const [reportsPerPage] = useState(5);
+
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [reports]);
 	if (!reports || reports.length === 0) {
 		return <p className="text-muted-foreground">No reports yet.</p>;
 	}
+
+	const indexOfLastReport = currentPage * reportsPerPage;
+	const indexOfFirstReport = indexOfLastReport - reportsPerPage;
+	const currentReports = reports.slice(indexOfFirstReport, indexOfLastReport);
 
 	return (
 		<Card>
@@ -32,7 +44,7 @@ const ReportsTable = ({ accountType, reports }) => {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{reports.map((report) => (
+						{currentReports.map((report) => (
 							<TableRow
 								key={report._id}
 								className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
@@ -103,6 +115,14 @@ const ReportsTable = ({ accountType, reports }) => {
 					</TableBody>
 				</Table>
 			</div>
+			{reports.length > 0 && (
+				<Paging
+					totalItems={reports.length}
+					itemsPerPage={reportsPerPage}
+					setCurrentPage={setCurrentPage}
+					currentPage={currentPage}
+				/>
+			)}
 		</Card>
 	);
 };

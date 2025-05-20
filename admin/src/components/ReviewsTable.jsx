@@ -8,11 +8,23 @@ import {
 	TableRow,
 } from './table';
 import { Card } from './card';
+import { useEffect, useState } from 'react';
+import Paging from './Paging';
 
 export function ReviewsTable({ accountType, reviews }) {
+	const [currentPage, setCurrentPage] = useState(1);
+	const [reviewsPerPage] = useState(5);
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [reviews]);
+
 	if (!reviews || reviews.length === 0) {
 		return <p className="text-muted-foreground">No reviews yet.</p>;
 	}
+
+	const indexOfLastReview = currentPage * reviewsPerPage;
+	const indexOfFirstReview = indexOfLastReview - reviewsPerPage;
+	const currentReviews = reviews.slice(indexOfFirstReview, indexOfLastReview);
 
 	return (
 		<Card>
@@ -30,7 +42,7 @@ export function ReviewsTable({ accountType, reviews }) {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{reviews.map((review) => (
+						{currentReviews.map((review) => (
 							<TableRow
 								key={review._id}
 								className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
@@ -87,6 +99,15 @@ export function ReviewsTable({ accountType, reviews }) {
 					</TableBody>
 				</Table>
 			</div>
+
+			{reviews.length > 0 && (
+				<Paging
+					totalItems={reviews.length}
+					itemsPerPage={reviewsPerPage}
+					setCurrentPage={setCurrentPage}
+					currentPage={currentPage}
+				/>
+			)}
 		</Card>
 	);
 }

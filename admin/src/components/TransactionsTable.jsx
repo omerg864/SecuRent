@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import {
 	Table,
 	TableBody,
@@ -9,8 +10,15 @@ import {
 } from './table';
 import { Card } from './card';
 import { formatCurrencySymbol } from '../utils/functions';
-
+import Paging from './Paging';
 export function TransactionsTable({ accountType, transactions, currency }) {
+	const [currentPage, setCurrentPage] = useState(1);
+	const [transactionsPerPage] = useState(5);
+
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [transactions]);
+
 	if (!currency) {
 		currency = 'ILS';
 	}
@@ -26,6 +34,14 @@ export function TransactionsTable({ accountType, transactions, currency }) {
 		const date = new Date(isoString);
 		return date.toLocaleDateString('en-GB');
 	};
+
+	const indexOfLastTransaction = currentPage * transactionsPerPage;
+	const indexOfFirstTransaction =
+		indexOfLastTransaction - transactionsPerPage;
+	const currentTransactions = transactions.slice(
+		indexOfFirstTransaction,
+		indexOfLastTransaction
+	);
 
 	return (
 		<Card>
@@ -48,7 +64,7 @@ export function TransactionsTable({ accountType, transactions, currency }) {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{transactions.map((tx) => (
+						{currentTransactions.map((tx) => (
 							<TableRow
 								key={tx._id}
 								className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
@@ -57,7 +73,6 @@ export function TransactionsTable({ accountType, transactions, currency }) {
 									to={`/transaction/${tx._id}`}
 									className="contents"
 								>
-									{/* Customer with avatar */}
 									<TableCell className="font-medium flex items-center gap-2 whitespace-nowrap">
 										<img
 											src={
@@ -92,7 +107,6 @@ export function TransactionsTable({ accountType, transactions, currency }) {
 											: tx.business?.name || '—'}
 									</TableCell>
 
-									{/* Status */}
 									<TableCell>
 										<span
 											className={`inline-block px-2 py-1 text-xs font-semibold rounded-full
@@ -112,7 +126,6 @@ export function TransactionsTable({ accountType, transactions, currency }) {
 										</span>
 									</TableCell>
 
-									{/* Amount or Actual Amount */}
 									<TableCell className="text-right">
 										{formatAmount(
 											tx.status === 'closed' &&
@@ -122,7 +135,6 @@ export function TransactionsTable({ accountType, transactions, currency }) {
 										)}
 									</TableCell>
 
-									{/* Created At */}
 									<TableCell className="text-right">
 										{formatDate(tx.createdAt)}
 									</TableCell>
@@ -132,6 +144,15 @@ export function TransactionsTable({ accountType, transactions, currency }) {
 					</TableBody>
 				</Table>
 			</div>
+
+			{transactions.length > 0 && (
+				<Paging
+					totalItems={transactions.length}
+					itemsPerPage={transactionsPerPage}
+					setCurrentPage={setCurrentPage}
+					currentPage={currentPage}
+				/>
+			)}
 		</Card>
 	);
 }
