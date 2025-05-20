@@ -4,6 +4,8 @@ import {
 	AuthData,
 	AuthResponse,
 	BusinessDetails,
+	BusinessesResponse,
+	BusinessResponse,
 	StepResponse,
 	ValidResponse,
 } from './interfaceService';
@@ -135,10 +137,7 @@ const getNearestBusinesses = async (
 ) => {
 	try {
 		const accessToken = await checkToken();
-		const response = await client.get<{
-			success: boolean;
-			businesses: Business[];
-		}>(
+		const response = await client.get<BusinessesResponse>(
 			`business/nearby?lat=${lat}&lng=${lng}&radius=${radius}&rating=${rating}&category=${encodeURIComponent(
 				category
 			)}&search=${encodeURIComponent(search)}`,
@@ -171,10 +170,7 @@ const getBusinessProfile = async (businessId: string) => {
 const getBusinessData = async () => {
 	try {
 		const accessToken = await checkToken();
-		const response = await client.get<{
-			success: boolean;
-			business: Business;
-		}>(`business/me`, {
+		const response = await client.get<BusinessResponse>(`business/me`, {
 			headers: { Authorization: `Bearer ${accessToken}` },
 		});
 		return response.data;
