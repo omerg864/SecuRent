@@ -9,9 +9,9 @@ import {
 } from './table';
 import { Card } from './card';
 
-const ReportsTable = ({ accountType, reports }) => {
-	if (!reports || reports.length === 0) {
-		return <p className="text-muted-foreground">No reports yet.</p>;
+export function ReviewsTable({ accountType, reviews }) {
+	if (!reviews || reviews.length === 0) {
+		return <p className="text-muted-foreground">No reviews yet.</p>;
 	}
 
 	return (
@@ -20,45 +20,43 @@ const ReportsTable = ({ accountType, reports }) => {
 				<Table>
 					<TableHeader>
 						<TableRow>
-							<TableHead className="w-1/4">
+							<TableHead className="w-1/6">
 								{accountType === 'Business'
 									? 'Customer'
 									: 'Business'}
 							</TableHead>
-							<TableHead className="w-1/4">Title</TableHead>
-							<TableHead className="w-1/5">Status</TableHead>
-							<TableHead className="w-1/5">Resolved By</TableHead>
-							<TableHead className="w-1/5">Date</TableHead>
+							<TableHead className="w-5/6">Comment</TableHead>
+							<TableHead className="w-1/6">Date</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{reports.map((report) => (
+						{reviews.map((review) => (
 							<TableRow
-								key={report._id}
+								key={review._id}
 								className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
 							>
 								<Link
-									to={`/report/${report._id}`}
-									state={report}
+									to={`/review/${review._id}`}
+									state={review}
 									className="contents"
 								>
 									<TableCell className="font-medium flex items-center gap-2 whitespace-nowrap">
 										<img
 											src={
 												accountType === 'Business'
-													? report.customer?.image ||
+													? review.customer?.image ||
 													  '/admin/public/avatar.png'
-													: report.business?.image ||
+													: review.business?.image ||
 													  `/admin/public/business-icon.png`
 											}
 											alt={
 												accountType === 'Business'
-													? report.customer?.name ||
+													? review.customer?.name ||
 													  'Customer'
-													: report.business?.name ||
+													: review.business?.name ||
 													  'Business'
 											}
-											className="w-6 h-6 rounded-full"
+											className="w-6 h-6 rounded-full object-cover"
 											onError={(e) => {
 												if (
 													e.currentTarget.src !==
@@ -71,30 +69,16 @@ const ReportsTable = ({ accountType, reports }) => {
 											}}
 										/>
 										{accountType === 'Business'
-											? report.customer?.name || '—'
-											: report.business?.name || '—'}
+											? review.customer?.name || '—'
+											: review.business?.name || '—'}
+									</TableCell>
+									<TableCell className="whitespace-normal break-words align-middle">
+										{review.content}
 									</TableCell>
 
-									<TableCell>{report.title}</TableCell>
-									<TableCell>
-										<span
-											className={`inline-block px-2 py-1 text-xs font-semibold rounded-full
-                                                ${
-													report.status === 'resolved'
-														? 'bg-green-100 text-green-800'
-														: 'bg-yellow-100 text-yellow-800'
-												}
-                                            `}
-										>
-											{report.status}
-										</span>
-									</TableCell>
-									<TableCell>
-										{report.resolutionBy?.name || '—'}
-									</TableCell>
 									<TableCell>
 										{new Date(
-											report.createdAt
+											review.createdAt
 										).toLocaleDateString('en-GB')}
 									</TableCell>
 								</Link>
@@ -105,5 +89,4 @@ const ReportsTable = ({ accountType, reports }) => {
 			</div>
 		</Card>
 	);
-};
-export default ReportsTable;
+}
