@@ -313,7 +313,7 @@ const CustomerHome: React.FC = () => {
 						</Text>
 						<Slider
 							minimumValue={10}
-							maximumValue={500}
+							maximumValue={30000}
 							step={1}
 							value={maxDistance}
 							onValueChange={setMaxDistance}

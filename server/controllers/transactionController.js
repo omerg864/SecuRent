@@ -276,22 +276,22 @@ const closeTransactionById = asyncHandler(async (req, res) => {
 		};
 	}
 
-	const chargedScore = 5 - (chargedTransactionCount / transactionCount) * 5;
-	const reviewOverallScore = business.rating.reviewOverall || 5;
-	const reviewScoreWeight = reviewOverallScore * REVIEW_WEIGHT;
-	const chargedScoreWeight = chargedScore * CHARGED_WEIGHT;
-	let overAllScore = reviewScoreWeight + chargedScoreWeight;
-	if (!reviewScoreWeight && !chargedScoreWeight) {
-		overAllScore = 5;
-	} else if (!reviewScoreWeight) {
-		overAllScore = chargedScore;
-	}
-	if (!chargedScoreWeight) {
-		overAllScore = reviewOverallScore;
-	}
+	// const chargedScore = 5 - (chargedTransactionCount / transactionCount) * 5;
+	// const reviewOverallScore = business.rating.reviewOverall || 5;
+	// const reviewScoreWeight = reviewOverallScore * REVIEW_WEIGHT;
+	// const chargedScoreWeight = chargedScore * CHARGED_WEIGHT;
+	// let overAllScore = reviewScoreWeight + chargedScoreWeight;
+	// if (!reviewScoreWeight && !chargedScoreWeight) {
+	// 	overAllScore = 5;
+	// } else if (!reviewScoreWeight) {
+	// 	overAllScore = chargedScore;
+	// }
+	// if (!chargedScoreWeight) {
+	// 	overAllScore = reviewOverallScore;
+	// }
 
-	business.rating.charged = chargedScore;
-	business.rating.overall = overAllScore;
+	// business.rating.charged = chargedScore;
+	// business.rating.overall = overAllScore;
 
 	await business.save();
 
@@ -421,22 +421,22 @@ const captureDeposit = asyncHandler(async (req, res) => {
 		}
 	}
 
-	const chargedScore = 5 - (chargedTransactionCount / transactionCount) * 5;
-	const reviewOverallScore = business.rating.reviewOverall || 5;
-	const reviewScoreWeight = reviewOverallScore * REVIEW_WEIGHT;
-	const chargedScoreWeight = chargedScore * CHARGED_WEIGHT;
-	let overAllScore = reviewScoreWeight + chargedScoreWeight;
-	if (!reviewScoreWeight && !chargedScoreWeight) {
-		overAllScore = 5;
-	} else if (!reviewScoreWeight) {
-		overAllScore = chargedScore;
-	}
-	if (!chargedScoreWeight) {
-		overAllScore = reviewOverallScore;
-	}
+	// const chargedScore = 5 - (chargedTransactionCount / transactionCount) * 5;
+	// const reviewOverallScore = business.rating.reviewOverall || 5;
+	// const reviewScoreWeight = reviewOverallScore * REVIEW_WEIGHT;
+	// const chargedScoreWeight = chargedScore * CHARGED_WEIGHT;
+	// let overAllScore = reviewScoreWeight + chargedScoreWeight;
+	// if (!reviewScoreWeight && !chargedScoreWeight) {
+	// 	overAllScore = 5;
+	// } else if (!reviewScoreWeight) {
+	// 	overAllScore = chargedScore;
+	// }
+	// if (!chargedScoreWeight) {
+	// 	overAllScore = reviewOverallScore;
+	// }
 
-	business.rating.charged = chargedScore;
-	business.rating.overall = overAllScore;
+	// business.rating.charged = chargedScore;
+	// business.rating.overall = overAllScore;
 
 	await business.save();
 

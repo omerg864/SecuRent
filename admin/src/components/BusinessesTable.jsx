@@ -32,51 +32,51 @@ const BusinessesTable = ({ businesses }) => {
 				</div>
 
 				{businesses.map((business, key) => (
-					<div
-						className={`grid grid-cols-3 sm:grid-cols-4 ${
-							key === business.length - 1
+					<Link
+						to={`/business/${business._id}`}
+						state={business}
+						key={business._id}
+						className={`grid grid-cols-3 sm:grid-cols-4 items-center hover:bg-gray-2 dark:hover:bg-meta-4 ${
+							key === businesses.length - 1
 								? ''
 								: 'border-b border-stroke dark:border-strokedark'
-						}`}
-						key={business._id}
+						} p-2.5 xl:p-5`}
 					>
-						<Link
-							to={`/business/${business._id}`}
-							state={business}
-							className="flex items-center gap-3 p-2.5 xl:p-5 hover:bg-gray-2 dark:hover:bg-meta-4"
-						>
+						{/* Name */}
+						<div className="flex items-center gap-3">
 							<div className="flex-shrink-0 hidden sm:block">
 								<img
 									className="h-8 w-8 rounded-full"
-									src={
-										business.image
-											? business.image
-											: './business-icon.png'
-									}
+									src={business.image || './business-icon.png'}
 									alt="Brand"
 								/>
 							</div>
 							<p className="text-black dark:text-white">
 								{business.name}
 							</p>
-						</Link>
+						</div>
 
-						<div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
+						{/* Category */}
+						<div className="hidden items-center justify-center sm:flex">
 							<p className="text-black dark:text-white">
-								{business.category[0] || 'No Category'}
+								{business.category?.[0] || 'No Category'}
 							</p>
 						</div>
 
-						<div className="flex items-center justify-center p-2.5 xl:p-5">
+						{/* Transactions */}
+						<div className="flex items-center justify-center">
 							<p className="text-black dark:text-white">
 								{business.transactionCount}
 							</p>
 						</div>
 
-						<div className="flex items-center justify-center p-2.5 xl:p-5">
-							<p className="text-meta-3">{business.chargedTransactionCount}</p>
+						{/* Charges */}
+						<div className="flex items-center justify-center">
+							<p className="text-meta-3">
+								{business.chargedTransactionCount}
+							</p>
 						</div>
-					</div>
+					</Link>
 				))}
 			</div>
 		</div>

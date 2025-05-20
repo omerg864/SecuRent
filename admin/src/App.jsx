@@ -13,6 +13,7 @@ import SingleCustomer from "./pages/SingleCustomer";
 import Customers from "./pages/Customers";
 import SingleTransaction from "./pages/SingleTransaction";
 import SingleReview from "./pages/SingleReview";
+import Notifications from "./pages/Notifications";
 
 function App() {
   return (
@@ -55,6 +56,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Reports />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <Notifications />
             </ProtectedRoute>
           }
         />
