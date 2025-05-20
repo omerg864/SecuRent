@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { CustomerInfoCard } from '../components/customer-info-card';
 import { TransactionsTable } from '../components/transactions-table';
 import { ReviewsTable } from '../components/customerReviewsTable ';
 import { ReportsTable } from '../components/customerReportsTable.jsx';
@@ -12,6 +11,7 @@ import {
 } from '../services/adminServices';
 import Loader from '../components/Loader';
 import SuspensionButton from '../components/SuspensionButton.jsx';
+import { UserInfoCard } from '../components/UserInfoCard.jsx';
 
 export default function SingleCustomer() {
 	const location = useLocation();
@@ -96,7 +96,10 @@ export default function SingleCustomer() {
 					{/* שמאל */}
 					<div className="lg:col-span-1">
 						<div className="h-full min-h-[400px] max-h-[500px] overflow-auto">
-							<CustomerInfoCard customer={customer} />
+							<UserInfoCard
+								accountType="Customer"
+								account={customer}
+							/>
 						</div>
 					</div>
 

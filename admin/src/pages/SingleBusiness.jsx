@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { BusinessInfoCard } from '../components/business-info-card';
+import { UserInfoCard } from '../components/UserInfoCard';
 import { BusinessTransactionsTable } from '../components/BusinessTransactionsTable';
 import { ReviewsTable } from '../components/BusinessReviewsTable';
 import { ReportsTable } from '../components/BusinessReportsTable';
@@ -98,7 +98,10 @@ export default function SingleBusiness() {
 					{/* Left */}
 					<div className="lg:col-span-1">
 						<div className="h-full">
-							<BusinessInfoCard business={business} />
+							<UserInfoCard
+								accountType="Business"
+								account={business}
+							/>
 						</div>
 					</div>
 
