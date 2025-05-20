@@ -92,9 +92,12 @@ const getAllBusinesses = async (page, name = '') => {
 			);
 			return response.data;
 		}
-		const response = await client.get(`admin/get-all-businesses?page=${page}`, {
-			headers: { Authorization: `Bearer ${accessToken}` },
-		});
+		const response = await client.get(
+			`admin/get-all-businesses?page=${page}`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
 		return response.data;
 	} catch (error) {
 		console.log('Get all businesses error: ', error);
@@ -103,7 +106,6 @@ const getAllBusinesses = async (page, name = '') => {
 		);
 	}
 };
-
 
 const getBusinessTransactions = async (businessId) => {
 	try {
@@ -125,7 +127,7 @@ const getBusinessTransactions = async (businessId) => {
 			error.response?.data?.message || 'Get business transactions failed'
 		);
 	}
-}
+};
 
 const getCustomerTransactions = async (customerId) => {
 	try {
@@ -147,9 +149,9 @@ const getCustomerTransactions = async (customerId) => {
 			error.response?.data?.message || 'Get customer transactions failed'
 		);
 	}
-}
+};
 
-const getAllCustomers = async(page, name='') => {
+const getAllCustomers = async (page, name = '') => {
 	try {
 		const accessToken = await checkToken();
 		if (!accessToken) {
@@ -164,9 +166,12 @@ const getAllCustomers = async(page, name='') => {
 			);
 			return response.data;
 		}
-		const response = await client.get(`admin/get-all-customers?page=${page}`, {
-			headers: { Authorization: `Bearer ${accessToken}` },
-		});
+		const response = await client.get(
+			`admin/get-all-customers?page=${page}`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
 		console.log('Get all customers response: ', response.data);
 		return response.data;
 	} catch (error) {
@@ -175,7 +180,7 @@ const getAllCustomers = async(page, name='') => {
 			error.response?.data?.message || 'Get all customers failed'
 		);
 	}
-}
+};
 
 const getCustomerReviews = async (customerId) => {
 	try {
@@ -183,12 +188,9 @@ const getCustomerReviews = async (customerId) => {
 		if (!accessToken) {
 			throw new Error('Access token is missing or invalid.');
 		}
-		const response = await client.get(
-			`review/customer/${customerId}`,
-			{
-				headers: { Authorization: `Bearer ${accessToken}` },
-			}
-		);
+		const response = await client.get(`review/customer/${customerId}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
 		console.log('Get customer reviews response: ', response.data);
 		return response.data;
 	} catch (error) {
@@ -197,19 +199,16 @@ const getCustomerReviews = async (customerId) => {
 			error.response?.data?.message || 'Get customer reviews failed'
 		);
 	}
-}
+};
 const getCustomerReports = async (customerId) => {
 	try {
 		const accessToken = await checkToken();
 		if (!accessToken) {
 			throw new Error('Access token is missing or invalid.');
 		}
-		const response = await client.get(
-			`report/customer/${customerId}`,
-			{
-				headers: { Authorization: `Bearer ${accessToken}` },
-			}
-		);
+		const response = await client.get(`report/customer/${customerId}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
 		console.log('Get customer reports response: ', response.data);
 		return response.data;
 	} catch (error) {
@@ -218,7 +217,7 @@ const getCustomerReports = async (customerId) => {
 			error.response?.data?.message || 'Get customer reports failed'
 		);
 	}
-}
+};
 
 const getBusinessReports = async (businessId) => {
 	try {
@@ -226,12 +225,9 @@ const getBusinessReports = async (businessId) => {
 		if (!accessToken) {
 			throw new Error('Access token is missing or invalid.');
 		}
-		const response = await client.get(
-			`report/business/${businessId}`,
-			{
-				headers: { Authorization: `Bearer ${accessToken}` },
-			}
-		);
+		const response = await client.get(`report/business/${businessId}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
 		console.log('Get business reports response: ', response.data);
 		return response.data;
 	} catch (error) {
@@ -248,15 +244,11 @@ const getBusinessReviews = async (businessId) => {
 		if (!accessToken) {
 			throw new Error('Access token is missing or invalid.');
 		}
-		const response = await client.get(
-			`review/business/${businessId}`,
-			{
-				headers: { Authorization: `Bearer ${accessToken}` },
-			}
-		);
+		const response = await client.get(`review/business/${businessId}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
 		console.log('Get business reviews response: ', response.data);
 		return response.data;
-		
 	} catch (error) {
 		console.log('Get business reviews error: ', error);
 		throw new Error(
@@ -268,7 +260,8 @@ const getBusinessReviews = async (businessId) => {
 const toggleBusinessSuspension = async (businessId) => {
 	try {
 		const accessToken = await checkToken();
-		if (!accessToken) throw new Error('Access token is missing or invalid.');
+		if (!accessToken)
+			throw new Error('Access token is missing or invalid.');
 
 		const response = await client.put(
 			`admin/suspend/business/${businessId}`,
@@ -276,7 +269,6 @@ const toggleBusinessSuspension = async (businessId) => {
 			{ headers: { Authorization: `Bearer ${accessToken}` } }
 		);
 		return response.data;
-
 	} catch (error) {
 		console.error('Toggle business suspension error: ', error);
 		throw new Error(
@@ -285,9 +277,39 @@ const toggleBusinessSuspension = async (businessId) => {
 	}
 };
 
+const toggleCustomerSuspension = async (id) => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken)
+			throw new Error('Access token is missing or invalid.');
 
+		const response = await client.put(
+			`admin/suspend/customer/${id}`,
+			{},
+			{ headers: { Authorization: `Bearer ${accessToken}` } }
+		);
+		return response.data;
+	} catch (error) {
+		console.error('Toggle business suspension error: ', error);
+		throw new Error(
+			error.response?.data?.message || 'Failed to toggle suspension'
+		);
+	}
+};
 
-
-export { register, login, googleLogin, analytics , getAllBusinesses , getBusinessTransactions , getAllCustomers , getCustomerTransactions ,
-	getCustomerReviews , getCustomerReports, getBusinessReports, getBusinessReviews, toggleBusinessSuspension
- };
+export {
+	register,
+	login,
+	googleLogin,
+	analytics,
+	getAllBusinesses,
+	getBusinessTransactions,
+	getAllCustomers,
+	getCustomerTransactions,
+	getCustomerReviews,
+	getCustomerReports,
+	getBusinessReports,
+	getBusinessReviews,
+	toggleBusinessSuspension,
+	toggleCustomerSuspension,
+};
