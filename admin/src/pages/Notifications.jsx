@@ -1,35 +1,37 @@
-import ReportsTable from "../components/ReportsTable";
+import NotificationsTable from "../components/NotificationTable";
 import Pagination from "../components/Pagination";
 import { useState, useEffect } from "react";
-import { getAllReports } from "../services/reportService"; // <-- You need to implement this service
 import Loader from "../components/Loader";
+import { getAllNotifications } from "../services/notificationsService";
 
-const Reports = () => {
-  const [reports, setReports] = useState([]);
-  const [filteredReports, setFilteredReports] = useState([]);
+
+const Notifications = () => {
+  const [notifications, setNotifications] = useState([]);
+  const [filteredNotifications, setFilteredNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const fetchReports = async (page) => {
+  const fetchNotifications = async (page) => {
     setIsLoading(true);
     try {
-      const data = await getAllReports(page, "open");
-      setReports(data.reports);
-      setFilteredReports(data.reports);
-      setTotalPages(data.total);
-      console.log("Reports data: ", totalPages);
+      const data = await getAllNotifications(page);
+      setNotifications(data.notifications);
+      setFilteredNotifications(data.notifications);
+      const pages = (data.total / 10);
+      setTotalPages(pages);
+      console.log("Notifications data: ", data.notifications);
     } catch (error) {
-      console.error("Error fetching reports:", error);
-      setError(error.message || "Failed to fetch reports");
+      console.error("Error fetching notifications:", error);
+      setError(error.message || "Failed to fetch notifications");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchReports(page);
+    fetchNotifications(page);
   }, [page]);
 
   if (isLoading) {
@@ -50,10 +52,10 @@ const Reports = () => {
 
   return (
     <>
-      <ReportsTable reports={filteredReports} />
+      <NotificationsTable notifications={filteredNotifications} />
       <Pagination totalPages={totalPages} pageSize={10} />
     </>
   );
 };
 
-export default Reports;
+export default Notifications;

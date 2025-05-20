@@ -9,7 +9,8 @@ const getAdminNotifications = asyncHandler(async (req, res) => {
 	})
 		.skip((page - 1) * NOTIFICATION_LIMIT_PER_PAGE)
 		.limit(NOTIFICATION_LIMIT_PER_PAGE)
-		.sort({ createdAt: -1 });
+		.sort({ createdAt: -1 })
+        .populate('customer', 'name image');
 	res.status(200).json({
 		notifications,
 		page: page,
