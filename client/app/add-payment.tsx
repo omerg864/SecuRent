@@ -19,8 +19,8 @@ import { COMPLETED_STEPS, CURRENT_ACCOUNT_TYPE } from '@/utils/asyncStorageConst
 const AddPaymentScreen = () => {
 	const router = useRouter();
 	const [loading, setLoading] = useState(false);
-	const params = useLocalSearchParams();
-	const accountType = (params.accountType as string) || 'personal';
+	const params = useLocalSearchParams<{ accountType: string}>();
+	const accountType = params.accountType || 'personal';
 	const [customerSheetVisible, setCustomerSheetVisible] = useState(false);
 	const [clientSecret, setClientSecret] = useState('');
 	const [customerId, setCustomerId] = useState('');

@@ -1,7 +1,8 @@
 import { FileObject } from "@/types/business";
 import { checkToken, client } from "./httpClient";
-import { Item } from "./interfaceService";
 import { buildFormData } from "@/utils/functions";
+import { Item } from "@/types/item";
+import { AuthResponse, ItemResponse, SuccessResponse } from "./interfaceService";
 
 const createTemporaryItem = async (
     description: string,
@@ -10,7 +11,7 @@ const createTemporaryItem = async (
 ) => {
     try {
         const accessToken = await checkToken();
-        const response = await client.post<{ item: Item; success: boolean }>(
+        const response = await client.post<ItemResponse>(
             "item",
             {
                 temporary: true,
@@ -46,7 +47,7 @@ const createBusinessItem = async (
             },
             file
         );
-        const response = await client.post<{ item: Item; success: boolean }>(
+        const response = await client.post<ItemResponse>(
             "item",
             formData,
             {
@@ -65,7 +66,7 @@ const createBusinessItem = async (
 const getItemById = async (itemId: string) => {
     try {
         const accessToken = await checkToken();
-        const response = await client.get<{ item: Item; success: boolean }>(
+        const response = await client.get<ItemResponse>(
             `item/${itemId}`,
             {
                 headers: { Authorization: `Bearer ${accessToken}` }
@@ -80,7 +81,7 @@ const getItemById = async (itemId: string) => {
 const getItemByIdForTransaction = async (itemId: string) => {
     try {
         const accessToken = await checkToken();
-        const response = await client.get<{ item: Item; success: boolean }>(
+        const response = await client.get<ItemResponse>(
             `item/${itemId}`,
             {
                 headers: { Authorization: `Bearer ${accessToken}` }
@@ -118,7 +119,7 @@ const getItemByIdForTransaction = async (itemId: string) => {
 const deleteItem = async (itemId: string) => {
 	try {
 		const accessToken = await checkToken();
-		const response = await client.delete<{ success: boolean }>(
+		const response = await client.delete<SuccessResponse>(
 			`item/${itemId}`,
 			{
 				headers: { Authorization: `Bearer ${accessToken}` },
@@ -133,7 +134,7 @@ const deleteItem = async (itemId: string) => {
 
 const getItemByIdForBusiness = async (itemId: string) => {
     const accessToken = await checkToken();
-    const response = await client.get<{ item: Item; success: boolean }>(
+    const response = await client.get<ItemResponse>(
         `item/business/${itemId}`,
         { headers: { Authorization: `Bearer ${accessToken}` } }
     );
@@ -151,7 +152,7 @@ const updateItemById = async (
 ) => {
     try {
         const accessToken = await checkToken();
-        const response = await client.put<{ item: Item; success: boolean }>(
+        const response = await client.put<ItemResponse>(
             `item/${id}`,
             formData,
             {
@@ -170,10 +171,7 @@ const updateItemById = async (
 const deleteItemById = async (id: string) => {
     try {
         const accessToken = await checkToken();
-        const response = await client.delete<{
-            success: boolean;
-            message?: string;
-        }>(`item/${id}`, {
+        const response = await client.delete<AuthResponse>(`item/${id}`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }

@@ -1,5 +1,9 @@
 import { Business } from '@/types/business';
 import { Customer } from '@/types/customer';
+import { Item } from '@/types/item';
+import { Report } from '@/types/report';
+import { Review } from '@/types/review';
+import { Transaction } from '@/types/transaction';
 interface AuthData {
 	name?: string;
 	email?: string;
@@ -14,6 +18,10 @@ interface LoginCredentials {
 interface AuthResponse {
 	success: boolean;
 	message: string;
+}
+
+interface SuccessResponse {
+	success: boolean;
 }
 
 interface ValidResponse {
@@ -60,33 +68,29 @@ interface CustomerLoginResponse {
 
 type LoginResponse = CustomerLoginResponse | BusinessLoginResponse;
 
-interface CreditCardData {
-	number: string;
-	expiry: string;
-	cvv: string;
-	cardHolderName: string;
+interface CustomerResponse {
+	success: boolean;
+	customer: Customer;
 }
 
-interface BankDetails {
-	accountNumber: string;
-	sortCode: string;
-	accountHolderName: string;
-	bankName: string;
+interface BusinessResponse {
+	success: boolean;
+	business: Business;
 }
 
-interface Item {
-	_id: string;
-	business: string;
-	description: string;
-	price: number;
-	currency: string;
-	image?: string;
-	return_date?: string | null;
-	duration?: number | null;
-	timeUnit?: 'days' | 'minutes' | 'hours';
-	temporary?: boolean;
-	createdAt?: string | Date;
-	updatedAt?: string | Date;
+interface BusinessesResponse {
+	success: boolean;
+	businesses: Business[];
+}
+
+interface ReportResponse {
+	success: boolean;
+	report: Report;
+}
+
+interface ReviewResponse {
+	success: boolean;
+	review: Review;
 }
 
 interface ChargeDepositPayload {
@@ -96,54 +100,12 @@ interface ChargeDepositPayload {
 
 interface TransactionResponse {
 	success: boolean;
-	transaction: {
-		_id: string;
-		transaction_id: string;
-		amount: number;
-		currency: string;
-		status: string;
-		business: string;
-		customer?: string;
-		closed_at?: string;
-		return_date?: string;
-		charged?: number;
-		charged_description?: string;
-		createdAt: string;
-		updatedAt: string;
-	};
+	transaction: Transaction;
 }
 
-interface Transaction {
-	_id: string;
-	transaction_id?: string;
-	amount: number;
-	description: string;
-	currency: string;
-	status: string;
-	business?: {
-		_id?: string;
-		name?: string;
-		image?: string;
-	};
-	customer?: {
-		_id: string;
-		name: string;
-		image?: string;
-		phone?: string;
-	};
-	opened_at?: Date;
-	closed_at?: Date;
-	return_date?: Date;
-	charged?: number;
-	charged_description?: string;
-	createdAt: string;
-	updatedAt: string;
-	review?: {
-		_id?: string;
-		image?: string[];
-		content?: string;
-		createdAt: string;
-	};
+interface TransactionsResponse {
+	success: boolean;
+	transactions: Transaction[];
 }
 
 interface LocationPrediction {
@@ -156,21 +118,9 @@ interface LocationDetails {
 	location: { lat: number; lng: number };
 }
 
-interface Review {
-	_id: string;
-	transaction: string;
-	business: string;
-	customer: string;
-	images?: string[];
-	rating: {
-		overall: number;
-		reliability: number;
-		price: number;
-		quality: number;
-	};
-	content?: string;
-	createdAt: Date;
-	updatedAt: Date;
+interface ItemResponse {
+	success: boolean;
+	item: Item;
 }
 
 interface BusinessDetails {
@@ -183,21 +133,24 @@ export type {
 	AuthData,
 	LoginCredentials,
 	AuthResponse,
+	SuccessResponse,
 	BusinessLoginResponse,
 	CustomerLoginResponse,
-	CreditCardData,
+	CustomerResponse,
+	BusinessesResponse,
+	BusinessResponse,
 	LoginResponse,
-	BankDetails,
-	Item,
 	ChargeDepositPayload,
 	TransactionResponse,
-	Transaction,
+	TransactionsResponse,
 	LocationPrediction,
 	LocationDetails,
 	StepResponse,
 	ClientStripeParamsResponse,
 	ValidResponse,
 	TransactionIntentResponse,
-	Review,
 	BusinessDetails,
+	ItemResponse,
+	ReportResponse,
+	ReviewResponse
 };

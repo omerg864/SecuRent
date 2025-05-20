@@ -1,4 +1,5 @@
 import { checkToken, client } from './httpClient';
+import { ReviewResponse } from './interfaceService';
 
 // In ReviewService.ts
 const createReview = async (
@@ -21,7 +22,7 @@ const createReview = async (
 				formData.append('images', image);
 			});
 
-			const response = await client.post('/review', formData, {
+			const response = await client.post<ReviewResponse>('/review', formData, {
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
 					'Content-Type': 'multipart/form-data',

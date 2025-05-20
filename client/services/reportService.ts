@@ -1,5 +1,6 @@
 import ShowToast from '@/components/ui/ShowToast';
 import { client, checkToken } from './httpClient';
+import { ReportResponse } from './interfaceService';
 
 const createReport = async (
 	businessId: string,
@@ -21,7 +22,7 @@ const createReport = async (
 			images.forEach((image) => {
 				formData.append('images', image);
 			});
-			const response = await client.post('/report', formData, {
+			const response = await client.post<ReportResponse>('/report', formData, {
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
 					'Content-Type': 'multipart/form-data',
