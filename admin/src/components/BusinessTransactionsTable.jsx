@@ -8,6 +8,7 @@ import {
     TableRow
 } from "../components/table";
 import { Card } from "./card";
+import { formatCurrencySymbol } from "../utils/functions"; 
 
 export function BusinessTransactionsTable({ transactions, currency }) {
     if (!currency) {
@@ -15,10 +16,11 @@ export function BusinessTransactionsTable({ transactions, currency }) {
     }
 
     const formatAmount = (amount) => {
-        return new Intl.NumberFormat("he-IL", {
-            style: "currency",
-            currency
+        const symbol = formatCurrencySymbol(currency);
+        const formatted = new Intl.NumberFormat("he-IL", {
         }).format(amount);
+
+        return `${formatted} ${symbol}`; 
     };
 
     const formatDate = (isoString) => {
@@ -79,8 +81,24 @@ export function BusinessTransactionsTable({ transactions, currency }) {
                                     </TableCell>
 
                                     {/* Status */}
-                                    <TableCell className='capitalize'>
-                                        {tx.status || "pending"}
+                                    <TableCell>
+                                        <span
+                                            className={`inline-block px-2 py-1 text-xs font-semibold rounded-full
+                                                ${
+                                                    tx.status === "open"
+                                                        ? "bg-green-100 text-green-800"
+                                                        : tx.status ===
+                                                          "closed"
+                                                        ? "bg-gray-200 text-gray-800"
+                                                        : tx.status ===
+                                                          "charged"
+                                                        ? "bg-red-100 text-red-800"
+                                                        : "bg-yellow-100 text-yellow-800"
+                                                }
+                                            `}
+                                        >
+                                            {tx.status || "pending"}
+                                        </span>
                                     </TableCell>
 
                                     {/* Amount or Actual Amount */}
