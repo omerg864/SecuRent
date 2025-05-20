@@ -92,7 +92,7 @@ export function BusinessInfoCard({ business }) {
                     <div>
                         <p className='font-medium'>Rating</p>
                         <div className='flex items-center'>
-                            <p className='text-sm text-muted-foreground'>
+                            <p className='text-sm text-muted-foreground mr-2'>
                                 {Number(business?.rating?.overall ?? 0).toFixed(
                                     1
                                 )}

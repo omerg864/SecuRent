@@ -28,6 +28,14 @@ export default function SuspensionButton({
 		}
 	};
 
+	const buttonText = isToggling
+		? account?.suspended
+			? 'Activating...'
+			: 'Suspending...'
+		: account?.suspended
+		? 'Activate'
+		: 'Suspend';
+
 	return (
 		<>
 			<button
@@ -38,9 +46,11 @@ export default function SuspensionButton({
 						account?.suspended
 							? 'border-green-600 text-green-600 hover:bg-green-50 dark:border-green-400 dark:text-green-400 dark:hover:bg-green-900/20'
 							: 'border-yellow-600 text-yellow-600 hover:bg-yellow-50 dark:border-yellow-400 dark:text-yellow-400 dark:hover:bg-yellow-900/20'
-					}`}
+					}
+                    ${isToggling ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
 			>
-				{account?.suspended ? 'Activate' : 'Suspend'}
+				{buttonText}
 			</button>
 
 			{showConfirm && (
@@ -59,7 +69,12 @@ export default function SuspensionButton({
 						<div className="flex justify-end space-x-4">
 							<button
 								onClick={() => setShowConfirm(false)}
-								className="px-5 py-2 rounded-md text-base text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+								disabled={isToggling}
+								className={`px-5 py-2 rounded-md text-base transition ${
+									isToggling
+										? 'opacity-50 cursor-not-allowed'
+										: 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+								}`}
 							>
 								Cancel
 							</button>
@@ -68,14 +83,17 @@ export default function SuspensionButton({
 									await handleToggle();
 									setShowConfirm(false);
 								}}
+								disabled={isToggling}
 								className={`px-5 py-2 rounded-md text-base font-semibold transition
                                     ${
 										account?.suspended
 											? 'bg-green-600 text-white hover:bg-green-700'
 											: 'bg-yellow-600 text-white hover:bg-yellow-700'
-									}`}
+									}
+                                    ${isToggling ? 'opacity-50 cursor-not-allowed' : ''}
+                                `}
 							>
-								{account?.suspended ? 'Activate' : 'Suspend'}
+								{buttonText}
 							</button>
 						</div>
 					</div>

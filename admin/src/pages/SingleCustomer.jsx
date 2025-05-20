@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { CustomerInfoCard } from '../components/customer-info-card';
-import { TransactionsTable } from '../components/transactions-table';
-import { ReviewsTable } from '../components/customerReviewsTable ';
-import { ReportsTable } from '../components/customerReportsTable.jsx';
+import { TransactionsTable } from '../components/TransactionsTable.jsx';
+import { ReviewsTable } from '../components/ReviewsTable.jsx';
+import { ReportsTableSingle } from '../components/ReportsTableSingle.jsx';
 import { getCustomerById } from '../services/customerService';
 import {
 	getCustomerTransactions,
@@ -109,6 +109,7 @@ export default function SingleCustomer() {
 							<TransactionsTable
 								transactions={transactions}
 								currency={customer.currency}
+								isBusiness={false}
 							/>
 						</section>
 
@@ -116,14 +117,16 @@ export default function SingleCustomer() {
 							<h2 className="text-2xl font-semibold mb-4">
 								Reviews
 							</h2>
-							<ReviewsTable reviews={reviews} />
+							<ReviewsTable reviews={reviews}
+							isBusiness={false} />
 						</section>
 
 						<section>
 							<h2 className="text-2xl font-semibold mb-4">
 								Reports
 							</h2>
-							<ReportsTable reports={reports} />
+							<ReportsTableSingle reports={reports}
+							isBusiness={false} />
 						</section>
 					</div>
 				</div>
