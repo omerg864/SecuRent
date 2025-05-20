@@ -1,7 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import Business from '../models/businessModel.js';
 import Customer from '../models/customerModel.js';
-import Item from '../models/itemModel.js';
+import Transaction from '../models/transactionModel.js';
 import Review from '../models/reviewModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -662,7 +662,7 @@ const getBusinessProfile = asyncHandler(async (req, res) => {
 		throw new Error('Business not found');
 	}
 	const promises = [];
-	promises.push(Item.find({ business: id, temporary: false }));
+	promises.push(Transaction.find({ business: id }));
 	promises.push(
 		Review.find({ business: id })
 			.populate('customer', 'name image')

@@ -1,4 +1,4 @@
-import ReportsTable from '../components/ReportsTable';
+import OpenReportsTable from '../components/OpenReportsTable';
 import Pagination from '../components/Pagination';
 import { useState, useEffect } from 'react';
 import { getAllReports } from '../services/reportService'; // <-- You need to implement this service
@@ -50,7 +50,7 @@ const Reports = () => {
 
 	return (
 		<>
-			<ReportsTable reports={filteredReports} />
+			<OpenReportsTable reports={filteredReports} />
 			<Pagination totalPages={totalPages} pageSize={10} />
 		</>
 	);

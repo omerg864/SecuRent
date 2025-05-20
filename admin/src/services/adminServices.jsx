@@ -119,7 +119,7 @@ const getBusinessTransactions = async (businessId) => {
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
 		);
-		console.log('Get business transactions response: ', response.data);
+		console.log('Get business transactions response: ', response.data.transactions);
 		return response.data;
 	} catch (error) {
 		console.log('Get business transactions error: ', error);
