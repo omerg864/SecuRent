@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { TransactionsTable } from '../components/transactions-table';
 import { ReviewsTable } from '../components/customerReviewsTable ';
 import { ReportsTable } from '../components/customerReportsTable.jsx';
 import { getCustomerById } from '../services/customerService';
@@ -12,6 +11,7 @@ import {
 import Loader from '../components/Loader';
 import SuspensionButton from '../components/SuspensionButton.jsx';
 import { UserInfoCard } from '../components/UserInfoCard.jsx';
+import { TransactionsTable } from '../components/TransactionsTable.jsx';
 
 export default function SingleCustomer() {
 	const location = useLocation();
@@ -110,6 +110,7 @@ export default function SingleCustomer() {
 								Transactions
 							</h2>
 							<TransactionsTable
+								accountType="Customer"
 								transactions={transactions}
 								currency={customer.currency}
 							/>
