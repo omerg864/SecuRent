@@ -32,12 +32,12 @@ export function ReviewsTable({ accountType, reviews }) {
 				<Table>
 					<TableHeader>
 						<TableRow>
-							<TableHead className="w-1/6">
+							<TableHead className="w-2/6">
 								{accountType === 'Business'
 									? 'Customer'
 									: 'Business'}
 							</TableHead>
-							<TableHead className="w-5/6">Comment</TableHead>
+							<TableHead className="w-3/6">Comment</TableHead>
 							<TableHead className="w-1/6">Date</TableHead>
 						</TableRow>
 					</TableHeader>
