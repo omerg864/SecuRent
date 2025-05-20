@@ -17,6 +17,13 @@ import Toast from 'react-native-toast-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StripeProvider } from '@stripe/stripe-react-native';
 import Constants from 'expo-constants';
+import {
+	ACCOUNT_SETUP,
+	BUSINESS_DATA,
+	CUSTOMER_DATA,
+} from '@/utils/asyncStorageConstants';
+import { CustomerProvider } from '@/context/CustomerContext';
+import { BusinessProvider } from '@/context/BusinessContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -32,15 +39,15 @@ export default function RootLayout() {
 			const checkStorage = async () => {
 				try {
 					const businessData = await AsyncStorage.getItem(
-						'Business_Data'
+						BUSINESS_DATA
 					);
 					const customerData = await AsyncStorage.getItem(
-						'Customer_Data'
+						CUSTOMER_DATA
 					);
 
 					if (businessData) {
 						const setup_mode = await AsyncStorage.getItem(
-							'Account_setup'
+							ACCOUNT_SETUP
 						);
 						if (setup_mode === 'true') {
 							router.replace('/login');
@@ -52,7 +59,7 @@ export default function RootLayout() {
 
 					if (customerData) {
 						const setup_mode = await AsyncStorage.getItem(
-							'Account_setup'
+							ACCOUNT_SETUP
 						);
 						if (setup_mode === 'true') {
 							router.replace('/login');
@@ -83,37 +90,51 @@ export default function RootLayout() {
 
 	return (
 		<AuthProvider>
-			<GestureHandlerRootView>
-				<ThemeProvider
-					value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
-				>
-					<StripeProvider publishableKey={stripePublishableKey}>
-						<Stack
-							screenOptions={{
-								headerShown: false, // Hide headers globally
-							}}
+			<CustomerProvider>
+				<BusinessProvider>
+					<GestureHandlerRootView>
+						<ThemeProvider
+							value={
+								colorScheme === 'dark'
+									? DarkTheme
+									: DefaultTheme
+							}
 						>
-							<Stack.Screen name="customer" />
-							<Stack.Screen name="business" />
-							<Stack.Screen name="login" />
-							<Stack.Screen name="get-started" />
-							<Stack.Screen name="register" />
-							<Stack.Screen name="+not-found" />
-							<Stack.Screen name="bank-details" />
-							<Stack.Screen name="setup-screen" />
-							<Stack.Screen name="verification" />
-							<Stack.Screen name="verify-email" />
-							<Stack.Screen name="add-payment" />
-							<Stack.Screen name="reset-password" />
-							<Stack.Screen name="restore-account" />
-						</Stack>
-						<StatusBar
-							style={colorScheme === 'dark' ? 'dark' : 'light'}
-						/>
-						<Toast />
-					</StripeProvider>
-				</ThemeProvider>
-			</GestureHandlerRootView>
+							<StripeProvider
+								publishableKey={stripePublishableKey}
+							>
+								<Stack
+									screenOptions={{
+										headerShown: false, // Hide headers globally
+									}}
+								>
+									<Stack.Screen name="customer" />
+									<Stack.Screen name="business" />
+									<Stack.Screen name="login" />
+									<Stack.Screen name="get-started" />
+									<Stack.Screen name="register" />
+									<Stack.Screen name="+not-found" />
+									<Stack.Screen name="bank-details" />
+									<Stack.Screen name="setup-screen" />
+									<Stack.Screen name="verification" />
+									<Stack.Screen name="verify-email" />
+									<Stack.Screen name="add-payment" />
+									<Stack.Screen name="reset-password" />
+									<Stack.Screen name="restore-account" />
+								</Stack>
+								<StatusBar
+									style={
+										colorScheme === 'dark'
+											? 'dark'
+											: 'light'
+									}
+								/>
+								<Toast />
+							</StripeProvider>
+						</ThemeProvider>
+					</GestureHandlerRootView>
+				</BusinessProvider>
+			</CustomerProvider>
 		</AuthProvider>
 	);
 }

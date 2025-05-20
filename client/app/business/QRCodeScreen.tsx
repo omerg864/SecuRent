@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useWebSocketContext } from '@/context/WebSocketContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ShowToast from '@/components/ui/ShowToast';
+import { USER_ID } from '@/utils/asyncStorageConstants';
 
 const QRCodeScreen = () => {
 	const router = useRouter();
@@ -42,7 +43,7 @@ const QRCodeScreen = () => {
 		try {
 			if (from === 'ProfilePage') {
 				console.log('from ProfilePage');
-				const storedUserId = await AsyncStorage.getItem('UserID');
+				const storedUserId = await AsyncStorage.getItem(USER_ID);
 				router.replace({
 					pathname: '/business/BusinessProfileScreen',
 					params: { id: storedUserId },

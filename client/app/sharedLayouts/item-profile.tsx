@@ -24,6 +24,7 @@ import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import { formatCurrencySymbol } from '@/utils/functions';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ShowToast from '@/components/ui/ShowToast';
+import { CURRENT_ACCOUNT_TYPE } from '@/utils/asyncStorageConstants';
 
 const ItemProfileScreen = () => {
 	const { id, from } = useLocalSearchParams<{ id: string; from: string }>();
@@ -38,7 +39,7 @@ const ItemProfileScreen = () => {
 		const fetchItem = async () => {
 			try {
 				setLoading(true);
-				const type = await AsyncStorage.getItem('current_account_type');
+				const type = await AsyncStorage.getItem(CURRENT_ACCOUNT_TYPE);
 				setAccountType(type);
 
 				const data =

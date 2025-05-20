@@ -17,6 +17,12 @@ import Header from '@/components/ui/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LoginUser } from '@/services/adminService';
 import ShowToast from '@/components/ui/ShowToast';
+import { LoginResponse } from '@/services/interfaceService';
+import { ACCESS_TOKEN, ACCOUNT_SETUP, AUTH_EXPIRATION, COMPLETED_STEPS_BUSINESS, CURRENT_ACCOUNT_TYPE, REFRESH_TOKEN, USER_ID } from '@/utils/asyncStorageConstants';
+import { Business } from '@/types/business';
+import { Customer } from '@/types/customer';
+import { useCustomer } from '@/context/CustomerContext';
+import { useBusiness } from '@/context/BusinessContext';
 
 const LoginScreen = () => {
 	const [email, setEmail] = useState('');
@@ -24,6 +30,8 @@ const LoginScreen = () => {
 	const [showPassword, setShowPassword] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
+	const { setCustomer } = useCustomer();
+	const { setBusiness } = useBusiness();
 
 	const handleLogin = async () => {
 		if (!email || !password) {
@@ -32,7 +40,7 @@ const LoginScreen = () => {
 		}
 		setLoading(true);
 		try {
-			const response: any = await LoginUser(email, password);
+			const response: LoginResponse = await LoginUser(email, password);
 			console.log(response);
 			if (!response) {
 				setLoading(false);
@@ -40,29 +48,31 @@ const LoginScreen = () => {
 
 				return;
 			}
-			AsyncStorage.setItem('Access_Token', response.accessToken);
-			AsyncStorage.setItem('Refresh_Token', response.refreshToken);
+			AsyncStorage.setItem(ACCESS_TOKEN, response.accessToken);
+			AsyncStorage.setItem(REFRESH_TOKEN, response.refreshToken);
 			const expiration = new Date();
 			expiration.setHours(expiration.getHours() + 23);
-			AsyncStorage.setItem('Auth_Expiration', expiration.toISOString());
+			AsyncStorage.setItem(AUTH_EXPIRATION, expiration.toISOString());
 			if (response.user.role === 'Customer') {
+				await setCustomer(response.user as Customer);
 				await AsyncStorage.multiSet([
-					['current_account_type', 'personal'],
-					['Customer_Data', JSON.stringify(response.user)],
-					['UserID', response.user._id],
+					[CURRENT_ACCOUNT_TYPE, 'personal'],
+					[USER_ID, response.user._id],
 				]);
-				if (!response.user.isValid) {
-					AsyncStorage.setItem('Account_setup', 'true');
-					AsyncStorage.setItem('current_account_type', 'personal');
+				const customerUser: Customer = response.user as Customer;
+
+				if (!customerUser.isValid) {
+					AsyncStorage.setItem(ACCOUNT_SETUP, 'true');
+					AsyncStorage.setItem(CURRENT_ACCOUNT_TYPE, 'personal');
 					let completedSteps = [];
-					if (response.user.isEmailValid) {
+					if (customerUser.isEmailValid) {
 						completedSteps.push('email');
 					}
-					if (response.user.isPaymentValid) {
+					if (customerUser.isPaymentValid) {
 						completedSteps.push('payment');
 					}
 					AsyncStorage.setItem(
-						'completedSteps_personal',
+						COMPLETED_STEPS_BUSINESS,
 						JSON.stringify(completedSteps)
 					);
 					router.replace({
@@ -73,27 +83,29 @@ const LoginScreen = () => {
 					});
 					return;
 				}
-				AsyncStorage.removeItem('Account_setup');
+				AsyncStorage.removeItem(ACCOUNT_SETUP);
 				ShowToast('success', 'Login successful');
 				router.replace('/customer');
 			} else {
+				await setBusiness(response.user as Business);
 				await AsyncStorage.multiSet([
-					['current_account_type', 'business'],
-					['Business_Data', JSON.stringify(response.user)],
-					['UserID', response.user._id],
+					[CURRENT_ACCOUNT_TYPE, 'business'],
+					[USER_ID, response.user._id],
 				]);
 
-				if (!response.user.isValid) {
-					console.log('Id' + response.user._id);
+				const businessUser: Business = response.user as Business;
+
+				if (!businessUser.isValid) {
+					console.log('Id' + businessUser._id);
 					AsyncStorage.setItem('Account_setup', 'true');
 					let completedSteps = [];
-					if (response.user.isEmailValid) {
+					if (businessUser.isEmailValid) {
 						completedSteps.push('email');
 					}
-					if (response.user.isBankValid) {
+					if (businessUser.isBankValid) {
 						completedSteps.push('bank');
 					}
-					if (response.user.isCompanyNumberVerified) {
+					if (businessUser.isCompanyNumberVerified) {
 						completedSteps.push('verification');
 					}
 					AsyncStorage.setItem(

@@ -5,7 +5,7 @@ import { ThemedText } from '@/components/ui/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Business, Transaction } from '@/services/interfaceService';
+import { Transaction } from '@/services/interfaceService';
 import { getBusinessTransactions } from '@/services/transactionService';
 import { useWebSocketContext } from '@/context/WebSocketContext';
 import { currencies } from '@/utils/constants';
@@ -13,6 +13,8 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getBusinessData } from '@/services/businessService';
 import ShowToast from '@/components/ui/ShowToast';
+import { Business } from '@/types/business';
+import { useBusiness } from '@/context/BusinessContext';
 
 const PAGE_SIZE = 5;
 
@@ -22,7 +24,7 @@ const BusinessHomePage = () => {
 	const [page, setPage] = useState(1);
 	const [hasMore, setHasMore] = useState(true);
 	const router = useRouter();
-	const [businessData, setBusinessData] = useState<Business | null>(null); // Adjust type as needed
+	const { business, setBusiness } = useBusiness();
 
 	const { lastMessage } = useWebSocketContext();
 
@@ -75,11 +77,7 @@ const BusinessHomePage = () => {
 	const getBusiness = async () => {
 		try {
 			const businessData = await getBusinessData();
-			setBusinessData(businessData.business);
-			await AsyncStorage.setItem(
-				'Business_Data',
-				JSON.stringify(businessData.business)
-			);
+			setBusiness(businessData.business);
 		} catch (error: any) {
 			console.error('Error fetching business data:', error);
 			ShowToast('error', error.response.data.message);
@@ -97,7 +95,6 @@ const BusinessHomePage = () => {
 				setPage(1);
 				setHasMore(true);
 				setIsLoading(false);
-				setBusinessData(null); // Clear business data on unfocus
 			};
 		}, [])
 	);
@@ -160,7 +157,7 @@ const BusinessHomePage = () => {
 				</ThemedText>
 			</HapticButton>
 
-			{businessData?.suspended && (
+			{business?.suspended && (
 				<View className="flex-row items-center bg-red-100 p-4 rounded-lg mb-4 shadow-sm">
 					<Ionicons
 						name="alert-circle"

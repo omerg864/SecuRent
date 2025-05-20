@@ -19,6 +19,15 @@ import {
 } from '@/services/customerService';
 import { ActivityIndicator } from 'react-native';
 import ShowToast from '@/components/ui/ShowToast';
+import {
+	ACCESS_TOKEN,
+	AUTH_EXPIRATION,
+	COMPLETED_STEPS,
+	CURRENT_ACCOUNT_TYPE,
+	REFRESH_TOKEN,
+	TYPE,
+	USER_ID,
+} from '@/utils/asyncStorageConstants';
 
 export default function VerifyEmailScreen() {
 	const router = useRouter();
@@ -37,7 +46,7 @@ export default function VerifyEmailScreen() {
 		if (code.trim().length === 6) {
 			setLoading(true);
 			try {
-				const userId = await AsyncStorage.getItem('UserID');
+				const userId = await AsyncStorage.getItem(USER_ID);
 				console.log('User ID:', userId);
 				let response: any;
 				if (accountType === 'business') {
@@ -65,7 +74,7 @@ export default function VerifyEmailScreen() {
 				ShowToast('success', 'Email verified successfully');
 
 				if (!type) {
-					const storageKey = `completedSteps_${accountType}`;
+					const storageKey = `${COMPLETED_STEPS}_${accountType}`;
 					const savedSteps = await AsyncStorage.getItem(storageKey);
 					const completedSteps = savedSteps
 						? JSON.parse(savedSteps)
@@ -78,7 +87,7 @@ export default function VerifyEmailScreen() {
 						);
 					}
 					await AsyncStorage.setItem(
-						'current_account_type',
+						CURRENT_ACCOUNT_TYPE,
 						accountType
 					);
 					router.push({
@@ -89,20 +98,20 @@ export default function VerifyEmailScreen() {
 					});
 				} else {
 					await AsyncStorage.setItem(
-						'Access_Token',
+						ACCESS_TOKEN,
 						response.accessToken
 					);
 					await AsyncStorage.setItem(
-						'Refresh_Token',
+						REFRESH_TOKEN,
 						response.refreshToken
 					);
 					const expiration = new Date();
 					expiration.setHours(expiration.getHours() + 23);
 					await AsyncStorage.setItem(
-						'Auth_Expiration',
+						AUTH_EXPIRATION,
 						expiration.toISOString()
 					);
-					await AsyncStorage.setItem('Type', JSON.stringify(type));
+					await AsyncStorage.setItem(TYPE, JSON.stringify(type));
 					router.replace('/reset-password');
 				}
 			} catch (error: any) {
@@ -123,7 +132,7 @@ export default function VerifyEmailScreen() {
 	const handleResend = async () => {
 		setLoadingResend(true);
 		try {
-			const userId = await AsyncStorage.getItem('UserID');
+			const userId = await AsyncStorage.getItem(USER_ID);
 			if (accountType === 'business') {
 				const response: any = await resendBusinessVerificationCode(
 					userId as string

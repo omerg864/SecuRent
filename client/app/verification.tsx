@@ -18,6 +18,11 @@ import { businessTypes, currencies, Currency } from '@/utils/constants';
 import MultiSelectInput from '@/components/ui/MultiSelectInput';
 import { phone_regex } from '@/utils/regex';
 import ShowToast from '@/components/ui/ShowToast';
+import {
+	COMPLETED_STEPS,
+	CURRENT_ACCOUNT_TYPE,
+} from '@/utils/asyncStorageConstants';
+import { useBusiness } from '@/context/BusinessContext';
 
 export default function VerifyBusinessNumberScreen() {
 	const router = useRouter();
@@ -27,6 +32,7 @@ export default function VerifyBusinessNumberScreen() {
 	const [currency, setCurrency] = useState('ILS');
 	const [modalVisible, setModalVisible] = useState(false);
 	const [categories, setCategories] = useState<string[]>([]);
+	const { updateBusiness } = useBusiness();
 
 	const [selectedLocation, setSelectedLocation] = useState<{
 		address: string;
@@ -60,29 +66,29 @@ export default function VerifyBusinessNumberScreen() {
 				phone: phoneNumber.trim(),
 				address: selectedLocation?.address,
 				location: {
-					lat: selectedLocation?.lat || 0,
-					lng: selectedLocation?.lng || 0,
+					type: 'Point',
+					coordinates: [
+						selectedLocation?.lat || 0,
+						selectedLocation?.lng || 0,
+					],
 				},
 				currency: currency,
 				category: categories,
 			});
-			const businessData = await AsyncStorage.getItem('Business_Data');
-			if (businessData) {
-				const parsedBusinessData = JSON.parse(businessData);
-				parsedBusinessData.companyNumber = businessNumber.trim();
-				parsedBusinessData.phone = phoneNumber.trim();
-				parsedBusinessData.address = selectedLocation?.address;
-				parsedBusinessData.location = {
-					lat: selectedLocation?.lat || 0,
-					lng: selectedLocation?.lng || 0,
-				};
-				parsedBusinessData.currency = currency;
-				parsedBusinessData.category = categories;
-				await AsyncStorage.setItem(
-					'Business_Data',
-					JSON.stringify(parsedBusinessData)
-				);
-			}
+			updateBusiness({
+				companyNumber: businessNumber.trim(),
+				phone: phoneNumber.trim(),
+				address: selectedLocation?.address,
+				location: {
+					type: 'Point',
+					coordinates: [
+						selectedLocation?.lat || 0,
+						selectedLocation?.lng || 0,
+					],
+				},
+				currency: currency,
+				category: categories,
+			});
 
 			if (!response.success) {
 				setLoading(false);
@@ -90,7 +96,7 @@ export default function VerifyBusinessNumberScreen() {
 				return;
 			}
 
-			const storageKey = `completedSteps_${accountType}`;
+			const storageKey = `${COMPLETED_STEPS}_${accountType}`;
 			const savedSteps = await AsyncStorage.getItem(storageKey);
 			const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
 
@@ -102,7 +108,7 @@ export default function VerifyBusinessNumberScreen() {
 				);
 			}
 
-			await AsyncStorage.setItem('current_account_type', accountType);
+			await AsyncStorage.setItem(CURRENT_ACCOUNT_TYPE, accountType);
 			ShowToast('success', 'Business verified successfully');
 			router.replace({
 				pathname: './setup-screen',

@@ -6,6 +6,7 @@ import useWebSocket, {
 import Constants from 'expo-constants';
 import { checkToken } from '@/services/httpClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BUSINESS_DATA } from '@/utils/asyncStorageConstants';
 
 interface WebSocketContextType {
 	sendMessage: SendMessage | null;
@@ -25,9 +26,7 @@ export const WebSocketProvider: React.FC<{
 	const authWebSocket = async () => {
 		try {
 			const token = await checkToken();
-			const businessData = await AsyncStorage.getItem(
-				'Business_Data'
-			);
+			const businessData = await AsyncStorage.getItem(BUSINESS_DATA);
 			let type = 'customer';
 			if (businessData) {
 				type = 'business';

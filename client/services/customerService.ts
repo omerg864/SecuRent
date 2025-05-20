@@ -2,14 +2,13 @@ import { client } from './httpClient';
 import {
 	AuthData,
 	AuthResponse,
-	ClientStripeParamsResponse,
-	CreditCardData,
-	Customer,
+	ClientStripeParamsResponse
 } from './interfaceService';
 import { checkToken } from './httpClient';
 import { buildFormData } from '@/utils/functions';
 import { FileObject } from '@/types/business';
 import { AxiosResponse } from 'axios';
+import { Customer } from '@/types/customer';
 
 const registerCustomer = async (
 	customerData: AuthData,
