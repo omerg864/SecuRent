@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { CustomerInfoCard } from '../components/customer-info-card';
-import { TransactionsTable } from '../components/transactions-table';
-import { ReviewsTable } from '../components/customerReviewsTable ';
-import { ReportsTable } from '../components/customerReportsTable.jsx';
 import { getCustomerById } from '../services/customerService';
 import {
 	getCustomerTransactions,
@@ -12,6 +8,10 @@ import {
 } from '../services/adminServices';
 import Loader from '../components/Loader';
 import SuspensionButton from '../components/SuspensionButton.jsx';
+import { UserInfoCard } from '../components/UserInfoCard.jsx';
+import { TransactionsTable } from '../components/TransactionsTable.jsx';
+import { ReviewsTable } from '../components/ReviewsTable.jsx';
+import ReportsTable from '../components/ReportsTable.jsx';
 
 export default function SingleCustomer() {
 	const location = useLocation();
@@ -86,7 +86,6 @@ export default function SingleCustomer() {
 					/>
 				</div>
 			</div>
-
 			{loading ? (
 				<div className="flex justify-center items-center h-64">
 					<Loader />
@@ -96,7 +95,10 @@ export default function SingleCustomer() {
 					{/* שמאל */}
 					<div className="lg:col-span-1">
 						<div className="h-full min-h-[400px] max-h-[500px] overflow-auto">
-							<CustomerInfoCard customer={customer} />
+							<UserInfoCard
+								accountType="Customer"
+								account={customer}
+							/>
 						</div>
 					</div>
 
@@ -107,6 +109,7 @@ export default function SingleCustomer() {
 								Transactions
 							</h2>
 							<TransactionsTable
+								accountType="Customer"
 								transactions={transactions}
 								currency={customer.currency}
 							/>
@@ -116,14 +119,20 @@ export default function SingleCustomer() {
 							<h2 className="text-2xl font-semibold mb-4">
 								Reviews
 							</h2>
-							<ReviewsTable reviews={reviews} />
+							<ReviewsTable
+								accountType="Customer"
+								reviews={reviews}
+							/>
 						</section>
 
 						<section>
 							<h2 className="text-2xl font-semibold mb-4">
 								Reports
 							</h2>
-							<ReportsTable reports={reports} />
+							<ReportsTable
+								accountType="Customer"
+								reports={reports}
+							/>
 						</section>
 					</div>
 				</div>

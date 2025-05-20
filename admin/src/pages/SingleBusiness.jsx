@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { BusinessInfoCard } from '../components/business-info-card';
-import { BusinessTransactionsTable } from '../components/BusinessTransactionsTable';
-import { ReviewsTable } from '../components/BusinessReviewsTable';
-import { ReportsTable } from '../components/BusinessReportsTable';
+import { UserInfoCard } from '../components/UserInfoCard';
+import { TransactionsTable } from '../components/TransactionsTable';
 import Loader from '../components/Loader';
 import {
 	getBusinessTransactions,
@@ -12,6 +10,8 @@ import {
 } from '../services/adminServices';
 import { getBusinessById } from '../services/businessService';
 import SuspensionButton from '../components/SuspensionButton';
+import { ReviewsTable } from '../components/ReviewsTable';
+import ReportsTable from '../components/ReportsTable';
 
 export default function SingleBusiness() {
 	const { id } = useParams();
@@ -79,7 +79,6 @@ export default function SingleBusiness() {
 								</p>
 							</div>
 						)}
-						{console.log('Single Business: ', business)}
 						<SuspensionButton
 							accountType="Business"
 							account={business}
@@ -98,7 +97,10 @@ export default function SingleBusiness() {
 					{/* Left */}
 					<div className="lg:col-span-1">
 						<div className="h-full">
-							<BusinessInfoCard business={business} />
+							<UserInfoCard
+								accountType="Business"
+								account={business}
+							/>
 						</div>
 					</div>
 
@@ -109,7 +111,8 @@ export default function SingleBusiness() {
 								Transactions
 							</h2>
 							{transactions.length > 0 ? (
-								<BusinessTransactionsTable
+								<TransactionsTable
+									accountType="Business"
 									transactions={transactions}
 									currency={business.currency}
 								/>
@@ -125,7 +128,10 @@ export default function SingleBusiness() {
 								<h2 className="text-2xl font-semibold mb-4">
 									Reviews
 								</h2>
-								<ReviewsTable reviews={reviews} />
+								<ReviewsTable
+									accountType="Business"
+									reviews={reviews}
+								/>
 							</section>
 						}
 
@@ -133,7 +139,10 @@ export default function SingleBusiness() {
 							<h2 className="text-2xl font-semibold mb-4">
 								Reports
 							</h2>
-							<ReportsTable reports={reports} />
+							<ReportsTable
+								accountType="Business"
+								reports={reports}
+							/>
 						</section>
 					</div>
 				</div>
