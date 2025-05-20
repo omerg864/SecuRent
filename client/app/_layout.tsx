@@ -4,13 +4,12 @@ import {
 	ThemeProvider,
 } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { router, Slot, Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { AuthProvider } from '@/context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import '../global.css';
 import Toast from 'react-native-toast-message';
@@ -89,52 +88,44 @@ export default function RootLayout() {
 	}
 
 	return (
-		<AuthProvider>
-			<CustomerProvider>
-				<BusinessProvider>
-					<GestureHandlerRootView>
-						<ThemeProvider
-							value={
-								colorScheme === 'dark'
-									? DarkTheme
-									: DefaultTheme
-							}
-						>
-							<StripeProvider
-								publishableKey={stripePublishableKey}
+		<CustomerProvider>
+			<BusinessProvider>
+				<GestureHandlerRootView>
+					<ThemeProvider
+						value={
+							colorScheme === 'dark' ? DarkTheme : DefaultTheme
+						}
+					>
+						<StripeProvider publishableKey={stripePublishableKey}>
+							<Stack
+								screenOptions={{
+									headerShown: false, // Hide headers globally
+								}}
 							>
-								<Stack
-									screenOptions={{
-										headerShown: false, // Hide headers globally
-									}}
-								>
-									<Stack.Screen name="customer" />
-									<Stack.Screen name="business" />
-									<Stack.Screen name="login" />
-									<Stack.Screen name="get-started" />
-									<Stack.Screen name="register" />
-									<Stack.Screen name="+not-found" />
-									<Stack.Screen name="bank-details" />
-									<Stack.Screen name="setup-screen" />
-									<Stack.Screen name="verification" />
-									<Stack.Screen name="verify-email" />
-									<Stack.Screen name="add-payment" />
-									<Stack.Screen name="reset-password" />
-									<Stack.Screen name="restore-account" />
-								</Stack>
-								<StatusBar
-									style={
-										colorScheme === 'dark'
-											? 'dark'
-											: 'light'
-									}
-								/>
-								<Toast />
-							</StripeProvider>
-						</ThemeProvider>
-					</GestureHandlerRootView>
-				</BusinessProvider>
-			</CustomerProvider>
-		</AuthProvider>
+								<Stack.Screen name="customer" />
+								<Stack.Screen name="business" />
+								<Stack.Screen name="login" />
+								<Stack.Screen name="get-started" />
+								<Stack.Screen name="register" />
+								<Stack.Screen name="+not-found" />
+								<Stack.Screen name="bank-details" />
+								<Stack.Screen name="setup-screen" />
+								<Stack.Screen name="verification" />
+								<Stack.Screen name="verify-email" />
+								<Stack.Screen name="add-payment" />
+								<Stack.Screen name="reset-password" />
+								<Stack.Screen name="restore-account" />
+							</Stack>
+							<StatusBar
+								style={
+									colorScheme === 'dark' ? 'dark' : 'light'
+								}
+							/>
+							<Toast />
+						</StripeProvider>
+					</ThemeProvider>
+				</GestureHandlerRootView>
+			</BusinessProvider>
+		</CustomerProvider>
 	);
 }
