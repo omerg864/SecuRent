@@ -590,6 +590,7 @@ const getAllReviewsByBusinessId = asyncHandler(async (req, res) => {
 	const { id } = req.params;
 
 	const reviews = await Review.find({ business: id })
+		.sort({ createdAt: -1 })
 		.populate('customer', 'name image email')
 		.populate('business', 'name image');
 
@@ -603,5 +604,6 @@ const getAllReviewsByBusinessId = asyncHandler(async (req, res) => {
 		reviews,
 	});
 });
+
 
 export { createReview, getReviews, getReviewById, updateReview, deleteReview, getAllReviewsByCustomerId, getAllReviewsByBusinessId };

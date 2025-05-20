@@ -20,7 +20,7 @@ export function ReportsTable({ reports }) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                        <TableHead className='w-1/4'>Customer</TableHead>
+                            <TableHead className='w-1/4'>Customer</TableHead>
                             <TableHead className='w-1/4'>Title</TableHead>
                             <TableHead className='w-1/5'>Status</TableHead>
                             <TableHead className='w-1/5'>Resolved By</TableHead>
@@ -66,11 +66,13 @@ export function ReportsTable({ reports }) {
                                     <TableCell>{report.title}</TableCell>
                                     <TableCell>
                                         <span
-                                            className={`text-sm font-medium px-2 py-0.5 rounded ${
-                                                report.status === "resolved"
-                                                    ? "bg-green-100 text-green-600"
-                                                    : "bg-yellow-100 text-yellow-600"
-                                            }`}
+                                            className={`inline-block px-2 py-1 text-xs font-semibold rounded-full
+                                                ${
+                                                    report.status === "resolved"
+                                                        ? "bg-green-100 text-green-800"
+                                                        : "bg-yellow-100 text-yellow-800"
+                                                }
+                                            `}
                                         >
                                             {report.status}
                                         </span>
@@ -78,7 +80,7 @@ export function ReportsTable({ reports }) {
                                     <TableCell>
                                         {report.resolutionBy?.name || "—"}
                                     </TableCell>
-                                    <TableCell >
+                                    <TableCell>
                                         {new Date(
                                             report.createdAt
                                         ).toLocaleDateString("en-GB")}

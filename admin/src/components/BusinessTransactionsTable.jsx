@@ -8,7 +8,7 @@ import {
     TableRow
 } from "../components/table";
 import { Card } from "./card";
-import { formatCurrencySymbol } from "../utils/functions"; 
+import { formatCurrencySymbol } from "../utils/functions";
 
 export function BusinessTransactionsTable({ transactions, currency }) {
     if (!currency) {
@@ -17,10 +17,9 @@ export function BusinessTransactionsTable({ transactions, currency }) {
 
     const formatAmount = (amount) => {
         const symbol = formatCurrencySymbol(currency);
-        const formatted = new Intl.NumberFormat("he-IL", {
-        }).format(amount);
+        const formatted = new Intl.NumberFormat("he-IL", {}).format(amount);
 
-        return `${formatted} ${symbol}`; 
+        return `${formatted} ${symbol}`;
     };
 
     const formatDate = (isoString) => {
@@ -87,8 +86,7 @@ export function BusinessTransactionsTable({ transactions, currency }) {
                                                 ${
                                                     tx.status === "open"
                                                         ? "bg-green-100 text-green-800"
-                                                        : tx.status ===
-                                                          "closed"
+                                                        : tx.status === "closed"
                                                         ? "bg-gray-200 text-gray-800"
                                                         : tx.status ===
                                                           "charged"
