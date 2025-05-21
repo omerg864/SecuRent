@@ -1,4 +1,5 @@
 const Paging = ({ totalItems, itemsPerPage, setCurrentPage, currentPage }) => {
+	if (totalItems <= itemsPerPage) return;
 	const pageCount = Math.ceil(totalItems / itemsPerPage);
 	const pages = [];
 
