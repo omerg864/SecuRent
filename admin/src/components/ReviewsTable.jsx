@@ -99,15 +99,12 @@ export function ReviewsTable({ accountType, reviews }) {
 					</TableBody>
 				</Table>
 			</div>
-
-			{reviews.length > 0 && (
-				<Paging
-					totalItems={reviews.length}
-					itemsPerPage={reviewsPerPage}
-					setCurrentPage={setCurrentPage}
-					currentPage={currentPage}
-				/>
-			)}
+			<Paging
+				totalItems={reviews.length}
+				itemsPerPage={reviewsPerPage}
+				setCurrentPage={setCurrentPage}
+				currentPage={currentPage}
+			/>
 		</Card>
 	);
 }

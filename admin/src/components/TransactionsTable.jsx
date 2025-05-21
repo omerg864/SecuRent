@@ -144,15 +144,12 @@ export function TransactionsTable({ accountType, transactions, currency }) {
 					</TableBody>
 				</Table>
 			</div>
-
-			{transactions.length > 0 && (
-				<Paging
-					totalItems={transactions.length}
-					itemsPerPage={transactionsPerPage}
-					setCurrentPage={setCurrentPage}
-					currentPage={currentPage}
-				/>
-			)}
+			<Paging
+				totalItems={transactions.length}
+				itemsPerPage={transactionsPerPage}
+				setCurrentPage={setCurrentPage}
+				currentPage={currentPage}
+			/>
 		</Card>
 	);
 }
