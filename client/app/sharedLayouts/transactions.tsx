@@ -159,12 +159,7 @@ const TransactionsPage = () => {
 				}}
 				className="flex-row justify-between items-center bg-white rounded-xl mb-4 px-4 py-3 shadow-sm border border-gray-200"
 			>
-				<UserImage
-					image={userImage}
-					name={userName}
-					size={12}
-					className="ml-4"
-				/>
+				<UserImage image={userImage} name={userName} size={12} />
 				<View className="flex-1 ml-2">
 					<Text className="text-sm font-medium text-gray-900">
 						{accountType === 'business'
