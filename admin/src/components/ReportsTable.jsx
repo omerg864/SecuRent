@@ -115,14 +115,12 @@ const ReportsTable = ({ accountType, reports }) => {
 					</TableBody>
 				</Table>
 			</div>
-			{reports.length > 0 && (
-				<Paging
-					totalItems={reports.length}
-					itemsPerPage={reportsPerPage}
-					setCurrentPage={setCurrentPage}
-					currentPage={currentPage}
-				/>
-			)}
+			<Paging
+				totalItems={reports.length}
+				itemsPerPage={reportsPerPage}
+				setCurrentPage={setCurrentPage}
+				currentPage={currentPage}
+			/>
 		</Card>
 	);
 };
