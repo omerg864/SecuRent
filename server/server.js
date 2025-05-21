@@ -1,5 +1,12 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 import colors from 'colors';
 import connectDB from './config/db.js';
 import mongoSanitize from 'express-mongo-sanitize';
@@ -19,7 +26,6 @@ import cors from 'cors';
 import http from 'http';
 import { setUpWebSocket } from './config/websocket.js';
 
-dotenv.config();
 const PORT = process.env.PORT || 3000;
 
 const app = express();
