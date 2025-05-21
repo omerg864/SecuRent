@@ -470,7 +470,9 @@ const identifyUser = asyncHandler(async (req, res) => {
 const adminAnalytics = asyncHandler(async (req, res) => {
 	const numCustomers = await Customer.countDocuments();
 	const numBusinesses = await Business.countDocuments();
-	const numTransactions = await Transaction.countDocuments();
+	const numTransactions = await Transaction.countDocuments({
+		status: { $ne: 'intent' },
+	});
 	const numActiveTransactions = await Transaction.countDocuments({
 		status: 'open',
 	});
