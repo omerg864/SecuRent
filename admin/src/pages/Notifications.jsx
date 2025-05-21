@@ -19,9 +19,7 @@ const Notifications = () => {
       const data = await getAllNotifications(page);
       setNotifications(data.notifications);
       setFilteredNotifications(data.notifications);
-      const pages = (data.total / 10);
-      setTotalPages(pages);
-      console.log("Notifications data: ", data.notifications);
+      setTotalPages(data.total);
     } catch (error) {
       console.error("Error fetching notifications:", error);
       setError(error.message || "Failed to fetch notifications");

@@ -15,7 +15,7 @@ const getAdminNotifications = asyncHandler(async (req, res) => {
 		notifications,
 		page: page,
 		limit: NOTIFICATION_LIMIT_PER_PAGE,
-		total: await Notification.countDocuments(),
+		total: await Notification.countDocuments({ type: 'admin' }),
 		success: true,
 	});
 });
