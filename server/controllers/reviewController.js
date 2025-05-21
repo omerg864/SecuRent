@@ -573,7 +573,9 @@ const getAllReviewsByCustomerId = asyncHandler(async (req, res) => {
 	const { id } = req.params;
 	const reviews = await Review.find({
 		customer: id,
-	}).populate('customer', 'name image email ').populate('business', 'name image');
+	})
+	.sort({ createdAt: -1 })
+	.populate('customer', 'name image email ').populate('business', 'name image');
 
 	if (!reviews) {
 		res.status(404);
