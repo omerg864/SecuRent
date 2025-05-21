@@ -131,7 +131,7 @@ const ChargeDepositScreen = () => {
 							size={12}
 							className="mr-2"
 						/>
-						<Text className="text-base font-semibold text-[#2D2A2E]">
+						<Text className="text-base font-semibold text-[#2D2A2E] ml-2">
 							{customer?.name || 'Customer'}
 						</Text>
 					</View>
