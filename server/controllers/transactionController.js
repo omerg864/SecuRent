@@ -469,6 +469,7 @@ const getCustomerTransactionsAdmin = asyncHandler(async (req, res) => {
 		customer: id,
 		status: { $ne: 'intent' },
 	})
+	.sort({ opened_at: -1 })
 	.populate('business', 'name image rating category')
 	.populate('customer', 'name image phone');
 	res.status(200).json({
