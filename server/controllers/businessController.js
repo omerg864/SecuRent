@@ -597,6 +597,7 @@ const getNearbyBusinesses = asyncHandler(async (req, res) => {
 			},
 		},
 		{ $match: { 'rating.overall': { $gte: parseFloat(rating) } } },
+		{ $match: { $or: [{ suspended: { $exists: false } }, { suspended: false }] } },
 		...(category !== 'all'
 			? [
 					{
