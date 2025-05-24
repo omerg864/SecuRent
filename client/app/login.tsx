@@ -84,7 +84,6 @@ const LoginScreen = () => {
 					return;
 				}
 				AsyncStorage.removeItem(ACCOUNT_SETUP);
-				ShowToast('success', 'Login successful');
 				router.replace('/customer');
 			} else {
 				await setBusiness(response.user as Business);
@@ -121,7 +120,6 @@ const LoginScreen = () => {
 					return;
 				}
 				AsyncStorage.removeItem('Account_setup');
-				ShowToast('success', 'Login successful');
 				router.replace('/business/business-home');
 			}
 		} catch (error: any) {

@@ -232,6 +232,21 @@ const updateCustomer = asyncHandler(async (req, res) => {
 		throw new Error('Customer not found');
 	}
 
+	if(email && email_regex.test(email)) {
+		const customerExists = await Customer.findOne({
+			email: new RegExp(`^${email}$`, 'i'),
+		});
+		const businessExists = await Business.findOne({
+			email: new RegExp(`^${email}$`, 'i'),
+		});
+		if (customerExists || businessExists ) {
+			if (customerExists && customerExists._id.toString() !== customer._id.toString()) {
+			res.status(409);
+			throw new Error('Email already in use');
+			}
+		}
+	}
+
 	if (req.file) {
 		if (customer.image) {
 			await deleteImage(customer.image, true);

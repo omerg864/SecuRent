@@ -14,6 +14,7 @@ interface ProfileImageInputProps {
   containerClassName?: string;
   themeText?: boolean;
   file: FileObject | null;
+  initialUrl?: string; // <- added support for existing profile image
 }
 
 export default function ProfileImageInput({
@@ -22,7 +23,8 @@ export default function ProfileImageInput({
   labelClassName,
   containerClassName,
   themeText = true,
-  file
+  file,
+  initialUrl,
 }: ProfileImageInputProps) {
   const [uri, setUri] = useState<string | null>(null);
   const [wasManuallyEdited, setWasManuallyEdited] = useState(false);
@@ -35,7 +37,7 @@ export default function ProfileImageInput({
   ): FileObject => ({
     uri,
     name: fileName,
-    type: "image/jpeg"
+    type: "image/jpeg",
   });
 
   const pickFromLibrary = async () => {
@@ -45,15 +47,12 @@ export default function ProfileImageInput({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 1
+        quality: 1,
       });
 
       if (!result.canceled) {
         const asset = result.assets[0];
-        const file = ensureValidFile(
-          asset.uri,
-          asset.fileName ?? "image.jpg"
-        );
+        const file = ensureValidFile(asset.uri, asset.fileName ?? "image.jpg");
         setWasManuallyEdited(true);
         setUri(asset.uri);
         setFile(file);
@@ -70,7 +69,7 @@ export default function ProfileImageInput({
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 1
+        quality: 1,
       });
 
       if (!result.canceled) {
@@ -95,10 +94,12 @@ export default function ProfileImageInput({
   useEffect(() => {
     if (file?.uri) {
       setUri(file.uri);
+    } else if (initialUrl && !wasManuallyEdited) {
+      setUri(initialUrl);
     } else {
       setUri(null);
     }
-  }, [file]);
+  }, [file, initialUrl, wasManuallyEdited]);
 
   const handleEditPress = () => {
     actionSheetRef.current?.show();
@@ -134,10 +135,7 @@ export default function ProfileImageInput({
 
         {uri && (
           <View className="mt-2 flex-col gap-2">
-            <Text
-              onPress={handleEditPress}
-              className="text-blue-500 underline"
-            >
+            <Text onPress={handleEditPress} className="text-blue-500 underline">
               Edit Image
             </Text>
           </View>
@@ -160,7 +158,6 @@ export default function ProfileImageInput({
           <Text className="text-lg text-center">Choose from Library</Text>
         </TouchableOpacity>
 
-        {/* Remove Image */}
         {uri && (
           <TouchableOpacity
             onPress={handleRemove}
@@ -194,7 +191,7 @@ export default function ProfileImageInput({
                 position: "absolute",
                 top: 50,
                 left: 20,
-                zIndex: 10
+                zIndex: 10,
               }}
             >
               <Text style={{ color: "white", fontSize: 30 }}>✕</Text>

@@ -119,6 +119,30 @@ const getCustomerData = async () => {
 	}
 };
 
+const updateCustomerDetails = async (
+	customerData: Partial<Customer>,
+	file: FileObject | null
+): Promise<CustomerResponse> => {
+	try {
+		const formData = buildFormData(customerData, file);
+		const accessToken = await checkToken();
+		const response = await client.put<CustomerResponse>(
+			'customer/update',
+			formData,
+			{
+				headers: {
+					'Content-Type': 'multipart/form-data',
+					Authorization: `Bearer ${accessToken}`,
+				},
+			}
+		);
+		console.log('Update response:', response.data);
+		return response.data;
+	} catch (error) {
+		throw error || 'Updating customer details failed.';
+	}
+}
+
 export {
 	registerCustomer,
 	updateCreditCard,
@@ -127,4 +151,5 @@ export {
 	resendCustomerVerificationCode,
 	customerCardIntent,
 	getCustomerData,
+	updateCustomerDetails
 };
