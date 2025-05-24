@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 
 const ColumnChart = ({ analyticsData }) => {
@@ -66,8 +66,8 @@ const ColumnChart = ({ analyticsData }) => {
 
 	const [time, setTime] = useState('this');
 
-	const [state, setState] = useState({
-		series: [
+	const state = useMemo(() => {
+		return [
 			{
 				name: 'Closed',
 				data:
@@ -90,15 +90,10 @@ const ColumnChart = ({ analyticsData }) => {
 								(item) => item.numChargedTransactions
 						  ),
 			},
-		],
-	});
+		];
+	}, [time, analyticsData]);
 
-	const handleReset = () => {
-		setState((prevState) => ({
-			...prevState,
-		}));
-	};
-	handleReset;
+	console.log('state', state);
 
 	return (
 		<div className="col-span-12 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">
@@ -152,7 +147,7 @@ const ColumnChart = ({ analyticsData }) => {
 				<div id="chartTwo" className="-ml-5 -mb-9">
 					<ReactApexChart
 						options={options}
-						series={state.series}
+						series={state}
 						type="bar"
 						height={350}
 					/>

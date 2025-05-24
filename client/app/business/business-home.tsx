@@ -5,15 +5,13 @@ import { ThemedText } from '@/components/ui/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Transaction } from '@/services/interfaceService';
+import { Transaction } from '../../types/transaction';
 import { getBusinessTransactions } from '@/services/transactionService';
 import { useWebSocketContext } from '@/context/WebSocketContext';
 import { currencies } from '@/utils/constants';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getBusinessData } from '@/services/businessService';
 import ShowToast from '@/components/ui/ShowToast';
-import { Business } from '@/types/business';
 import { useBusiness } from '@/context/BusinessContext';
 
 const PAGE_SIZE = 5;
@@ -190,7 +188,7 @@ const BusinessHomePage = () => {
 
 			<View
 				className="bg-white rounded-xl shadow-lg p-2"
-				style={{ height: 280 }} // fixed height ensures scrolling within this box
+				style={{ minHeight: 280, maxHeight: '100%' }} // fixed height ensures scrolling within this box
 			>
 				<View className="flex-row justify-between items-center py-4 px-2 border-b border-gray-200">
 					<ThemedText
@@ -199,11 +197,15 @@ const BusinessHomePage = () => {
 					>
 						Active Transactions
 					</ThemedText>
-					<Ionicons name="chevron-forward" size={20} color="#666" />
+					<Ionicons
+						name="chevron-forward"
+						size={20}
+						color="#666"
+						onPress={() => router.push('/business/transactions')}
+					/>
 				</View>
 
 				<FlatList
-					style={{ flex: 1 }}
 					data={transactions}
 					renderItem={renderTransaction}
 					keyExtractor={(item) => item._id}
@@ -226,10 +228,7 @@ const BusinessHomePage = () => {
 					}
 					ListFooterComponent={() =>
 						isLoading && (
-							<View
-								className="py-4 justify-center items-center align-middle"
-								style={{ height: 200 }}
-							>
+							<View className="py-4 justify-center items-center align-middle">
 								<LoadingSpinner />
 							</View>
 						)
