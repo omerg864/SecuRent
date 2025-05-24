@@ -434,14 +434,9 @@ const updateBusinessDetails = asyncHandler(async (req, res) => {
 		business.image = imageUrl;
 	}
 
-	const geoLocation = {
-		type: 'Point',
-		coordinates: [location.lng, location.lat], // important: [lng, lat]
-	};
-
 	business.companyNumber = companyNumber;
 	business.address = address;
-	business.location = geoLocation;
+	business.location = location;
 	business.phone = phone;
 	business.currency = currency;
 	business.category = category || [];
