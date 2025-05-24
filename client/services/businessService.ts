@@ -1,6 +1,7 @@
 import { buildFormData } from '@/utils/functions';
 import { checkToken, client } from './httpClient';
 import {
+	ActivationResponse,
 	AuthData,
 	AuthResponse,
 	BusinessDetails,
@@ -179,6 +180,18 @@ const getBusinessData = async () => {
 	}
 };
 
+const toggleActivation = async () => {
+	try {
+		const accessToken = await checkToken();
+		const response = await client.get<ActivationResponse>(`business/activation`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
+		return response.data;
+	} catch (error) {
+		throw error || 'Toggle activation failed';
+	}
+}
+
 export {
 	registerBusiness,
 	verifyEmailBusiness,
@@ -189,5 +202,6 @@ export {
 	getStripeOnboardingLink,
 	getNearestBusinesses,
 	getBusinessProfile,
-	getBusinessData
+	getBusinessData,
+	toggleActivation
 };

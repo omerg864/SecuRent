@@ -6,8 +6,8 @@ import {
 } from '@/services/locationService';
 import { LocationPrediction } from '@/services/interfaceService';
 
-export const useAddressAutocomplete = () => {
-	const [query, setQuery] = useState('');
+export const useAddressAutocomplete = (defaultQuery: string = '') => {
+	const [query, setQuery] = useState(defaultQuery);
 	const [suggestions, setSuggestions] = useState<LocationPrediction[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [selected, setSelected] = useState<{

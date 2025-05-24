@@ -115,6 +115,10 @@ const businessScheme = mongoose.Schema({
 		type: Boolean,
 		default: false,
 	},
+	activated: {
+		type: Boolean,
+		default: true,
+	},
 });
 
 businessScheme.index({ location: '2dsphere' });
