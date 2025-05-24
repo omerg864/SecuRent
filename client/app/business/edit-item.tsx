@@ -4,7 +4,7 @@ import { FileObject } from '@/types/business';
 import { ThemedText } from '@/components/ui/ThemedText';
 import { getItemByIdForBusiness, updateItemById } from '@/services/itemService';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Item } from '@/services/interfaceService';
+import { Item } from '@/types/item';
 import HapticButton from '@/components/ui/HapticButton';
 import ItemForm from '@/components/forms/ItemForm';
 import ShowToast from '@/components/ui/ShowToast';

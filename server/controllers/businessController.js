@@ -16,6 +16,7 @@ import { verifyCompanyNumber } from '../utils/externalFunctions.js';
 import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
 import { v4 as uuidv4 } from 'uuid';
 import stripe from '../config/stripe.js';
+import Transaction from '../models/transactionModel.js';
 
 //Reusable login success function
 const successFullLogin = async (res, business) => {
@@ -393,7 +394,11 @@ const updateBusinessDetails = asyncHandler(async (req, res) => {
 		throw new Error('Invalid phone number format');
 	}
 
-	if (location.lat === undefined || location.lng === undefined) {
+	if (
+		location.coordinates[0] === undefined ||
+		location.coordinates[1] === undefined ||
+		location.type !== 'Point'
+	) {
 		res.status(401);
 		throw new Error('Location invalid');
 	}
@@ -429,14 +434,9 @@ const updateBusinessDetails = asyncHandler(async (req, res) => {
 		business.image = imageUrl;
 	}
 
-	const geoLocation = {
-		type: 'Point',
-		coordinates: [location.lng, location.lat], // important: [lng, lat]
-	};
-
 	business.companyNumber = companyNumber;
 	business.address = address;
-	business.location = geoLocation;
+	business.location = location;
 	business.phone = phone;
 	business.currency = currency;
 	business.category = category || [];
@@ -597,6 +597,8 @@ const getNearbyBusinesses = asyncHandler(async (req, res) => {
 			},
 		},
 		{ $match: { 'rating.overall': { $gte: parseFloat(rating) } } },
+		{ $match: { activated: true } },
+		{ $match: { $or: [{ suspended: { $exists: false } }, { suspended: false }] } },
 		...(category !== 'all'
 			? [
 					{
@@ -684,6 +686,31 @@ const getBusinessData = asyncHandler(async (req, res) => {
 	res.status(200).json({ success: true, business });
 });
 
+const toggleBusinessActivation = asyncHandler(async (req, res) => {
+	const businessOpenTransactionsCount = await Transaction.countDocuments({
+		business: req.business._id,
+		status: 'open',
+	});
+
+	if (businessOpenTransactionsCount > 0) {
+		res.status(400);
+		throw new Error(
+			'Cannot change activation status while there are open transactions'
+		);
+	}
+
+	req.business.activated = !req.business.activated;
+	await req.business.save();
+
+	res.status(200).json({
+		success: true,
+		message: `Business ${
+			req.business.activated ? 'activated' : 'deactivated'
+		} successfully`,
+		activated: req.business.activated,
+	});
+});
+
 export {
 	registerBusiness,
 	loginBusiness,
@@ -701,4 +728,5 @@ export {
 	getNearbyBusinesses,
 	getBusinessProfile,
 	getBusinessData,
+	toggleBusinessActivation,
 };

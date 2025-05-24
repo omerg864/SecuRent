@@ -78,6 +78,12 @@ interface BusinessResponse {
 	business: Business;
 }
 
+interface ActivationResponse {
+	success: boolean;
+	message: string;
+	activated: boolean;
+}
+
 interface BusinessesResponse {
 	success: boolean;
 	businesses: Business[];
@@ -152,5 +158,6 @@ export type {
 	BusinessDetails,
 	ItemResponse,
 	ReportResponse,
-	ReviewResponse
+	ReviewResponse,
+	ActivationResponse
 };
