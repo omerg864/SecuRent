@@ -43,4 +43,5 @@ export interface Business {
 		bankName: string;
 	};
 	suspended: boolean;
+	activated: boolean;
 }

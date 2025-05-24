@@ -9,17 +9,21 @@ interface AccountProps {
 	title: string;
 	subTitle: string;
 	Icon: ReactElement;
+	buttonBackground?: string;
+	descriptionColor?: string;
 }
 const AccountButton = ({
 	handlePress,
 	title,
 	subTitle,
 	Icon,
+	buttonBackground = 'bg-indigo-600/30',
+	descriptionColor = Colors.light.icon,
 }: AccountProps) => {
 	return (
 		<HapticButton
 			onPress={handlePress}
-			className="bg-indigo-600/30 p-6 pt-10 pb-10 rounded-2xl active:opacity-90"
+			className={`p-6 pt-10 pb-10 rounded-2xl active:opacity-90 ${buttonBackground}`}
 		>
 			<View className="flex-row justify-between items-center">
 				<View className="flex-1">
@@ -28,7 +32,7 @@ const AccountButton = ({
 					</ThemedText>
 					<ThemedText
 						className="mt-1"
-						style={{ color: Colors.light.icon }}
+						style={{ color: descriptionColor }}
 					>
 						{subTitle}
 					</ThemedText>

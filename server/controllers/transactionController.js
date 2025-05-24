@@ -88,6 +88,21 @@ const createTransaction = asyncHandler(async (req, res) => {
 		throw new Error('Business not found');
 	}
 
+	if (businessDoc.suspended) {
+		res.status(403);
+		throw new Error('Business is suspended');
+	}
+
+	if (!businessDoc.activated) {
+		res.status(403);
+		throw new Error('Business is not active');
+	}
+
+	if (!req.customer.stripe_customer_id) {
+		res.status(400);
+		throw new Error('Stripe customer not initialized');
+	}
+
 	const paymentIntent = await stripe.paymentIntents.create({
 		amount: amount * 100, // Stripe expects amount in cents
 		currency,
@@ -127,6 +142,11 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 	if (business.suspended) {
 		res.status(403);
 		throw new Error('Business is suspended');
+	}
+
+	if (!business.activated) {
+		res.status(403);
+		throw new Error('Business is not active');
 	}
 
 	if (!req.customer.stripe_customer_id) {
@@ -468,9 +488,9 @@ const getCustomerTransactionsAdmin = asyncHandler(async (req, res) => {
 		customer: id,
 		status: { $ne: 'intent' },
 	})
-	.sort({ opened_at: -1 })
-	.populate('business', 'name image rating category')
-	.populate('customer', 'name image phone');
+		.sort({ opened_at: -1 })
+		.populate('business', 'name image rating category')
+		.populate('customer', 'name image phone');
 	res.status(200).json({
 		success: true,
 		transactions,
@@ -484,7 +504,7 @@ const getBusinessTransactionsAdmin = asyncHandler(async (req, res) => {
 		business: id,
 		status: { $ne: 'intent' },
 	})
-		.sort({ opened_at: -1 }) 
+		.sort({ opened_at: -1 })
 		.populate('customer', 'name image phone')
 		.populate('business', 'name image rating category');
 
@@ -493,7 +513,6 @@ const getBusinessTransactionsAdmin = asyncHandler(async (req, res) => {
 		transactions,
 	});
 });
-
 
 const getTransactionById = asyncHandler(async (req, res) => {
 	const transaction = await Transaction.findById(req.params.id)

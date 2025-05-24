@@ -121,6 +121,13 @@ export default function Layout() {
 						}}
 					/>
 					<Drawer.Screen
+						name="settings"
+						options={{
+							drawerLabel: 'Settings',
+							title: 'Settings',
+						}}
+					/>
+					<Drawer.Screen
 						name="edit-item"
 						options={{
 							drawerLabel: 'Edit Item',
@@ -144,6 +151,24 @@ export default function Layout() {
 							title: 'Item Profile',
 							drawerItemStyle: { display: 'none' },
 							headerShown: true,
+						}}
+					/>
+					<Drawer.Screen
+						name="bank-details"
+						options={{
+							drawerLabel: 'Bank Details',
+							title: 'Bank Details',
+							drawerItemStyle: { display: 'none' },
+							headerShown: false,
+						}}
+					/>
+					<Drawer.Screen
+						name="business-details"
+						options={{
+							drawerLabel: 'Business Details',
+							title: 'Business Details',
+							drawerItemStyle: { display: 'none' },
+							headerShown: false,
 						}}
 					/>
 				</Drawer>
