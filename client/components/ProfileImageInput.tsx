@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { View, Text, Image, TouchableOpacity, Modal } from "react-native";
+import { View, Text, Image, TouchableOpacity, Modal, StyleProp, TextStyle } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import HapticButton from "@/components/ui/HapticButton";
 import { ThemedText } from "./ui/ThemedText";
@@ -15,6 +15,7 @@ interface ProfileImageInputProps {
   themeText?: boolean;
   file: FileObject | null;
   initialUrl?: string; // <- added support for existing profile image
+  labelColor?: string;
 }
 
 export default function ProfileImageInput({
@@ -25,11 +26,17 @@ export default function ProfileImageInput({
   themeText = true,
   file,
   initialUrl,
+  labelColor = "",
 }: ProfileImageInputProps) {
   const [uri, setUri] = useState<string | null>(null);
   const [wasManuallyEdited, setWasManuallyEdited] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const actionSheetRef = useRef<ActionSheetRef>(null);
+
+  const labelStyle: StyleProp<TextStyle> = {};
+	if (labelColor) {
+		labelStyle.color = labelColor;
+	}
 
   const ensureValidFile = (
     uri: string,
@@ -109,7 +116,7 @@ export default function ProfileImageInput({
     <View className={`${containerClassName} flex-col gap-4`}>
       <View className="items-center">
         {themeText ? (
-          <ThemedText className={`text-sm font-medium ${labelClassName}`}>
+          <ThemedText style={labelStyle} className={`text-sm font-medium ${labelClassName}`}>
             {label}
           </ThemedText>
         ) : (

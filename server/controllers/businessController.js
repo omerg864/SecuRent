@@ -307,7 +307,6 @@ const updateBusiness = asyncHandler(async (req, res) => {
 		email,
 		phone,
 		category,
-		bank,
 		address,
 		imageDeleteFlag,
 		currency,
@@ -342,7 +341,6 @@ const updateBusiness = asyncHandler(async (req, res) => {
 	if (email && email_regex.test(email)) business.email = email;
 	if (phone) business.phone = phone;
 	if (category) business.category = category;
-	if (bank) business.bank = bank;
 	if (address) business.address = address;
 	if (currency) business.currency = currency;
 	if (rating !== undefined) business.rating = rating;
@@ -451,6 +449,123 @@ const updateBusinessDetails = asyncHandler(async (req, res) => {
 		valid: business.isValid,
 		message: 'Company verified and updated successfully',
 		company: verification,
+	});
+});
+
+const updateBusinessAccount = asyncHandler(async (req, res) => {
+	const { companyNumber, address, phone, currency, name, email, imageDeleteFlag } = req.body;
+	let { category = '[]', location } = req.body;
+
+	const categoryArray = JSON.parse(category);
+
+	if (!Array.isArray(categoryArray)) {
+		res.status(400);
+		throw new Error('Category must be an array');
+	}
+	category = categoryArray.map((cat) => cat.trim()).filter(Boolean);
+
+	if (category.every((cat) => typeof cat !== 'string')) {
+		res.status(400);
+		throw new Error('Category must contain only strings');
+	}
+
+	if (
+		!companyNumber ||
+		!address ||
+		!location ||
+		!phone ||
+		!currency ||
+		!name ||
+		!email
+	) {
+		res.status(400);
+		throw new Error('All fields are required');
+	}
+
+	if (!phone_regex.test(phone)) {
+		res.status(401);
+		throw new Error('Invalid phone number format');
+	}
+
+	if (!email_regex.test(email)) {
+		res.status(401);
+		throw new Error('Invalid email format');
+	}
+
+	const geoLocation = JSON.parse(location);
+
+	if (
+		geoLocation.coordinates[0] === undefined ||
+		geoLocation.coordinates[1] === undefined ||
+		geoLocation.type !== 'Point'
+	) {
+		res.status(401);
+		throw new Error('Location invalid');
+	}
+
+	let isBusiness = await Business.findOne({ companyNumber });
+	if (
+		isBusiness &&
+		isBusiness._id.toString() !== req.business._id.toString()
+	) {
+		res.status(401);
+		throw new Error('Business already exists');
+	}
+
+	isBusiness = await Business.findOne({
+		email: new RegExp(`^${email}$`, 'i'),
+	});
+	if (
+		isBusiness &&
+		isBusiness._id.toString() !== req.business._id.toString()
+	) {
+		res.status(401);
+		throw new Error('Email already in use');
+	}
+
+	const verification = await verifyCompanyNumber(companyNumber);
+	if (!verification) {
+		res.status(402);
+		throw new Error('Company number not found in official registry');
+	}
+
+	const business = await Business.findById(req.business._id);
+
+	if (req.file) {
+		if (business.image) {
+			await deleteImage(business.image, true);
+		}
+		const imageID = uuidv4();
+		const imageUrl = await uploadToCloudinary(
+			req.file.buffer,
+			`${process.env.CLOUDINARY_BASE_FOLDER}/businesses`,
+			imageID
+		);
+		business.image = imageUrl;
+	} else if (imageDeleteFlag) {
+		if (business.image) {
+			await deleteImage(business.image, true);
+		}
+		business.image = '';
+	}
+
+	business.companyNumber = companyNumber;
+	business.address = address;
+	business.location = geoLocation;
+	business.phone = phone;
+	business.currency = currency;
+	business.category = category || [];
+	business.isCompanyNumberVerified = true;
+	business.name = name;
+	business.email = email;
+	if (business.isEmailValid && business.isBankValid) {
+		business.isValid = true;
+	}
+	await business.save();
+
+	res.status(200).json({
+		success: true,
+		business
 	});
 });
 
@@ -598,7 +713,11 @@ const getNearbyBusinesses = asyncHandler(async (req, res) => {
 		},
 		{ $match: { 'rating.overall': { $gte: parseFloat(rating) } } },
 		{ $match: { activated: true } },
-		{ $match: { $or: [{ suspended: { $exists: false } }, { suspended: false }] } },
+		{
+			$match: {
+				$or: [{ suspended: { $exists: false } }, { suspended: false }],
+			},
+		},
 		...(category !== 'all'
 			? [
 					{
@@ -729,4 +848,5 @@ export {
 	getBusinessProfile,
 	getBusinessData,
 	toggleBusinessActivation,
+	updateBusinessAccount
 };
