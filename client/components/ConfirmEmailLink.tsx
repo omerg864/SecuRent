@@ -12,7 +12,7 @@ const ConfirmEmailLink: React.FC<ConfirmEmailLinkProps> = ({
     email,
     recipientName,
     businessName = "Your Business",
-    className = "text-sm font-medium text-blue-600 underline mb-2"
+    className = "text-md font-medium text-blue-600 underline mb-2"
 }) => {
     const handlePress = () => {
         Alert.alert(

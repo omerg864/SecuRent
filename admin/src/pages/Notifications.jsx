@@ -2,12 +2,11 @@ import NotificationsTable from "../components/NotificationTable";
 import Pagination from "../components/Pagination";
 import { useState, useEffect } from "react";
 import Loader from "../components/Loader";
-import { getAllNotifications } from "../services/notificationsService";
+import { getAllNotifications, markAdminNotificationAsRead } from "../services/notificationsService";
 
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
-  const [filteredNotifications, setFilteredNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
@@ -18,7 +17,6 @@ const Notifications = () => {
     try {
       const data = await getAllNotifications(page);
       setNotifications(data.notifications);
-      setFilteredNotifications(data.notifications);
       setTotalPages(data.total);
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -27,6 +25,21 @@ const Notifications = () => {
       setIsLoading(false);
     }
   };
+
+  const markAsRead = async (id) => {
+    try {
+      await markAdminNotificationAsRead(id);
+      setNotifications((prev) =>
+        prev.map((notification) =>
+          notification._id === id ? { ...notification, isRead: true } : notification
+        )
+      );
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      setError(error.message || "Failed to mark notification as read");
+    }
+  };
+
 
   useEffect(() => {
     fetchNotifications(page);
@@ -50,7 +63,9 @@ const Notifications = () => {
 
   return (
     <>
-      <NotificationsTable notifications={filteredNotifications} />
+      <NotificationsTable notifications={notifications}
+      setNotifications={setNotifications}
+       markAsRead={markAsRead}/>
       <Pagination totalPages={totalPages} pageSize={10} />
     </>
   );

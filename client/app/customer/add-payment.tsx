@@ -88,7 +88,7 @@ const AddPaymentScreen = () => {
 
 	return (
 		<ParallaxScrollView
-			headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+			headerBackgroundColor={{ light: '#D0D0D0', dark: '#D0D0D0' }}
 			headerImage={
 				<Ionicons
 					name="card-outline"
@@ -101,12 +101,12 @@ const AddPaymentScreen = () => {
 				router.replace({ pathname: './settings' });
 			}}
 		>
-			<ScrollView className="pb-8">
+			<ScrollView className="pb-8 bg-white">
 				<View className="px-5 pt-8 pb-5">
-					<ThemedText className="text-3xl font-bold text-white">
+					<ThemedText className="text-3xl font-bold text-black" darkColor='black'>
 						Change Payment Method
 					</ThemedText>
-					<ThemedText className="text-lg text-indigo-200 mt-1">
+					<ThemedText className="text-lg text-indigo-200 mt-1" darkColor='black'>
 						Enter your payment details
 					</ThemedText>
 					{loading && (

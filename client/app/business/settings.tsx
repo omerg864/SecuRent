@@ -101,6 +101,7 @@ export default function SettingsPage() {
 									title={page.title}
 									subTitle={page.subTitle}
 									Icon={page.icon}
+									isSettings={true}
 								/>
 							))}
 						</View>

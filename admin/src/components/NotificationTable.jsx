@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-const NotificationsTable = ({ notifications }) => {
+const NotificationsTable = ({ notifications, setNotifications, markAsRead }) => {
   const hasCustomer = notifications.some((n) => n.customer);
   const hasBusiness = notifications.some((n) => n.business);
 
@@ -11,7 +11,12 @@ const NotificationsTable = ({ notifications }) => {
       </h4>
 
       <div className="flex flex-col">
-        <div className={`grid rounded-sm bg-gray-2 dark:bg-meta-4`} style={{ gridTemplateColumns: `repeat(${hasCustomer + hasBusiness + 1}, 1fr)` }}>
+        <div
+          className="grid rounded-sm bg-gray-2 dark:bg-meta-4"
+          style={{
+            gridTemplateColumns: `repeat(${hasCustomer + hasBusiness + 2}, 1fr)`,
+          }}
+        >
           {hasCustomer && (
             <div className="p-2.5 xl:p-5">
               <h5 className="text-sm font-medium uppercase xsm:text-base">Customer</h5>
@@ -25,8 +30,12 @@ const NotificationsTable = ({ notifications }) => {
           <div className="p-2.5 text-center xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">Content</h5>
           </div>
+          <div className="p-2.5 text-center xl:p-5">
+            <h5 className="text-sm font-medium uppercase xsm:text-base">Mark as Read</h5>
+          </div>
         </div>
 
+        {/* Table Body */}
         {notifications.length === 0 ? (
           <div className="p-5 text-center text-gray-500 dark:text-gray-400">
             There are no notifications.
@@ -39,13 +48,15 @@ const NotificationsTable = ({ notifications }) => {
                 index !== notifications.length - 1
                   ? "border-b border-stroke dark:border-strokedark"
                   : ""
-              } p-2.5 xl:p-5 hover:bg-gray-1 dark:hover:bg-meta-4`}
-              style={{ gridTemplateColumns: `repeat(${hasCustomer + hasBusiness + 1}, 1fr)` }}
+              } p-2.5 xl:p-5`}
+              style={{
+                gridTemplateColumns: `repeat(${hasCustomer + hasBusiness + 2}, 1fr)`,
+              }}
             >
               {hasCustomer && notification.customer ? (
                 <Link
                   to={`/customer/${notification.customer._id}`}
-                  className="flex items-center gap-3"
+                  className="flex items-center gap-3 hover:underline"
                 >
                   <div className="flex-shrink-0 hidden sm:block">
                     <img
@@ -80,6 +91,18 @@ const NotificationsTable = ({ notifications }) => {
                 <p className="text-black dark:text-white text-center break-words whitespace-pre-line">
                   {notification.content}
                 </p>
+              </div>
+              <div className="flex justify-center items-center">
+                <input
+                  type="checkbox"
+                  onChange={() => {
+                    markAsRead(notification._id);
+                    setNotifications((prev) =>
+                      prev.filter((n) => n._id !== notification._id)
+                    );
+                  }}
+                  className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
+                />
               </div>
             </div>
           ))
