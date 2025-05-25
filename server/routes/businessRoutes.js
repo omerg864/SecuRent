@@ -17,6 +17,7 @@ import {
 	getBusinessProfile,
 	getBusinessData,
 	toggleBusinessActivation,
+	updateBusinessAccount,
 } from '../controllers/businessController.js';
 import {
 	authAny,
@@ -43,6 +44,12 @@ router.get('/nearby', authCustomer, getNearbyBusinesses);
 
 // Protected Routes (Requires Authentication)
 router.put('/update', authBusiness, upload.single('image'), updateBusiness);
+router.put(
+	'/update/account',
+	authBusiness,
+	upload.single('image'),
+	updateBusinessAccount
+);
 router.delete('/delete', authBusiness, deleteBusiness);
 router.put('/update-password', authBusiness, updateBusinessPassword);
 router.get('/stripe-onboarding', authBusiness, getStripeOnboardingLink);

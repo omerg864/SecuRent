@@ -7,17 +7,23 @@ import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import { ThemedText } from '@/components/ui/ThemedText';
 import HapticButton from '@/components/ui/HapticButton';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { updateBusinessDetails } from '@/services/businessService';
+import {
+	updateBusinessAccount,
+	updateBusinessDetails,
+} from '@/services/businessService';
 import AddressAutocompleteInput from '../../components/ui/AddressAutoCompleteInput';
-import { StepResponse } from '@/services/interfaceService';
+import { BusinessResponse, StepResponse } from '@/services/interfaceService';
 import { TouchableOpacity } from '@/components/ui/touchable-opacity';
 import ModalList from '@/components/ModalList';
 import { businessTypes, currencies, Currency } from '@/utils/constants';
 import MultiSelectInput from '@/components/ui/MultiSelectInput';
-import { phone_regex } from '@/utils/regex';
+import { emailRegex, phone_regex } from '@/utils/regex';
 import ShowToast from '@/components/ui/ShowToast';
 import { useBusiness } from '@/context/BusinessContext';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
+import { FileObject } from '@/types/business';
+import ProfileImageInput from '@/components/ProfileImageInput';
+import { ThemedTextInput } from '@/components/ui/ThemedTextInput';
 
 export default function UpdateBusinessDetails() {
 	const router = useRouter();
@@ -25,6 +31,9 @@ export default function UpdateBusinessDetails() {
 	const [businessNumber, setBusinessNumber] = useState(
 		business?.companyNumber || ''
 	);
+	const [name, setName] = useState(business?.name || '');
+	const [email, setEmail] = useState(business?.email || '');
+	const [file, setFile] = useState<FileObject | null>(null);
 	const [phoneNumber, setPhoneNumber] = useState(business?.phone || '');
 	const [loading, setLoading] = useState(false);
 	const [currency, setCurrency] = useState(business?.currency || 'ILS');
@@ -56,6 +65,14 @@ export default function UpdateBusinessDetails() {
 			ShowToast('info', 'Please enter a valid phone number');
 			return;
 		}
+		if (!name.trim()) {
+			ShowToast('info', 'Please enter a valid business name');
+			return;
+		}
+		if (!email.trim() || !emailRegex.test(email.trim())) {
+			ShowToast('info', 'Please enter a valid email address');
+			return;
+		}
 		if (!/^\d{9}$/.test(businessNumber.trim())) {
 			ShowToast('info', 'Please enter a valid 9-digit business number');
 			return;
@@ -76,20 +93,25 @@ export default function UpdateBusinessDetails() {
 				currency: currency,
 				category: categories,
 			});
-			const response: StepResponse = await updateBusinessDetails({
-				companyNumber: businessNumber.trim(),
-				phone: phoneNumber.trim(),
-				address: selectedLocation?.address,
-				location: {
-					type: 'Point',
-					coordinates: [
-						selectedLocation?.lat || 0,
-						selectedLocation?.lng || 0,
-					],
+			const response = await updateBusinessAccount(
+				{
+					companyNumber: businessNumber.trim(),
+					phone: phoneNumber.trim(),
+					address: selectedLocation?.address,
+					location: {
+						type: 'Point',
+						coordinates: [
+							selectedLocation?.lat || 0,
+							selectedLocation?.lng || 0,
+						],
+					},
+					currency: currency,
+					category: categories,
+					name: name.trim(),
+					email: email.trim(),
 				},
-				currency: currency,
-				category: categories,
-			});
+				file
+			);
 			updateBusiness({
 				companyNumber: businessNumber.trim(),
 				phone: phoneNumber.trim(),
@@ -103,6 +125,9 @@ export default function UpdateBusinessDetails() {
 				},
 				currency: currency,
 				category: categories,
+				name: name.trim(),
+				email: email.trim(),
+				image: response.business?.image || business?.image,
 			});
 
 			if (!response.success) {
@@ -158,6 +183,33 @@ export default function UpdateBusinessDetails() {
 					<Text className="text-3xl mb-4 font-bold text-black">
 						Update Business Details
 					</Text>
+
+					<ProfileImageInput
+						file={file}
+						label="Business Image"
+						setFile={setFile}
+						initialUrl={business?.image}
+						labelColor="black"
+					/>
+
+					<Text className="text-lg font-semibold mb-2">
+						Business Name
+					</Text>
+					<TextInput
+						className="w-full h-12 px-4 border border-gray-300 rounded-md"
+						value={name}
+						onChangeText={setName}
+						autoCapitalize="words"
+					/>
+
+					<Text className="text-lg font-semibold mb-2">Email</Text>
+					<TextInput
+						className="w-full h-12 px-4 border border-gray-300 rounded-md"
+						value={email}
+						onChangeText={setEmail}
+						keyboardType="email-address"
+						autoCapitalize="none"
+					/>
 
 					<Text className="text-lg font-semibold mb-2">
 						Phone Number

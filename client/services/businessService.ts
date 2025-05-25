@@ -57,6 +57,32 @@ const updateBusinessDetails = async (businessData: Partial<Business>) => {
 	}
 };
 
+const updateBusinessAccount = async (
+	businessData: Partial<Business>,
+	file: FileObject | null
+) => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken) {
+			throw new Error('Access token is missing or invalid.');
+		}
+		const formData = buildFormData(businessData, file);
+		const response = await client.put<BusinessResponse>(
+			'business/account',
+			formData,
+			{
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					'Content-Type': 'multipart/form-data',
+				},
+			}
+		);
+		return response.data;
+	} catch (error) {
+		throw error || 'Business details update failed.';
+	}
+};
+
 const verifyEmailBusiness = async (code: string, userId: string) => {
 	try {
 		const response = await client.post<AuthResponse>(
@@ -183,14 +209,17 @@ const getBusinessData = async () => {
 const toggleActivation = async () => {
 	try {
 		const accessToken = await checkToken();
-		const response = await client.get<ActivationResponse>(`business/activation`, {
-			headers: { Authorization: `Bearer ${accessToken}` },
-		});
+		const response = await client.get<ActivationResponse>(
+			`business/activation`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
 		return response.data;
 	} catch (error) {
 		throw error || 'Toggle activation failed';
 	}
-}
+};
 
 export {
 	registerBusiness,
@@ -203,5 +232,6 @@ export {
 	getNearestBusinesses,
 	getBusinessProfile,
 	getBusinessData,
-	toggleActivation
+	toggleActivation,
+	updateBusinessAccount,
 };
