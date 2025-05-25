@@ -19,4 +19,26 @@ const getAllNotifications = async (page) => {
     }
 }
 
-export { getAllNotifications };
+const markAdminNotificationAsRead = async (id) => {
+    try {
+        const accessToken = await checkToken();
+        if (!accessToken) {
+            throw new Error('Access token is missing or invalid.');
+        }
+        const response = await client.put(
+            'notifications/admin/read',
+            { id },
+            {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.log('Mark admin notification as read error: ', error);
+        throw new Error(
+            error.response?.data?.message || 'Mark admin notification as read failed'
+        );
+    }
+}
+
+export { getAllNotifications, markAdminNotificationAsRead };

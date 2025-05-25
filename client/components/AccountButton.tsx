@@ -11,6 +11,7 @@ interface AccountProps {
 	Icon: ReactElement;
 	buttonBackground?: string;
 	descriptionColor?: string;
+	isSettings?: boolean;
 }
 const AccountButton = ({
 	handlePress,
@@ -19,6 +20,7 @@ const AccountButton = ({
 	Icon,
 	buttonBackground = 'bg-indigo-600/30',
 	descriptionColor = Colors.light.icon,
+	isSettings = false,
 }: AccountProps) => {
 	return (
 		<HapticButton
@@ -27,7 +29,9 @@ const AccountButton = ({
 		>
 			<View className="flex-row justify-between items-center">
 				<View className="flex-1">
-					<ThemedText className="text-xl font-semibold text-white">
+					<ThemedText className="text-xl font-semibold text-white"
+						style={{ color: isSettings ? 'white' : Colors.light.text }}
+					>
 						{title}
 					</ThemedText>
 					<ThemedText

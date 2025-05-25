@@ -6,6 +6,7 @@ const getAdminNotifications = asyncHandler(async (req, res) => {
 	const page = parseInt(req.query.page) || 1;
 	const notifications = await Notification.find({
 		type: 'admin',
+        isRead: false,
 	})
 		.skip((page - 1) * NOTIFICATION_LIMIT_PER_PAGE)
 		.limit(NOTIFICATION_LIMIT_PER_PAGE)
@@ -15,20 +16,20 @@ const getAdminNotifications = asyncHandler(async (req, res) => {
 		notifications,
 		page: page,
 		limit: NOTIFICATION_LIMIT_PER_PAGE,
-		total: await Notification.countDocuments({ type: 'admin' }),
+		total: await Notification.countDocuments({ type: 'admin', isRead: false }),
 		success: true,
 	});
 });
 
 const markAdminNotificationAsRead = asyncHandler(async (req, res) => {
-	const { ids } = req.body;
-	if (!ids || !Array.isArray(ids)) {
+	const { id } = req.body;
+	if (!id) {
 		res.status(400);
 		throw new Error('Invalid request: ids must be an array');
 	}
 	const notifications = await Notification.updateMany(
-		{ _id: { $in: ids } },
-		{ $set: { read: true } }
+		{ _id: { $in: id } },
+		{ $set: { isRead: true } }
 	);
 	res.status(200).json({
 		notifications,
