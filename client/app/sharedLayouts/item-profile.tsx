@@ -117,9 +117,10 @@ const ItemProfileScreen = () => {
 					<View className="w-full h-full justify-center items-center bg-gray-400">
 						<Ionicons
 							name="image-outline"
-							size={64}
+							size={130}
 							color="white"
 						/>
+						<Text className="text-white text-lg font-bold">No image available</Text>
 					</View>
 				)
 			}
