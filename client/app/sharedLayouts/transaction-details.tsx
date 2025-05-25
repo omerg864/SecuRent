@@ -60,7 +60,6 @@ export default function TransactionDetails() {
           setTransaction(data);
           setHasReviewed(!!data.review?.content);
           setIsOpen(data.status === "open");
-          console.log("Transaction details loaded for ID:", data);
         } catch (error: any) {
           ShowToast(
             "error",
@@ -163,7 +162,7 @@ export default function TransactionDetails() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-gray-100">
       <StatusBar barStyle="dark-content" />
 
       <FloatingBackArrowButton
@@ -183,7 +182,7 @@ export default function TransactionDetails() {
 
       <ScrollView
         className="flex-1 px-6"
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 130 }}
       >
         <View className="items-center mb-8 mt-2">
           <UserImage
@@ -355,7 +354,7 @@ export default function TransactionDetails() {
       )}
 
       {isOpen && accountType === "business" && (
-        <View className="absolute bottom-4 left-0 right-0 px-6 pb-6 bg-white">
+        <View className="absolute bottom-4 left-0 right-0 px-6 pb-6 bg-white pt-2">
           <HapticButton
             className="bg-red-500 rounded-full py-4 items-center mb-3"
             onPress={handleChargeDeposit}
@@ -390,7 +389,7 @@ const Row = ({
 }) => (
   <View className="flex-row">
     <View className="flex-1 p-4">
-      <Text className="text-sm text-gray-600">{label}</Text>
+      <Text className="text-sm text-gray-800">{label}</Text>
     </View>
     <View className="flex-1 p-4 items-end">
       <Text className={`text-sm font-medium text-black ${valueClass}`}>
