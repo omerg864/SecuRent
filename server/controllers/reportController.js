@@ -171,8 +171,13 @@ const resolveReport = asyncHandler(async (req, res) => {
 
 	await report.save();
 
+	const updatedReport = await Report.findById(report._id).populate(
+		'resolutionBy',
+		'name _id'
+	);
+
 	res.status(200).json({
-		report,
+		report: updatedReport,
 		success: true,
 	});
 });
