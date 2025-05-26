@@ -26,7 +26,6 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import WarningPopupModal from "@/components/ui/WarningPopUpModal";
 import { CURRENT_ACCOUNT_TYPE, USER_ID } from "@/utils/asyncStorageConstants";
 
-
 const BusinessProfileScreen = () => {
     const [activeTab, setActiveTab] = useState("items");
     const [businessData, setBusinessData] = useState<BusinessDetails | null>(
@@ -189,20 +188,6 @@ const BusinessProfileScreen = () => {
 
     return (
         <>
-            <View className='absolute top-6 right-5 z-10'>
-                {accountType === "personal" && (
-                    <HapticButton
-                        onPress={handleOpenReportModal}
-                        className='bg-gray-100 px-4 py-2 rounded-full'
-                    >
-                        <ThemedText
-                            style={{ color: "#dc2626", fontWeight: "600" }}
-                        >
-                            Report
-                        </ThemedText>
-                    </HapticButton>
-                )}
-            </View>
             <ParallaxScrollView
                 headerImage={
                     business.image ? (
@@ -231,6 +216,20 @@ const BusinessProfileScreen = () => {
                         router.back();
                     }
                 }}
+                topOverlayContent={
+                    accountType === "personal" ? (
+                        <HapticButton
+                            onPress={handleOpenReportModal}
+                            className='bg-gray-100 px-4 py-2 rounded-full'
+                        >
+                            <ThemedText
+                                style={{ color: "#dc2626", fontWeight: "600" }}
+                            >
+                                Report
+                            </ThemedText>
+                        </HapticButton>
+                    ) : undefined
+                }
             >
                 <ScrollView className='bg-white'>
                     <ThemedView
@@ -377,17 +376,16 @@ const BusinessProfileScreen = () => {
                                                     resizeMode='cover'
                                                 />
                                             ) : (
-												<View className='w-20 h-20 rounded-lg bg-gray-400 justify-center items-center'>
-												<Ionicons
-													name='image-outline'
-													size={40}
-													color='white' 
-												/>
-												<Text className='text-white text-xs font-bold'>
-													No image
-												</Text>
-											</View>
-											
+                                                <View className='w-20 h-20 rounded-lg bg-gray-400 justify-center items-center'>
+                                                    <Ionicons
+                                                        name='image-outline'
+                                                        size={40}
+                                                        color='white'
+                                                    />
+                                                    <Text className='text-white text-xs font-bold'>
+                                                        No image
+                                                    </Text>
+                                                </View>
                                             )}
                                             <View className='ml-3 flex-1'>
                                                 <ThemedText
