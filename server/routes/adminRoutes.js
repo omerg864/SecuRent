@@ -14,6 +14,7 @@ import {
 	getAllCustomers,
 	toggleCustomerSuspension,
 	toggleBusinessSuspension,
+	getAdminById,
 } from '../controllers/adminController.js';
 import { authAdmin } from '../middleware/authMiddleware.js';
 import { upload } from '../middleware/uploadMiddleware.js';
