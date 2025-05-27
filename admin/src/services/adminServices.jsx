@@ -300,20 +300,70 @@ const toggleCustomerSuspension = async (id) => {
 	}
 };
 
-const getAdminById = async (id) => {
+const getAdminByEmail = async (email) => {
 	try {
 		const accessToken = await checkToken();
 		if (!accessToken) {
 			throw new Error('Access token is missing or invalid.');
 		}
-		const response = await client.get(`admin/${id}`, {
+		const response = await client.get(`admin/getByEmail/${email}`, {
 			headers: { Authorization: `Bearer ${accessToken}` },
 		});
 		return response.data;
 	} catch (error) {
-		console.error('Get admin by ID error: ', error);
+		console.error('Get admin by Email error: ', error);
 		throw new Error(
-			error.response?.data?.message || 'Failed to get admin by ID'
+			error.response?.data?.message || 'Failed to get admin by Email'
+		);
+	}
+};
+
+const getAllResolvedReportsByAdminId = async (adminId) => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken) {
+			throw new Error('Access token is missing or invalid.');
+		}
+		const response = await client.get(`report/admin/${adminId}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
+		console.log('Get all resolved reports response: ', response.data);
+		return response.data;
+	} catch (error) {
+		console.log('Get access token error: ', error);
+		throw new Error('Failed to get access token');
+	}
+};
+
+const updateAdmin = async ({
+	name,
+	email,
+	imageFile,
+	imageDeleteFlag = false,
+}) => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken) {
+			throw new Error('Access token is missing or invalid.');
+		}
+		const formData = new FormData();
+
+		if (name) formData.append('name', name);
+		if (email) formData.append('email', email);
+		if (imageFile) formData.append('Image', imageFile);
+		if (imageDeleteFlag) formData.append('imageDeleteFlag', 'true');
+
+		const { data } = await client.put('/admin/update', formData, {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+				'Content-Type': 'multipart/form-data',
+			},
+		});
+
+		return data;
+	} catch (error) {
+		throw new Error(
+			error?.response?.data?.message || 'Failed to update admin profile'
 		);
 	}
 };
@@ -333,5 +383,7 @@ export {
 	getBusinessReviews,
 	toggleBusinessSuspension,
 	toggleCustomerSuspension,
-	getAdminById,
+	getAdminByEmail,
+	getAllResolvedReportsByAdminId,
+	updateAdmin,
 };
