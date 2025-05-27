@@ -795,10 +795,20 @@ const toggleCustomerSuspension = asyncHandler(async (req, res) => {
 	});
 });
 
-const getAdminById = asyncHandler(async (req, res) => {
-	const admin = await Admin.findById(req.params.id);
+const getAdminByEmail = asyncHandler(async (req, res) => {
+	const { email } = req.params;
+	if (!email) {
+		res.status(400);
+		throw new Error('Email was not provided');
+	}
+
+	const admin = await Admin.findOne({
+		email: email,
+	});
+
 	if (!admin) {
-		return res.status(404).json({ message: 'Admin not found' });
+		res.status(404);
+		throw new Error('Admin was not found');
 	}
 
 	res.status(200).json({ success: true, admin });
@@ -819,5 +829,5 @@ export {
 	getAllCustomers,
 	toggleBusinessSuspension,
 	toggleCustomerSuspension,
-	getAdminById,
+	getAdminByEmail,
 };

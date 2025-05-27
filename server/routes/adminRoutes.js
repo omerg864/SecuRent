@@ -14,6 +14,7 @@ import {
 	getAllCustomers,
 	toggleCustomerSuspension,
 	toggleBusinessSuspension,
+	getAdminByEmail,
 } from '../controllers/adminController.js';
 import { authAdmin } from '../middleware/authMiddleware.js';
 import { upload } from '../middleware/uploadMiddleware.js';
@@ -37,6 +38,5 @@ router.get('/get-all-businesses', authAdmin, getAllBusinesses); // Get all busin
 router.get('/get-all-customers', authAdmin, getAllCustomers); // Get all customers
 router.put('/suspend/customer/:id', authAdmin, toggleCustomerSuspension); // Toggle customer suspension
 router.put('/suspend/business/:id', authAdmin, toggleBusinessSuspension); // Toggle business suspension
-router.get('/:id', authAdmin, getAdminById); // Get admin by ID
-
+router.get('/getByEmail/:email', authAdmin, getAdminByEmail); // Get admin by email
 export default router;
