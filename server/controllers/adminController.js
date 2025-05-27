@@ -659,10 +659,6 @@ const getAllCustomers = asyncHandler(async (req, res) => {
 	});
 });
 
-
-
-
-
 const getAllBusinesses = asyncHandler(async (req, res) => {
 	const page = parseInt(req.query.page) || 1;
 	const name = req.query.name || '';
@@ -799,6 +795,15 @@ const toggleCustomerSuspension = asyncHandler(async (req, res) => {
 	});
 });
 
+const getAdminById = asyncHandler(async (req, res) => {
+	const admin = await Admin.findById(req.params.id);
+	if (!admin) {
+		return res.status(404).json({ message: 'Admin not found' });
+	}
+
+	res.status(200).json({ success: true, admin });
+});
+
 export {
 	login,
 	register,
@@ -814,4 +819,5 @@ export {
 	getAllCustomers,
 	toggleBusinessSuspension,
 	toggleCustomerSuspension,
+	getAdminById,
 };
