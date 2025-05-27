@@ -119,7 +119,10 @@ const getBusinessTransactions = async (businessId) => {
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
 		);
-		console.log('Get business transactions response: ', response.data.transactions);
+		console.log(
+			'Get business transactions response: ',
+			response.data.transactions
+		);
 		return response.data;
 	} catch (error) {
 		console.log('Get business transactions error: ', error);
@@ -297,6 +300,24 @@ const toggleCustomerSuspension = async (id) => {
 	}
 };
 
+const getAdminById = async (id) => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken) {
+			throw new Error('Access token is missing or invalid.');
+		}
+		const response = await client.get(`admin/${id}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
+		return response.data;
+	} catch (error) {
+		console.error('Get admin by ID error: ', error);
+		throw new Error(
+			error.response?.data?.message || 'Failed to get admin by ID'
+		);
+	}
+};
+
 export {
 	register,
 	login,
@@ -312,4 +333,5 @@ export {
 	getBusinessReviews,
 	toggleBusinessSuspension,
 	toggleCustomerSuspension,
+	getAdminById,
 };
