@@ -248,28 +248,23 @@ const updateAdmin = asyncHandler(async (req, res) => {
 	}
 
 	if (req.file) {
-		// Delete old image if it exists
 		if (admin.image) {
 			await deleteImage(admin.image, true);
 		}
-		// Upload new image
 		const imageID = uuidv4();
 		const imageUrl = await uploadToCloudinary(
 			req.file.buffer,
 			`${process.env.CLOUDINARY_BASE_FOLDER}/admins`,
 			imageID
 		);
-		// ADD THIS LINE - assign the new image URL to admin.image
 		admin.image = imageUrl;
 	} else if (imageDeleteFlag) {
-		// Delete image if flag is set
 		if (admin.image) {
 			await deleteImage(admin.image, true);
 		}
 		admin.image = '';
 	}
 
-	// Update other fields
 	if (name) admin.name = name;
 	if (email && email_regex.test(email)) admin.email = email;
 
