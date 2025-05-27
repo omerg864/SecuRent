@@ -9,6 +9,7 @@ import {
   Award,
   CheckCircle,
   MonitorX,
+  Activity,
 } from "lucide-react";
 import StarRating from "./StarRating";
 import { useState } from "react";
@@ -129,9 +130,21 @@ export function UserInfoCard({ accountType, account }) {
             </div>
           </div>
         )}
-
-        {accountType === "Customer" && (
-          //suspended yes or no
+         {accountType === "Business" && (
+          <div className="flex items-start gap-3">
+            <Activity className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium">Activated</p>
+              <p
+                className={`text-sm ${
+                  account?.activated ? "text-green-500" : "text-red-500"
+                }`}
+              >
+                {account?.activated ? "Yes" : "No"}
+              </p>
+            </div>
+          </div>
+        )}
           <div className="flex items-start gap-3">
             <MonitorX className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
             <div>
@@ -145,7 +158,6 @@ export function UserInfoCard({ accountType, account }) {
               </p>
             </div>
           </div>
-        )}
         {accountType === "Customer" && (
           <div className="flex items-start gap-3">
             <CheckCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />

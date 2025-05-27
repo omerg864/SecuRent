@@ -144,17 +144,15 @@ export default function Layout() {
           <Drawer.Screen
             name="add-payment"
             options={{
-              title: "Add payment method",
+              title: "Change Payment Method",
               drawerItemStyle: { display: "none" },
-              headerShown: false,
             }}
           />
           <Drawer.Screen
             name="update-customer"
             options={{
-              title: "Update Customer",
+              title: "Customer Details",
               drawerItemStyle: { display: "none" },
-              headerShown: false,
             }}
           />
           <Drawer.Screen
