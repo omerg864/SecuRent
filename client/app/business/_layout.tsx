@@ -159,7 +159,6 @@ export default function Layout() {
 							drawerLabel: 'Bank Details',
 							title: 'Bank Details',
 							drawerItemStyle: { display: 'none' },
-							headerShown: false,
 						}}
 					/>
 					<Drawer.Screen
@@ -168,7 +167,6 @@ export default function Layout() {
 							drawerLabel: 'Business Details',
 							title: 'Business Details',
 							drawerItemStyle: { display: 'none' },
-							headerShown: false,
 						}}
 					/>
 				</Drawer>

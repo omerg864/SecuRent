@@ -150,7 +150,7 @@ const BusinessHomePage = () => {
 				style={{ backgroundColor: '#4338CA' }}
 				onPress={handleNewTransaction}
 			>
-				<ThemedText className="text-white font-semibold text-lg">
+				<ThemedText className="text-white font-semibold text-lg" lightColor='white'>
 					New Transaction
 				</ThemedText>
 			</HapticButton>
@@ -181,6 +181,30 @@ const BusinessHomePage = () => {
 								support@securent.com
 							</ThemedText>
 							.
+						</ThemedText>
+					</View>
+				</View>
+			)}
+			{!business?.activated && (
+				<View className="flex-row items-center bg-red-100 p-4 rounded-lg mb-4 shadow-sm">
+					<Ionicons
+						name="alert-circle"
+						size={24}
+						color="#DC2626"
+						className="mr-3"
+					/>
+					<View className="flex-1">
+						<ThemedText
+							style={{ color: '#DC2626' }}
+							className="text-base font-semibold mb-1"
+						>
+							Account Deactivated
+						</ThemedText>
+						<ThemedText
+							style={{ color: '#991B1B' }}
+							className="text-sm"
+						>
+							Your account is currently deactivated it isn't visible to customers. You can reactivate it by going to the settings page.
 						</ThemedText>
 					</View>
 				</View>
@@ -220,7 +244,7 @@ const BusinessHomePage = () => {
 					ListEmptyComponent={() =>
 						!isLoading && (
 							<View className="flex-1 justify-center items-center mt-4">
-								<ThemedText className="text-gray-500 text-base text-center">
+								<ThemedText className="text-gray-500 text-black text-center" darkColor='black'>
 									No active transactions
 								</ThemedText>
 							</View>
@@ -228,7 +252,7 @@ const BusinessHomePage = () => {
 					}
 					ListFooterComponent={() =>
 						isLoading && (
-							<View className="py-4 justify-center items-center align-middle">
+							<View className="py-4 justify-center items-center align-middle mt-4">
 								<LoadingSpinner />
 							</View>
 						)
