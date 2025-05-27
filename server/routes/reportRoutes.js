@@ -4,10 +4,11 @@ import {
 	getReportById,
 	resolveReport,
 	createReport,
-    getCustomerReports,
-    getCustomerReportById,
-   getAllReportsByCustomerId,
-   getAllReportsByBusinessId
+	getCustomerReports,
+	getCustomerReportById,
+	getAllReportsByCustomerId,
+	getAllReportsByBusinessId,
+	getAllResolvedReportsByAdminId,
 } from '../controllers/reportController.js';
 import { upload } from '../middleware/uploadMiddleware.js';
 import { authCustomer, authAdmin } from '../middleware/authMiddleware.js';
@@ -22,6 +23,6 @@ router.post('/', authCustomer, upload.array('images'), createReport);
 router.put('/:id', authAdmin, resolveReport);
 router.get('/customer/:id', authAdmin, getAllReportsByCustomerId);
 router.get('/business/:id', authAdmin, getAllReportsByBusinessId);
-
+router.get('/admin/:id', authAdmin, getAllResolvedReportsByAdminId);
 
 export default router;
