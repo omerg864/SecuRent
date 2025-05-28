@@ -1,12 +1,7 @@
 import { User, Mail, Calendar, CheckCircle } from 'lucide-react';
 import ProfileImage from './ProfileImage';
 
-const ProfileInfo = ({ adminData, isLoading, reportsResolved }) => {
-	if (isLoading) {
-		console.log('Admin Data: ', adminData);
-		return <div>Loading...</div>;
-	}
-
+const ProfileInfo = ({ adminData, reportsResolved }) => {
 	return (
 		<div className="max-w mx-auto p-6 bg-white dark:bg-black rounded-xl shadow space-y-10">
 			<div className="text-center space-y-4">

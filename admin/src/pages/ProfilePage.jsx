@@ -8,6 +8,7 @@ import ProfileEdit from '../components/ProfileEdit';
 import ProfileReports from '../components/ProfileReports';
 import ProfileInfo from '../components/ProfileInfo';
 import NavigationTabs from '../components/NavigationTabs';
+import Loader from '../components/Loader';
 
 const tabs = [
 	{ id: 'profile', label: 'Info', icon: User },
@@ -47,13 +48,20 @@ const ProfilePage = () => {
 		profile: (
 			<ProfileInfo
 				adminData={adminData}
-				isLoading={isLoading}
 				reportsResolved={resolvedReports.length}
 			/>
 		),
 		edit: <ProfileEdit adminData={adminData} onSave={setAdminData} />,
 		reports: <ProfileReports reports={resolvedReports} />,
 	}[activeTab];
+
+	if (isLoading) {
+		return (
+			<div className="flex items-center justify-center h-screen dark:bg-boxdark-2">
+				<Loader isLoading={isLoading} />
+			</div>
+		);
+	}
 
 	return (
 		<div className="min-h-screen p-6">
