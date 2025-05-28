@@ -1,4 +1,5 @@
 import { User, Mail, Calendar, CheckCircle } from 'lucide-react';
+import ProfileImage from './ProfileImage';
 
 const ProfileInfo = ({ adminData, isLoading, reportsResolved }) => {
 	if (isLoading) {
@@ -7,18 +8,16 @@ const ProfileInfo = ({ adminData, isLoading, reportsResolved }) => {
 	}
 
 	return (
-		<div className="max-w-4xl mx-auto p-6 bg-white dark:bg-black rounded-xl shadow space-y-10">
+		<div className="max-w mx-auto p-6 bg-white dark:bg-black rounded-xl shadow space-y-10">
 			<div className="text-center space-y-4">
 				<h3 className="text-2xl font-semibold">
 					Hey {adminData.name}!
 				</h3>
-				<div className="w-28 h-28 rounded-full overflow-hidden border mx-auto">
-					<img
-						src={adminData.image ? adminData.image : './avatar.png'}
-						alt="Profile"
-						className="w-full h-full object-cover"
-					/>
-				</div>
+				<ProfileImage
+					imagePreview={adminData.image}
+					isEditing={false}
+					showControls={false}
+				/>
 			</div>
 
 			{/* Personal Information */}
