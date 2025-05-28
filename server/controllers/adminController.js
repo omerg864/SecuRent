@@ -257,6 +257,7 @@ const updateAdmin = asyncHandler(async (req, res) => {
 			`${process.env.CLOUDINARY_BASE_FOLDER}/admins`,
 			imageID
 		);
+		admin.image = imageUrl;
 	} else if (imageDeleteFlag) {
 		if (admin.image) {
 			await deleteImage(admin.image, true);

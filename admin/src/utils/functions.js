@@ -19,13 +19,22 @@ export const getShortMonthName = (monthNumber) => {
 
 export const formatCurrencySymbol = (code) => {
 	switch (code?.toUpperCase()) {
-	  case 'ILS':
-		return '₪';
-	  case 'USD':
-		return '$';
-	  case 'EUR':
-		return '€';
-	  default:
-		return code;
+		case 'ILS':
+			return '₪';
+		case 'USD':
+			return '$';
+		case 'EUR':
+			return '€';
+		default:
+			return code;
 	}
-  };  
+};
+
+export const formatDate = (dateStr) =>
+	new Date(dateStr).toLocaleString('en-GB', {
+		day: '2-digit',
+		month: '2-digit',
+		year: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit',
+	});

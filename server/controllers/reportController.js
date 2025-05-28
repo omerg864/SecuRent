@@ -219,6 +219,24 @@ const getAllReportsByBusinessId = asyncHandler(async (req, res) => {
 	});
 });
 
+const getAllResolvedReportsByAdminId = asyncHandler(async (req, res) => {
+	const adminId = req.params.id;
+	const reports = await Report.find({ resolutionBy: adminId })
+		.populate('business', 'name email rating image suspended')
+		.populate('customer', 'name phone email image suspended')
+		.populate('resolutionBy', 'name')
+		.sort({ resolutionDate: -1 }); // or createdAt: -1 if you prefer
+
+	if (!reports || reports.length === 0) {
+		res.status(404);
+		throw new Error('No  resolve reports found for this admin');
+	}
+
+	res.status(200).json({
+		reports,
+		success: true,
+	});
+});
 
 export {
 	createReport,
@@ -228,5 +246,6 @@ export {
 	getCustomerReports,
 	getCustomerReportById,
 	getAllReportsByCustomerId,
-	getAllReportsByBusinessId
+	getAllReportsByBusinessId,
+	getAllResolvedReportsByAdminId,
 };
