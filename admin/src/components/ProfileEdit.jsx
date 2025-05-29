@@ -12,6 +12,7 @@ const ProfileEdit = ({ adminData, onSave }) => {
 	const [imageFile, setImageFile] = useState(null);
 	const [imagePreview, setImagePreview] = useState(adminData.image || '');
 	const [deleteImageFlag, setDeleteImageFlag] = useState(false);
+	const [isUpdating, setIsUpdating] = useState(false);
 	const schema = z.object({
 		name: z.string().min(2, 'Name must be at least 2 characters long'),
 		email: z.string().email('Invalid email address'),
@@ -40,6 +41,7 @@ const ProfileEdit = ({ adminData, onSave }) => {
 	};
 	const onSubmit = async (data) => {
 		try {
+			setIsUpdating(true);
 			await updateAdmin({
 				name: data.name,
 				email: data.email,
@@ -55,6 +57,8 @@ const ProfileEdit = ({ adminData, onSave }) => {
 		} catch (error) {
 			console.error(error);
 			alert(error.message);
+		} finally {
+			setIsUpdating(false);
 		}
 	};
 	const handleCancel = () => {
@@ -89,6 +93,7 @@ const ProfileEdit = ({ adminData, onSave }) => {
 				isEditing={isEditing}
 				onEdit={handleEdit}
 				onCancel={handleCancel}
+				isUpdating={isUpdating}
 			/>
 			<ProfileImage
 				imagePreview={imagePreview}

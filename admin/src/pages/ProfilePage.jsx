@@ -18,25 +18,16 @@ const ProfilePage = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [resolvedReports, setResolvedReports] = useState([]);
 	const [adminData, setAdminData] = useState({});
-
-	const tabs = [
-		{ id: 'profile', label: 'Info', icon: User },
-		...(!stateEmail
-			? [{ id: 'edit', label: 'Edit Profile', icon: Edit3 }]
-			: []),
-		{ id: 'reports', label: 'Reports', icon: FileText },
-	];
+	const [loggedUserEmail, setLoggedUserEmail] = useState('');
 
 	useEffect(() => {
 		const fetchData = async () => {
 			setIsLoading(true);
 			try {
-				const email = stateEmail
-					? stateEmail
-					: JSON.parse(localStorage.getItem('user'))?.email;
-				const { admin } = await getAdminByEmail(email);
+				const loggedUser = JSON.parse(localStorage.getItem('user'));
+				setLoggedUserEmail(loggedUser?.email);
+				const { admin } = await getAdminByEmail(stateEmail);
 				setAdminData(admin);
-
 				const { reports } = await getAllResolvedReportsByAdminId(
 					admin._id
 				);
@@ -49,7 +40,16 @@ const ProfilePage = () => {
 		};
 
 		fetchData();
-	}, [stateEmail]);
+	}, [loggedUserEmail, stateEmail]);
+
+	// Rest of your component remains the same...
+	const tabs = [
+		{ id: 'profile', label: 'Info', icon: User },
+		...(loggedUserEmail === stateEmail
+			? [{ id: 'edit', label: 'Edit Profile', icon: Edit3 }]
+			: []),
+		{ id: 'reports', label: 'Reports', icon: FileText },
+	];
 
 	const renderTabContent = {
 		profile: (
