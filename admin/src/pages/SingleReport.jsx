@@ -215,8 +215,15 @@ export default function SingleReport() {
 						) : (
 							<div className="mt-4 space-y-2">
 								<div className="flex items-center gap-3">
-									<span className="text-sm font-medium">
-										Resolved by{' '}
+									<span className="text-sm font-medium flex items-center gap-2">
+										Resolved by :{' '}
+										<img
+											src={
+												report.resolutionBy?.image ||
+												'/avatar.png'
+											}
+											className="w-8 h-8 rounded-full"
+										></img>
 										<button
 											onClick={handleAdminClick}
 											className="text-blue-600 hover:underline dark:text-blue-400"

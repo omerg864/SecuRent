@@ -81,7 +81,7 @@ const getReports = asyncHandler(async (req, res) => {
 		.skip((page - 1) * REPORT_LIMIT_PER_PAGE)
 		.populate('business', 'name address phone email rating image suspended')
 		.populate('customer', 'name phone email image suspended')
-		.populate('resolutionBy', 'name')
+		.populate('resolutionBy', 'name ')
 		.sort({ createdAt: -1 })
 		.limit(REPORT_LIMIT_PER_PAGE);
 
@@ -98,7 +98,7 @@ const getReportById = asyncHandler(async (req, res) => {
 	const report = await Report.findById(req.params.id)
 		.populate('business', 'name address phone email rating image suspended')
 		.populate('customer', 'name phone email image suspended')
-		.populate('resolutionBy', 'name email');
+		.populate('resolutionBy', 'name email image');
 
 	if (!report) {
 		res.status(404);
@@ -205,7 +205,7 @@ const getAllReportsByBusinessId = asyncHandler(async (req, res) => {
 
 	const reports = await Report.find({ business: businessId })
 		.populate('customer', 'name email phone image suspended')
-		.populate('resolutionBy', 'name')
+		.populate('resolutionBy', 'name image')
 		.sort({ createdAt: -1 });
 
 	if (!reports || reports.length === 0) {
