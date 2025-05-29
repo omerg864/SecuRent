@@ -81,7 +81,7 @@ const getReports = asyncHandler(async (req, res) => {
 		.skip((page - 1) * REPORT_LIMIT_PER_PAGE)
 		.populate('business', 'name address phone email rating image suspended')
 		.populate('customer', 'name phone email image suspended')
-		.populate('resolutionBy', 'name')
+		.populate('resolutionBy', 'name email')
 		.sort({ createdAt: -1 })
 		.limit(REPORT_LIMIT_PER_PAGE);
 
