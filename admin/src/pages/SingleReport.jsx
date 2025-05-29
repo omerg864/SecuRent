@@ -20,7 +20,6 @@ export default function SingleReport() {
 			setLoading(true);
 			try {
 				const data = await getReportById(id);
-				console.log(data);
 				setReport(data);
 			} catch (error) {
 				console.error('Error fetching report:', error);
@@ -48,6 +47,7 @@ export default function SingleReport() {
 					resolvedAt: new Date().toISOString(),
 					resolutionBy: {
 						name: user.name,
+						email: user.email,
 					},
 				}));
 				setResolutionText('');

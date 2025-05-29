@@ -1,6 +1,6 @@
 import { Edit3 } from 'lucide-react';
 
-const EditProfileHeader = ({ isEditing, onEdit, onCancel }) => (
+const EditProfileHeader = ({ isEditing, onEdit, onCancel, isUpdating }) => (
 	<div className="flex justify-between items-center bg-white dark:bg-black">
 		<h2 className="text-2xl font-semibold">Edit Profile</h2>
 		<div className="space-x-3 bg-white dark:bg-black">
@@ -17,7 +17,7 @@ const EditProfileHeader = ({ isEditing, onEdit, onCancel }) => (
 						type="submit"
 						className="px-4 py-2 rounded-lg bg-white dark:bg-black hover:bg-gray-200 hover:dark:bg-gray-800"
 					>
-						Save Changes
+						{isUpdating ? ' Updating... ' : 'Save Changes'}
 					</button>
 				</>
 			) : (
