@@ -3,12 +3,10 @@ import { Link } from 'react-router-dom';
 import ClickOutside from '../ClickOutside';
 import { useAuth } from '../../context/AuthContext';
 import { FiUser } from 'react-icons/fi';
-import { RiSettings5Line } from 'react-icons/ri';
 import { CiLogout } from 'react-icons/ci';
 
 const DropdownUser = () => {
 	const [dropdownOpen, setDropdownOpen] = useState(false);
-
 	const { logout, user } = useAuth();
 
 	return (
@@ -28,12 +26,11 @@ const DropdownUser = () => {
 					<span className="block text-xs">{user.role}</span>
 				</span>
 
-				<span className="h-12 w-12 rounded-full">
-					<img
-						src={user.picture ? user.picture : './avatar.png'}
-						alt="User"
-					/>
-				</span>
+				<img
+					src={user.image ? user.image : './avatar.png'}
+					alt="User"
+					className="rounded-full h-12 w-12"
+				/>
 
 				<svg
 					className="hidden fill-current sm:block"
@@ -61,19 +58,15 @@ const DropdownUser = () => {
 						<li>
 							<Link
 								to="/profile"
+								state={{
+									email: JSON.parse(
+										localStorage.getItem('user')
+									)?.email,
+								}}
 								className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
 							>
 								<FiUser />
 								My Profile
-							</Link>
-						</li>
-						<li>
-							<Link
-								to="/settings"
-								className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
-							>
-								<RiSettings5Line />
-								Account Settings
 							</Link>
 						</li>
 					</ul>
