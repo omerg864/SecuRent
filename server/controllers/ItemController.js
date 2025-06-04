@@ -4,7 +4,9 @@ import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
 import { v4 as uuidv4 } from 'uuid';
 
 const createItem = asyncHandler(async (req, res) => {
-	const { description, price, temporary, date, duration, timeUnit} = req.body;
+	const { description, price, temporary, date, duration, timeUnit, smartPrice} = req.body;
+
+	const smartPriceBoolean = smartPrice === 'true' || smartPrice === true;
 
 	if (!description || !price) {
 		res.status(400);
@@ -62,6 +64,7 @@ const createItem = asyncHandler(async (req, res) => {
 		image: imageUrl,
 		temporary,
 		return_date: date,
+		smartPrice: smartPriceBoolean,
 		duration,
 	});
 
@@ -99,7 +102,9 @@ const getItemById = asyncHandler(async (req, res) => {
 
 const updateItem = asyncHandler(async (req, res) => {
 	const { id } = req.params;
-	const { description, price, imageDeleteFlag } = req.body;
+	const { description, price, imageDeleteFlag, smartPrice } = req.body;
+
+	const smartPriceBoolean = smartPrice === 'true' || smartPrice === true;
 
 	const item = await Item.findById(id);
 	if (!item) {
@@ -132,6 +137,7 @@ const updateItem = asyncHandler(async (req, res) => {
 
 	item.description = description || item.description;
 	item.price = price ?? item.price;
+	item.smartPrice = smartPriceBoolean;
 
 	await item.save();
 	res.status(200).json({
