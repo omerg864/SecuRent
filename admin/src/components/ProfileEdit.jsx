@@ -6,8 +6,10 @@ import { z } from 'zod';
 import EditProfileHeader from './EditProfileHeader';
 import ProfileImage from './ProfileImage';
 import EditProfileForm from './EditProfileFormField';
+import { useAuth } from '../context/AuthContext';
 
 const ProfileEdit = ({ adminData, onSave }) => {
+	const { updateUser } = useAuth();
 	const [isEditing, setIsEditing] = useState(false);
 	const [imageFile, setImageFile] = useState(null);
 	const [imagePreview, setImagePreview] = useState(adminData.image || '');
@@ -48,6 +50,18 @@ const ProfileEdit = ({ adminData, onSave }) => {
 				imageFile,
 				imageDeleteFlag: deleteImageFlag,
 			});
+
+			const currentUser = JSON.parse(localStorage.getItem('user'));
+			const updatedUserData = {
+				...currentUser,
+				name: data.name,
+				email: data.email,
+				image: imagePreview,
+			};
+			localStorage.setItem('user', JSON.stringify(updatedUserData));
+
+			updateUser();
+
 			onSave?.({
 				...data,
 				image: imagePreview,
@@ -56,7 +70,6 @@ const ProfileEdit = ({ adminData, onSave }) => {
 			setDeleteImageFlag(false);
 		} catch (error) {
 			console.error(error);
-			alert(error.message);
 		} finally {
 			setIsUpdating(false);
 		}
@@ -87,7 +100,7 @@ const ProfileEdit = ({ adminData, onSave }) => {
 	return (
 		<form
 			onSubmit={handleSubmit(onSubmit)}
-			className="space-y-6 bg-white dark:bg-black pt-2 pb-10 rounded-xl pl-5 pr-5"
+			className="space-y-6 bg-white dark:bg-black pt-2 pb-10 rounded-xl px-5"
 		>
 			<EditProfileHeader
 				isEditing={isEditing}
