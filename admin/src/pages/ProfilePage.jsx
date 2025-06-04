@@ -56,6 +56,7 @@ const ProfilePage = () => {
 			<ProfileInfo
 				adminData={adminData}
 				reportsResolved={resolvedReports.length}
+				isLoggedUser={loggedUserEmail === stateEmail}
 			/>
 		),
 		edit: <ProfileEdit adminData={adminData} onSave={setAdminData} />,
