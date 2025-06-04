@@ -167,6 +167,22 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 		}
 	);
 
+	let price = item.price;
+
+	if (item.smartPrice) {
+		const customerTransactionsCount = await Transaction.countDocuments({
+			customer: req.customer._id,
+		});
+		const chargedTransactionsCount = await Transaction.countDocuments({
+			customer: req.customer._id,
+			status: 'charged',
+		});
+		const chargedTransactionChange = Math.round(
+			chargedTransactionsCount / customerTransactionsCount || 1
+		);
+		price += Math.round(item.price * chargedTransactionChange);
+	}
+
 	let return_date = item.return_date;
 
 	if (!item.temporary) {
@@ -183,7 +199,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 
 	const transaction = new Transaction({
 		stripe_payment_id: paymentIntent.id,
-		amount: item.price,
+		amount: price,
 		currency: item.currency,
 		status: 'intent',
 		business: item.business,
