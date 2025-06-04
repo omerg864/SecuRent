@@ -1,12 +1,12 @@
 import { User, Mail, Calendar, CheckCircle } from 'lucide-react';
 import ProfileImage from './ProfileImage';
 
-const ProfileInfo = ({ adminData, reportsResolved }) => {
+const ProfileInfo = ({ adminData, reportsResolved, isLoggedUser }) => {
 	return (
 		<div className="max-w mx-auto p-6 bg-white dark:bg-black rounded-xl shadow space-y-10">
 			<div className="text-center space-y-4">
 				<h3 className="text-2xl font-semibold">
-					Hey {adminData.name}!
+					{isLoggedUser ? 'Hey' : ''} {adminData.name}{' '}
 				</h3>
 				<ProfileImage
 					imagePreview={adminData.image}
@@ -18,7 +18,7 @@ const ProfileInfo = ({ adminData, reportsResolved }) => {
 			{/* Personal Information */}
 			<div className="space-y-6">
 				<h3 className="text-xl font-medium border-b pb-2">
-					Your Information
+					{isLoggedUser ? 'Your Information' : 'Info'}
 				</h3>
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 					{[
