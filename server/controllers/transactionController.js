@@ -830,8 +830,6 @@ const getTransactionQRCodeImage = asyncHandler(async (req, res) => {
 
 	const qrData = `${APP_URL}${TRANSACTION_NAME}-${transaction._id}`;
 
-	console.log('QR Data:', qrData);
-
 	try {
 		const qrImage = await QRCode.toBuffer(qrData, {
 			type: 'png',
