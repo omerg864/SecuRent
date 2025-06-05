@@ -4,13 +4,14 @@ import Item from '../models/itemModel.js';
 import { businesses, customers, admins } from '../config/websocket.js';
 import stripe from '../config/stripe.js';
 import {
+	APP_URL,
 	CHARGED_PERCENT_NOTIFICATION,
-	CHARGED_WEIGHT,
-	REVIEW_WEIGHT,
+	TRANSACTION_NAME,
 } from '../utils/constants.js';
 import Business from '../models/businessModel.js';
-import Customer from '../models/customerModel.js';
 import Notification from '../models/notificationModel.js';
+import { sendEmail } from '../utils/functions.js';
+import QRCode from 'qrcode';
 
 const getBusinessTransactions = asyncHandler(async (req, res) => {
 	const transactions = await Transaction.find({
@@ -298,8 +299,76 @@ const closeTransactionById = asyncHandler(async (req, res) => {
 					},
 				})
 			);
+			ws.send(
+				JSON.stringify({
+					type: 'endTransaction',
+					data: {
+						transaction: transaction,
+					},
+				})
+			);
 		}
 	}
+
+	const plainText = `
+✅ Deposit Released
+
+Hello ${transaction.customer.name},
+
+Your deposit for the transaction with ${
+		transaction.business.name
+	} has been successfully released.
+
+Transaction Details:
+- Description: ${transaction.description}
+- Amount: ${transaction.amount} ${transaction.currency.toUpperCase()}
+- Opened At: ${new Date(transaction.opened_at).toLocaleString()}
+- Closed At: ${new Date(transaction.closed_at).toLocaleString()}
+- Business: ${transaction.business.name}
+
+No charge has been made to your payment method.
+
+Thank you,
+SecuRent Team
+`;
+
+	const html = `
+  <div style="font-family: Arial, sans-serif; color: #1e3a8a; line-height: 1.5;">
+    <h2 style="color: #1e3a8a;">✅ Deposit Released</h2>
+    <p>Hello <strong>${transaction.customer.name}</strong>,</p>
+
+    <p>Your deposit for the transaction with <strong>${
+		transaction.business.name
+	}</strong> has been successfully released.</p>
+
+    <h3 style="color: #1e3a8a;">Transaction Details</h3>
+    <ul style="padding-left: 16px;">
+      <li><strong>Description:</strong> ${transaction.description}</li>
+      <li><strong>Amount:</strong> ${
+			transaction.amount
+		} ${transaction.currency.toUpperCase()}</li>
+      <li><strong>Opened At:</strong> ${new Date(
+			transaction.opened_at
+		).toLocaleString()}</li>
+      <li><strong>Closed At:</strong> ${new Date(
+			transaction.closed_at
+		).toLocaleString()}</li>
+      <li><strong>Business:</strong> ${transaction.business.name}</li>
+    </ul>
+
+    <p>No charge has been made to your payment method.</p>
+
+    <p>If you have any questions, feel free to reply to this email or contact our support team.</p>
+
+    <p>Thank you,<br/>The <strong>BlueApp</strong> Team</p>
+  </div>
+`;
+	await sendEmail(
+		transaction.customer.email,
+		'Deposit Released',
+		plainText,
+		html
+	);
 
 	if (!business.rating) {
 		business.rating = {
@@ -404,6 +473,14 @@ const captureDeposit = asyncHandler(async (req, res) => {
 					type: 'notification',
 					data: {
 						notification: notification,
+					},
+				})
+			);
+			ws.send(
+				JSON.stringify({
+					type: 'endTransaction',
+					data: {
+						transaction: transaction,
 					},
 				})
 			);
@@ -621,6 +698,71 @@ const confirmTransactionPayment = asyncHandler(async (req, res) => {
 	transaction.status = 'open';
 	await transaction.save();
 
+	const qrCodeLink = `${req.protocol}://${req.get(
+		'host'
+	)}/api/transaction/qr/${transaction._id}`; // Or use a QR lib to generate a Data URI
+
+	const plainText = `
+🔔 New Transaction Opened
+
+Your transaction has been successfully opened.
+
+Transaction Details:
+- Description: ${transaction.description}
+- Amount: ${transaction.amount} ${transaction.currency.toUpperCase()}
+- Stripe Payment ID: ${transaction.stripe_payment_id}
+- Opened At: ${new Date(transaction.opened_at).toLocaleString()}
+${
+	transaction.return_date
+		? `- Return Date: ${new Date(transaction.return_date).toLocaleString()}`
+		: ''
+}
+
+To continue, scan or show your QR code at the business location.
+
+QR Code: ${qrCodeLink}
+
+Thank you,
+SecuRent Team
+`;
+
+	const html = `
+  <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1e3a8a;">
+    <h2 style="color: #1e3a8a;">🔔 New Transaction Opened</h2>
+    <p>Hello,</p>
+    <p>Your transaction has been successfully opened. When you return the item the business can scan the QR code to view the transaction details:</p>
+
+    <div style="text-align: center; margin: 20px 0;">
+      <img src="${qrCodeLink}" alt="QR Code" style="width: 180px; height: 180px;" />
+    </div>
+
+    <h3 style="color: #1e3a8a;">Transaction Details</h3>
+    <ul style="padding-left: 16px; color: #1e3a8a;">
+      <li><strong>Status:</strong> ${transaction.status}</li>
+      <li><strong>Description:</strong> ${transaction.description}</li>
+      <li><strong>Amount:</strong> ${
+			transaction.amount
+		} ${transaction.currency.toUpperCase()}</li>
+      <li><strong>Opened At:</strong> ${new Date(
+			transaction.opened_at
+		).toLocaleString()}</li>
+      ${
+			transaction.return_date
+				? `<li><strong>Return Date:</strong> ${new Date(
+						transaction.return_date
+				  ).toLocaleString()}</li>`
+				: ''
+		}
+    </ul>
+
+    <p>If you have any questions, please reply to this email or contact our support team.</p>
+
+    <p>Thank you,<br/>The <strong>SecuRent</strong> Team</p>
+  </div>
+`;
+
+	await sendEmail(req.customer.email, 'New Transaction', plainText, html);
+
 	res.status(200).json({
 		success: true,
 		message: 'Transaction confirmed and marked as open.',
@@ -659,6 +801,44 @@ const deleteIntentTransaction = asyncHandler(async (req, res) => {
 	});
 });
 
+const getTransactionQRCodeImage = asyncHandler(async (req, res) => {
+	const { id } = req.params;
+
+	const transaction = await Transaction.findById(id);
+	if (!transaction) {
+		res.status(404);
+		throw new Error('Transaction not found');
+	}
+
+	if (transaction.status === 'intent') {
+		res.status(400);
+		throw new Error("Transaction is in 'intent' state");
+	}
+	// Generate the QR code here and return it as an image
+
+	const qrData = `${APP_URL}${TRANSACTION_NAME}-${transaction._id}`;
+
+	console.log('QR Data:', qrData);
+
+	try {
+		const qrImage = await QRCode.toBuffer(qrData, {
+			type: 'png',
+			errorCorrectionLevel: 'H',
+			width: 300,
+		});
+
+		res.setHeader('Content-Type', 'image/png');
+		res.setHeader(
+			'Content-Disposition',
+			`inline; filename="transaction-${transaction._id}.png"`
+		);
+		res.send(qrImage);
+	} catch (err) {
+		res.status(500);
+		throw new Error('Failed to generate QR code');
+	}
+});
+
 export {
 	getBusinessTransactions,
 	getCustomerTransactions,
@@ -674,4 +854,5 @@ export {
 	captureDeposit,
 	confirmTransactionPayment,
 	deleteIntentTransaction,
+	getTransactionQRCodeImage
 };
