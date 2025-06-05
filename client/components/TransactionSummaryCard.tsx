@@ -64,7 +64,7 @@ export default function TransactionSummaryCard({
                     The deposit fee is:
                 </Text>
                 <Text className='text-white text-3xl font-bold text-center'>
-                    {item.price} {formatCurrencySymbol(item.currency)}
+                    {item.amount} {formatCurrencySymbol(item.currency)}
                 </Text>
             </View>
 

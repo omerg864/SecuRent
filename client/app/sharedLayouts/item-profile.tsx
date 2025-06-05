@@ -25,6 +25,7 @@ import { formatCurrencySymbol } from '@/utils/functions';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ShowToast from '@/components/ui/ShowToast';
 import { CURRENT_ACCOUNT_TYPE } from '@/utils/asyncStorageConstants';
+import { USER_ID } from '@/utils/asyncStorageConstants';
 
 const ItemProfileScreen = () => {
 	const { id, from } = useLocalSearchParams<{ id: string; from: string }>();
@@ -41,11 +42,13 @@ const ItemProfileScreen = () => {
 				setLoading(true);
 				const type = await AsyncStorage.getItem(CURRENT_ACCOUNT_TYPE);
 				setAccountType(type);
-
+				const storedUserId = await AsyncStorage.getItem(USER_ID) || '';
+				console.log('Stored User ID:', storedUserId);
+				console.log('Type:', type);
 				const data =
 					type === 'business'
 						? await getItemByIdForBusiness(id)
-						: await getItemById(id);
+						: await getItemById(id, storedUserId);
 
 				setItem(data.item);
 			} catch (error) {

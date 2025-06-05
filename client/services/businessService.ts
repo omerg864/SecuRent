@@ -178,12 +178,11 @@ const getNearestBusinesses = async (
 	}
 };
 
-const getBusinessProfile = async (businessId: string) => {
+const getBusinessProfile = async (businessId: string, customerId: string) => {
 	try {
 		const accessToken = await checkToken();
 		const response: any = await client.get<BusinessDetails>(
-			`business/business-profile/${businessId}`,
-
+			`business/business-profile/${businessId}?customerId=${customerId}`,
 			{
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
