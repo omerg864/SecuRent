@@ -62,7 +62,11 @@ const BusinessProfileScreen = () => {
               ? `/business/BusinessProfileScreen?id=${id}`
               : `/customer/BusinessProfileScreen?id=${id}`
           );
-          const data = await getBusinessProfile(id);
+          let customerId = "";
+          if(accountType === "personal") {
+            customerId = storedUserId || "";
+          }
+          const data = await getBusinessProfile(id,customerId);
           setBusinessData(data);
         } catch (error: any) {
           ShowToast("error", error.message);

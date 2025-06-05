@@ -132,6 +132,7 @@ const createTransaction = asyncHandler(async (req, res) => {
 
 const createTransactionFromItem = asyncHandler(async (req, res) => {
 	const { id } = req.params;
+	console.log('Creating transaction for item ID:', id);
 
 	const item = await Item.findById(id);
 	if (!item) {
@@ -198,7 +199,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 		}
 	}
 
-	const transaction = new Transaction({
+	let transaction = new Transaction({
 		stripe_payment_id: paymentIntent.id,
 		amount: price,
 		currency: item.currency,
@@ -211,7 +212,17 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 		item: item._id,
 	});
 
+	const businessDetails = await Business.findById(item.business)
+		.select('name image rating category stripe_account_id');
+
+	if (!businessDetails) {
+		res.status(404);
+		throw new Error('Business not found');
+	}
+
 	await transaction.save();
+
+	transaction.business = businessDetails;
 
 	const ephemeralKey = await stripe.ephemeralKeys.create(
 		{
@@ -224,6 +235,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 
 	res.status(201).json({
 		success: true,
+		transaction,
 		clientSecret: paymentIntent.client_secret,
 		customer_stripe_id: req.customer.stripe_customer_id,
 		ephemeralKey: ephemeralKey.secret,

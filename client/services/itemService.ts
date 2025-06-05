@@ -65,10 +65,10 @@ const createBusinessItem = async (
 	}
 };
 
-const getItemById = async (itemId: string) => {
+const getItemById = async (itemId: string, storedId: string) => {
 	try {
 		const accessToken = await checkToken();
-		const response = await client.get<ItemResponse>(`item/${itemId}`, {
+		const response = await client.get<ItemResponse>(`item/${itemId}?customerId=${storedId}`, {
 			headers: { Authorization: `Bearer ${accessToken}` },
 		});
 		return response.data;
