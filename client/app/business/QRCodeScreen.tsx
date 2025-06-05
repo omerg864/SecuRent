@@ -9,12 +9,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useWebSocketContext } from '@/context/WebSocketContext';
 import ShowToast from '@/components/ui/ShowToast';
 import { useBusiness } from '@/context/BusinessContext';
+import { APP_URL, ITEM_NAME } from '@/utils/constants';
 
 const QRCodeScreen = () => {
 	const router = useRouter();
 	// parameter to be passed in the QR code
 	const { id, from } = useLocalSearchParams();
-	const transactionUrl = `secuRent://${id}`;
+	const transactionUrl = `${APP_URL}${ITEM_NAME}-${id}`;
 	const { business } = useBusiness();
 	const { lastMessage } = useWebSocketContext();
 

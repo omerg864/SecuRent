@@ -1,4 +1,5 @@
 import ShowToast from '@/components/ui/ShowToast';
+import { APP_NAME, ITEM_NAME } from '@/utils/constants';
 import {
 	CameraView,
 	CameraType,
@@ -52,8 +53,9 @@ export default function QRScannerScreen() {
 			setScanned(true);
 			const data = result.data;
 			// extract id from the scanned data data is in the format of secuRent://id
-			const app_name = data.split('://')[0];
-			if (app_name !== 'secuRent') {
+			const split = data.split('://');
+			const app_name = split[0];
+			if (app_name !== APP_NAME) {
 				ShowToast(
 					'error',
 					'Invalid QR Code',
@@ -63,7 +65,29 @@ export default function QRScannerScreen() {
 				setScanned(false);
 				return;
 			}
-			const id = data.split('://')[1];
+			if (!split[1]) {
+				ShowToast(
+					'error',
+					'Invalid QR Code',
+					'Please scan a valid QR code.'
+				);
+
+				setScanned(false);
+				return;
+			}
+			const contextSplit = split[1].split('-');
+			const codeType = contextSplit[0];
+			if (codeType !== ITEM_NAME) {
+				ShowToast(
+					'error',
+					'Invalid QR Code',
+					'Please scan a valid QR code.'
+				);
+
+				setScanned(false);
+				return;
+			}
+			const id = contextSplit[1];
 			// check if id is valid
 			if (!id) {
 				ShowToast(
@@ -91,7 +115,7 @@ export default function QRScannerScreen() {
 	};
 
 	return (
-		<View className="flex-1 justify-center">
+		<View className="flex-1 justify-center relative">
 			<CameraView
 				style={styles.camera}
 				facing={facing}
@@ -99,24 +123,23 @@ export default function QRScannerScreen() {
 					barcodeTypes: ['qr'],
 				}}
 				onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-			>
-				<View className="absolute bottom-5 flex-row w-full justify-around px-5">
-					<TouchableOpacity
-						className="bg-black/60 px-4 py-2 rounded-lg"
-						onPress={() =>
-							setFacing(facing === 'back' ? 'front' : 'back')
-						}
-					>
-						<Text className="text-white text-lg">Flip Camera</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						className="bg-black/60 px-4 py-2 rounded-lg"
-						onPress={goBack}
-					>
-						<Text className="text-white text-lg">Go Back</Text>
-					</TouchableOpacity>
-				</View>
-			</CameraView>
+			/>
+			<View className="absolute bottom-5 flex-row w-full justify-around px-5">
+				<TouchableOpacity
+					className="bg-black/60 px-4 py-2 rounded-lg"
+					onPress={() =>
+						setFacing(facing === 'back' ? 'front' : 'back')
+					}
+				>
+					<Text className="text-white text-lg">Flip Camera</Text>
+				</TouchableOpacity>
+				<TouchableOpacity
+					className="bg-black/60 px-4 py-2 rounded-lg"
+					onPress={goBack}
+				>
+					<Text className="text-white text-lg">Go Back</Text>
+				</TouchableOpacity>
+			</View>
 		</View>
 	);
 }

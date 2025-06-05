@@ -14,6 +14,7 @@ import {
   captureDeposit,
   confirmTransactionPayment,
   deleteIntentTransaction,
+  getTransactionQRCodeImage
 } from "../controllers/transactionController.js";
 import {
   authAdmin,
@@ -24,6 +25,8 @@ import {
 } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
+
+router.get("/qr/:id", getTransactionQRCodeImage);
 
 // TODO: add middleware business to protect routes
 router.get("/business", authSuspendedBusiness, getBusinessTransactions);
