@@ -169,6 +169,13 @@ export default function Layout() {
 							drawerItemStyle: { display: 'none' },
 						}}
 					/>
+					<Drawer.Screen
+						name="QRScanner"
+						options={{
+							drawerLabel: 'QR Scanner',
+							title: 'QR Scanner',
+						}}
+					/>
 				</Drawer>
 			</GestureHandlerRootView>
 		</WebSocketProvider>
