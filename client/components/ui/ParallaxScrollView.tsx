@@ -76,7 +76,7 @@ export default function ParallaxScrollView({
                         <View
                             style={{
                                 position: "absolute",
-                                top: insets.top - 30,
+                                top: insets.top - 20,
                                 right: 12
                             }}
                         >
@@ -88,7 +88,7 @@ export default function ParallaxScrollView({
                         <HapticButton
                             onPress={onBack}
                             className='absolute w-12 h-12 rounded-full bg-gray-100 justify-center items-center'
-                            style={{ top: insets.top - 30, left: 12 }}
+                            style={{ top: insets.top - 20, left: 12 }}
                         >
                             <Ionicons
                                 name='arrow-back'

@@ -125,7 +125,7 @@ export default function QRScannerScreen() {
 				onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
 			/>
 			<View className="absolute top-0 flex-row w-full justify-center px-5 bg-black/60 z-50">
-				<Text className='text-white text-lg'>Scan QR code to view transaction details</Text>
+				<Text className='text-white text-lg py-2'>Scan QR code to view transaction details</Text>
 			</View>
 			<View className="absolute bottom-5 flex-row w-full justify-around px-5 z-50">
 				<TouchableOpacity
