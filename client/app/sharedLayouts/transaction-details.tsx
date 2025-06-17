@@ -376,7 +376,7 @@ export default function TransactionDetails() {
 			</ScrollView>
 
 			{!isOpen && accountType === 'personal' && (
-				<View className="absolute bottom-4 left-0 right-0 px-6 pb-6 bg-white">
+				<View className="absolute bottom-4 left-0 right-0 px-6 pb-6 bg-gray-100">
 					<HapticButton
 						className={`rounded-full py-4 items-center mb-3 ${
 							hasReviewed ? 'bg-yellow-500' : 'bg-green-500'
@@ -393,7 +393,7 @@ export default function TransactionDetails() {
 			)}
 
 			{isOpen && accountType === 'business' && (
-				<View className="absolute bottom-4 left-0 right-0 px-6 pb-6 bg-white pt-2">
+				<View className="absolute bottom-4 left-0 right-0 px-6 pb-6 bg-gray-100 pt-2">
 					<HapticButton
 						className="bg-red-500 rounded-full py-4 items-center mb-3"
 						onPress={handleChargeDeposit}
