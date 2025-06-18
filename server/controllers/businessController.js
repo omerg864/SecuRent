@@ -17,6 +17,8 @@ import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
 import { v4 as uuidv4 } from 'uuid';
 import stripe from '../config/stripe.js';
 import Transaction from '../models/transactionModel.js';
+import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
+
 
 //Reusable login success function
 const successFullLogin = async (res, business) => {
@@ -720,27 +722,27 @@ const getNearbyBusinesses = asyncHandler(async (req, res) => {
 		},
 		...(category !== 'all'
 			? [
-					{
-						$match: {
-							category: {
-								$elemMatch: {
-									$regex: new RegExp(category, 'i'),
-								},
+				{
+					$match: {
+						category: {
+							$elemMatch: {
+								$regex: new RegExp(category, 'i'),
 							},
 						},
 					},
-			  ]
+				},
+			]
 			: []),
 		...(search.trim() !== ''
 			? [
-					{
-						$match: {
-							name: {
-								$regex: new RegExp(search, 'i'),
-							},
+				{
+					$match: {
+						name: {
+							$regex: new RegExp(search, 'i'),
 						},
 					},
-			  ]
+				},
+			]
 			: []),
 		// Project only safe fields
 		{
@@ -823,11 +825,95 @@ const toggleBusinessActivation = asyncHandler(async (req, res) => {
 
 	res.status(200).json({
 		success: true,
-		message: `Business ${
-			req.business.activated ? 'activated' : 'deactivated'
-		} successfully`,
+		message: `Business ${req.business.activated ? 'activated' : 'deactivated'
+			} successfully`,
 		activated: req.business.activated,
 	});
+});
+
+const advisorSessions = new Map();
+
+const initBusinessAdvisor = asyncHandler(async (req, res) => {
+	const { businessId } = req.body;
+	if (!businessId) {
+		res.status(400);
+		throw new Error('Missing businessId');
+	}
+
+	const business = await Business.findById(businessId);
+	if (!business) {
+		res.status(404);
+		throw new Error('Business not found');
+	}
+	const summary = business.reviewSummary || '';
+
+	const systemPrompt = `
+SYSTEM:
+You are a seasoned business consultant with over 15 years of experience guiding small and medium businesses to success.  
+✅ Always reply in the same language the user writes in.  
+✅ Begin each response with exactly one emoji (e.g., 👋 or 💡) to add a human touch.  
+✅ Maintain a professional, concise, and sharp tone—no more than 3 sentences per bullet.  
+
+📊 Use the following business summary to craft precise recommendations and ask for clarification when needed:
+“${summary}”
+
+👉 For every user message, respond in this format:
+1. **Three Recommended Actions** (Action 1, Action 2, Action 3)  
+2. **Success Metric** (a clear number or KPI)  
+3. **Clarifying Question** to drive the conversation forward.  
+Now, when the business owner asks a question, reply like a real consultant: action, metric, question—tailored to their language.
+  `.trim();
+
+	const sessionId = uuidv4();
+	advisorSessions.set(sessionId, { systemPrompt, history: [] });
+
+	res.status(200).json({ success: true, sessionId });
+});
+
+
+
+const chatBusinessAdvisor = asyncHandler(async (req, res) => {
+	const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+	const { sessionId, message } = req.body;
+	if (!sessionId || !message) {
+		res.status(400);
+		throw new Error('Missing sessionId or message');
+	}
+
+	const session = advisorSessions.get(sessionId);
+	if (!session) {
+		res.status(404);
+		throw new Error('Advisor session not found');
+	}
+
+	const { systemPrompt, history } = session;
+
+	const fullPrompt = [
+		`SYSTEM: ${systemPrompt}`,
+		...history.map((h, i) => `${i % 2 === 0 ? 'USER' : 'ADVISOR'}: ${h}`),
+		`USER: ${message}`,
+		`ADVISOR:`
+	].join('\n');
+
+	const chatModel = genAI.getGenerativeModel({
+		model: 'gemini-2.0-flash',
+		generationConfig: {
+			responseMimeType: 'application/json',
+			responseSchema: {
+				type: SchemaType.OBJECT,
+				properties: {
+					reply: { type: SchemaType.STRING }
+				}
+			}
+		}
+	});
+
+	const aiResponse = await chatModel.generateContent(fullPrompt);
+	const { reply } = JSON.parse(aiResponse.response.text());
+
+	history.push(message, reply);
+
+	res.status(200).json({ success: true, advisorReply: reply });
 });
 
 export {
@@ -848,5 +934,7 @@ export {
 	getBusinessProfile,
 	getBusinessData,
 	toggleBusinessActivation,
-	updateBusinessAccount
+	updateBusinessAccount,
+	initBusinessAdvisor,
+	chatBusinessAdvisor
 };
