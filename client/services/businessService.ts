@@ -221,6 +221,50 @@ const toggleActivation = async () => {
 	}
 };
 
+ const initBusinessAdvisor = async (businessId: string) => {
+  const accessToken = await checkToken();
+  if (!accessToken) {
+    throw new Error('Access token is missing or invalid.');
+  }
+
+  try {
+    const response = await client.post(
+      'business/advisor/init',
+      { businessId },
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    console.log('Business advisor initialized:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Initialize business advisor failed:', error);
+    throw error;
+  }
+};
+
+ const chatBusinessAdvisor = async (
+  sessionId: string,
+  message: string
+) => {
+  const accessToken = await checkToken();
+  if (!accessToken) {
+    throw new Error('Access token is missing or invalid.');
+  }
+
+  try {
+    const response = await client.post(
+      'business/advisor/chat',
+      { sessionId, message },
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    console.log('Business advisor chat response:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Chat with business advisor failed:', error);
+    throw error;
+  }
+};
+
+
 export {
 	registerBusiness,
 	verifyEmailBusiness,
@@ -234,4 +278,6 @@ export {
 	getBusinessData,
 	toggleActivation,
 	updateBusinessAccount,
+	initBusinessAdvisor,
+	chatBusinessAdvisor,
 };

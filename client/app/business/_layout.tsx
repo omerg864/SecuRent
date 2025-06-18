@@ -66,6 +66,13 @@ export default function Layout() {
 						}}
 					/>
 					<Drawer.Screen
+						name="chat-bot"
+						options={{
+							drawerLabel: 'chat-bot',
+							title: 'chat-bot',
+						}}
+					/>
+					<Drawer.Screen
 						name="new-transaction"
 						options={{
 							drawerLabel: 'New Transaction',

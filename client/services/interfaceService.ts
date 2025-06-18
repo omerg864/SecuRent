@@ -134,6 +134,15 @@ interface BusinessDetails {
 	items: Item[];
 	reviews: Review[];
 }
+interface InitAdvisorResponse {
+  success: boolean;
+  sessionId: string;
+}
+
+interface ChatAdvisorResponse {
+  success: boolean;
+  advisorReply: string;
+}
 
 export type {
 	AuthData,
