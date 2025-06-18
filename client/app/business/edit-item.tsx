@@ -19,6 +19,7 @@ export default function EditItem() {
 	const [price, setPrice] = useState(0);
 	const [file, setFile] = useState<FileObject | null>(null);
 	const [duration, setDuration] = useState('');
+	const [smartPrice, setSmartPrice] = useState<boolean>(false);
 	const [timeUnit, setTimeUnit] = useState('days');
 	const [durationError, setDurationError] = useState('');
 	const [currency, setCurrency] = useState('ILS');
@@ -52,6 +53,7 @@ export default function EditItem() {
 				setPrice(item.price);
 				setDuration(String(item.duration || ''));
 				setTimeUnit(item.timeUnit || 'days');
+				setSmartPrice(item.smartPrice || false);
 
 				if (item.image) {
 					setFile({
@@ -100,7 +102,7 @@ export default function EditItem() {
 				setLoadingState(null);
 				return;
 			}
-
+			formData.append('smartPrice', String(smartPrice));
 			formData.append('duration', String(parsedDuration));
 			formData.append('timeUnit', timeUnit);
 
@@ -118,11 +120,6 @@ export default function EditItem() {
 
 			const response = await updateItemById(
 				id,
-				desc,
-				price,
-				parsedDuration,
-				timeUnit,
-				file,
 				formData
 			);
 
@@ -181,9 +178,10 @@ export default function EditItem() {
 				price={price}
 				setPrice={setPrice}
 				file={file}
+				smartPrice={smartPrice}
+				setSmartPrice={setSmartPrice}
 				setFile={setFile}
 				duration={duration}
-				setDuration={setDuration}
 				timeUnit={timeUnit}
 				setTimeUnit={setTimeUnit}
 				durationError={durationError}

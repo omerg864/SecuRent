@@ -2,12 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RxDashboard } from 'react-icons/rx';
 import { FiUser } from 'react-icons/fi';
-import { RiSettings5Line } from 'react-icons/ri';
 import { GrGroup } from 'react-icons/gr';
 import { IoBusinessOutline } from 'react-icons/io5';
-import { HiOutlineDocumentReport } from "react-icons/hi";
-import { IoIosNotifications } from "react-icons/io";
-
+import { HiOutlineDocumentReport } from 'react-icons/hi';
+import { IoIosNotifications } from 'react-icons/io';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 	const location = useLocation();
@@ -91,11 +89,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 			to: '/profile',
 			icon: <FiUser />,
 		},
-		{
-			name: 'Settings',
-			to: '/settings',
-			icon: <RiSettings5Line />,
-		},
 	];
 
 	return (
@@ -152,6 +145,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 								<li key={page.to}>
 									<NavLink
 										to={page.to}
+										state={{
+											email: JSON.parse(
+												localStorage.getItem('user')
+											)?.email,
+										}}
 										className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
 											pathname === page.to &&
 											'bg-graydark dark:bg-meta-4'

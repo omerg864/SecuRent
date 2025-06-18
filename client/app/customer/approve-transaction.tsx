@@ -43,9 +43,9 @@ export default function ApproveTransaction() {
 					if (customer) {
 						setCustomerName(customer.name);
 					}
-					const response = await getItemByIdForTransaction(id);
-					if (response.success) {
-						setItem(response.item);
+					const response = await createTransactionFromItem(id);
+					if (response.data.success) {
+						setItem(response.data);
 					} else {
 						ShowToast('error', 'Item not found');
 						router.replace({
@@ -70,21 +70,21 @@ export default function ApproveTransaction() {
 		try {
 			setLoadingApprove(true);
 
-			const response = await createTransactionFromItem(id);
+			// const response = await createTransactionFromItem(id);
 
-			if (!response || !response.data?.success) {
-				ShowToast('error', 'Failed to approve deposit');
-				setLoadingApprove(false);
-				return;
-			}
+			// if (!response || !response.data?.success) {
+			// 	ShowToast('error', 'Failed to approve deposit');
+			// 	setLoadingApprove(false);
+			// 	return;
+			// }
 
-			setTransaction({ return_date: response.data.return_date });
+			// setTransaction({ return_date: response.data.return_date });
 
 			await startDepositPaymentFlow({
-				customerId: response.data.customer_stripe_id,
-				ephemeralKey: response.data.ephemeralKey,
-				clientSecret: response.data.clientSecret,
-				transactionId: response.data.transactionId,
+				customerId: item.customer_stripe_id,
+				ephemeralKey: item.ephemeralKey,
+				clientSecret: item.clientSecret,
+				transactionId: item.transactionId,
 				onSuccess: () => router.replace({ pathname: '/customer' }),
 				onFail: () => setLoadingApprove(false),
 			});
@@ -142,7 +142,7 @@ export default function ApproveTransaction() {
 
 			{/* Payment Card */}
 			<TransactionSummaryCard
-				item={item}
+				item={item.transaction}
 				returnDate={returnDate}
 				onPressBusiness={handleGoToBusinessProfile}
 			/>

@@ -15,6 +15,7 @@ export default function newItem() {
 	const [file, setFile] = useState<FileObject | null>(null);
 	const [duration, setDuration] = useState('');
 	const [timeUnit, setTimeUnit] = useState('days');
+	const [smartPrice, setSmartPrice] = useState<boolean>(false);
 	const [durationError, setDurationError] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [currency, setCurrency] = useState('ILS');
@@ -57,6 +58,7 @@ export default function newItem() {
 				price,
 				parseInt(duration),
 				timeUnit,
+				smartPrice,
 				file
 			);
 			if (!response) {
@@ -157,8 +159,9 @@ export default function newItem() {
 				setPrice={setPrice}
 				file={file}
 				setFile={setFile}
+				smartPrice={smartPrice}
+				setSmartPrice={setSmartPrice}
 				duration={duration}
-				setDuration={setDuration}
 				timeUnit={timeUnit}
 				setTimeUnit={setTimeUnit}
 				durationError={durationError}

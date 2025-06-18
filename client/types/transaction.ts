@@ -15,6 +15,7 @@ export interface Transaction {
 		name: string;
 		image?: string;
 		phone?: string;
+		email: string;
 	};
 	charged?: number;
 	charged_description?: string;

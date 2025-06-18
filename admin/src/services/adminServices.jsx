@@ -327,7 +327,6 @@ const getAllResolvedReportsByAdminId = async (adminId) => {
 		const response = await client.get(`report/admin/${adminId}`, {
 			headers: { Authorization: `Bearer ${accessToken}` },
 		});
-		console.log('Get all resolved reports response: ', response.data);
 		return response.data;
 	} catch (error) {
 		console.log('Get access token error: ', error);
