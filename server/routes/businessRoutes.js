@@ -18,6 +18,8 @@ import {
 	getBusinessData,
 	toggleBusinessActivation,
 	updateBusinessAccount,
+	initBusinessAdvisor,
+	chatBusinessAdvisor
 } from '../controllers/businessController.js';
 import {
 	authAny,
@@ -38,6 +40,8 @@ router.put('/', authBusiness, upload.single('image'), updateBusinessDetails);
 router.get('/verify-bank', authBusiness, verifyBank);
 router.post('/verify-email', verifyEmail);
 router.post('/resend-code', resendVerificationCode);
+router.post('/init-advisor', authBusiness, initBusinessAdvisor);
+router.post('/chat-advisor', authBusiness, chatBusinessAdvisor);
 
 // protected routes customer
 router.get('/nearby', authCustomer, getNearbyBusinesses);
@@ -57,5 +61,6 @@ router.get('/me', authSuspendedBusiness, getBusinessData);
 router.get('/activation', authSuspendedBusiness, toggleBusinessActivation);
 router.get('/:id', authAny, getBusinessById);
 router.get('/business-profile/:id', authAny, getBusinessProfile);
+
 
 export default router;
