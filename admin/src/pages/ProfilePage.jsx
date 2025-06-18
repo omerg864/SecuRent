@@ -9,27 +9,25 @@ import ProfileReports from '../components/ProfileReports';
 import ProfileInfo from '../components/ProfileInfo';
 import NavigationTabs from '../components/NavigationTabs';
 import Loader from '../components/Loader';
-
-const tabs = [
-	{ id: 'profile', label: 'Info', icon: User },
-	{ id: 'edit', label: 'Edit Profile', icon: Edit3 },
-	{ id: 'reports', label: 'Reports', icon: FileText },
-];
+import { useLocation } from 'react-router-dom';
 
 const ProfilePage = () => {
+	const location = useLocation();
+	const stateEmail = location.state?.email;
 	const [activeTab, setActiveTab] = useState('profile');
 	const [isLoading, setIsLoading] = useState(false);
 	const [resolvedReports, setResolvedReports] = useState([]);
 	const [adminData, setAdminData] = useState({});
+	const [loggedUserEmail, setLoggedUserEmail] = useState('');
 
 	useEffect(() => {
 		const fetchData = async () => {
 			setIsLoading(true);
 			try {
-				const email = JSON.parse(localStorage.getItem('user'))?.email;
-				const { admin } = await getAdminByEmail(email);
+				const loggedUser = JSON.parse(localStorage.getItem('user'));
+				setLoggedUserEmail(loggedUser?.email);
+				const { admin } = await getAdminByEmail(stateEmail);
 				setAdminData(admin);
-
 				const { reports } = await getAllResolvedReportsByAdminId(
 					admin._id
 				);
@@ -42,13 +40,23 @@ const ProfilePage = () => {
 		};
 
 		fetchData();
-	}, []);
+	}, [loggedUserEmail, stateEmail]);
+
+	// Rest of your component remains the same...
+	const tabs = [
+		{ id: 'profile', label: 'Info', icon: User },
+		...(loggedUserEmail === stateEmail
+			? [{ id: 'edit', label: 'Edit Profile', icon: Edit3 }]
+			: []),
+		{ id: 'reports', label: 'Reports', icon: FileText },
+	];
 
 	const renderTabContent = {
 		profile: (
 			<ProfileInfo
 				adminData={adminData}
 				reportsResolved={resolvedReports.length}
+				isLoggedUser={loggedUserEmail === stateEmail}
 			/>
 		),
 		edit: <ProfileEdit adminData={adminData} onSave={setAdminData} />,
@@ -70,6 +78,7 @@ const ProfilePage = () => {
 					tabs={tabs}
 					activeTab={activeTab}
 					onTabChange={setActiveTab}
+					loginUserPage={stateEmail ? false : false}
 				/>
 				<div className=" rounded-lg shadow-sm p-6">
 					{renderTabContent}

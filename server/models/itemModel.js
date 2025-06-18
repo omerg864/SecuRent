@@ -15,6 +15,10 @@ const ItemSchema = mongoose.Schema(
             type: Number,
             required: true,
         },
+        smartPrice: {
+            type: Boolean,
+            default: false,
+        },
         currency:{
             type: String,
             required: true,

@@ -3,6 +3,7 @@ export interface Item {
 	business: string;
 	description: string;
 	price: number;
+	smartPrice?: boolean;
 	currency: string;
 	image?: string;
 	return_date?: string | null;

@@ -43,6 +43,7 @@ interface TransactionIntentResponse {
 	customer_stripe_id: string;
 	ephemeralKey: string;
 	transactionId: string;
+	transaction: Transaction;
 	return_date: any;
 }
 

@@ -154,6 +154,15 @@ const BusinessHomePage = () => {
 					New Transaction
 				</ThemedText>
 			</HapticButton>
+			<HapticButton
+				className="bg-white rounded-full py-4 items-center mb-5 shadow-lg"
+				style={{ backgroundColor: '#FFFFFF' }}
+				onPress={() => router.push('/business/QRScanner')}
+			>
+				<ThemedText className="text-black font-semibold text-lg" darkColor ='black'>
+					Scan QR Code
+				</ThemedText>
+			</HapticButton>
 
 			{business?.suspended && (
 				<View className="flex-row items-center bg-red-100 p-4 rounded-lg mb-4 shadow-sm">
