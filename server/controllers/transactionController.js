@@ -156,19 +156,6 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 		throw new Error('Stripe customer not initialized');
 	}
 
-	const paymentIntent = await stripe.paymentIntents.create(
-		{
-			amount: item.price * 100,
-			currency: item.currency,
-			payment_method_types: ['card'],
-			capture_method: 'manual',
-			customer: req.customer.stripe_customer_id,
-		},
-		{
-			stripeAccount: item.business.stripe_account_id,
-		}
-	);
-
 	let price = item.price;
 
 	if (item.smartPrice) {
@@ -184,6 +171,19 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 		);
 		price += Math.round(item.price * chargedTransactionChange);
 	}
+
+	const paymentIntent = await stripe.paymentIntents.create(
+		{
+			amount: price * 100,
+			currency: item.currency,
+			payment_method_types: ['card'],
+			capture_method: 'manual',
+			customer: req.customer.stripe_customer_id,
+		},
+		{
+			stripeAccount: item.business.stripe_account_id,
+		}
+	);
 
 	let return_date = item.return_date;
 
@@ -212,8 +212,9 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 		item: item._id,
 	});
 
-	const businessDetails = await Business.findById(item.business)
-		.select('name image rating category stripe_account_id');
+	const businessDetails = await Business.findById(item.business).select(
+		'name image rating category stripe_account_id'
+	);
 
 	if (!businessDetails) {
 		res.status(404);
@@ -864,5 +865,5 @@ export {
 	captureDeposit,
 	confirmTransactionPayment,
 	deleteIntentTransaction,
-	getTransactionQRCodeImage
+	getTransactionQRCodeImage,
 };
