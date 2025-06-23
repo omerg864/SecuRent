@@ -159,17 +159,44 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 	let price = item.price;
 
 	if (item.smartPrice) {
-		const customerTransactionsCount = await Transaction.countDocuments({
+		const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+		const reviewModel = genAI.getGenerativeModel({
+			model: 'gemini-2.0-flash',
+			generationConfig: {
+				responseMimeType: 'application/json',
+				responseSchema: {
+					type: SchemaType.NUMBER,
+				},
+			},
+		});
+
+		const customerTransactions = await Transaction.find({
 			customer: req.customer._id,
 		});
-		const chargedTransactionsCount = await Transaction.countDocuments({
-			customer: req.customer._id,
-			status: 'charged',
-		});
-		const chargedTransactionChange = Math.round(
-			chargedTransactionsCount / customerTransactionsCount || 1
-		);
-		price += Math.round(item.price * chargedTransactionChange);
+
+		const reviewPrompt = `You are a smart assistant for a digital deposit system. In this system, users (customers) make deposits when transacting with businesses. If something goes wrong—such as property damage, late return, or other issues—the business can charge all or part of the deposit.
+
+Your job is to help determine how much to charge the customer for a new transaction, based on:
+	•	The current transaction’s description and the minimum deposit price
+	•	The customer’s past transactions, including:
+	•	Description of each past transaction
+	•	Deposit amount
+	•	Whether the customer was charged, how much, and why
+
+Consider the following:
+	•	The more the customer has been charged in the past for similar reasons, the higher the deposit should be (to reduce business risk).
+	•	If the customer has a clean record (no charges), you may recommend a deposit closer to the minimum.
+	•	The nature of the current transaction also affects the price (e.g., high-risk items may require a higher deposit even for good customers).
+	•	The reason for previous charges is important (e.g., repeated damage vs. one-time lateness).
+
+Return the recommended deposit charge amount as a number only (e.g., 250) and nothing else. You must base it on patterns in the customer’s history and the transaction’s risk. 
+Current transaction description: ${item.description}
+Minimum deposit price: ${item.price}
+Customer's past transactions: ${JSON.stringify(customerTransactions)}`;
+
+		const newPriceResult = await reviewModel.generateContent(reviewPrompt);
+		console.log('Price Result:', reviewResult.response.text());
+		price = parseFloat(newPriceResult.response.text()) || item.price;
 	}
 
 	const paymentIntent = await stripe.paymentIntents.create(
