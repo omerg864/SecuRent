@@ -782,34 +782,8 @@ const getBusinessProfile = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("Business not found");
   }
-  let items = [];
-  if (!customerId) {
-    items = await Item.find({ business: id, temporary: false });
-  } else {
-    items = await Item.find({ business: id, temporary: false });
-    for (const item of items) {
-      let price = item.price;
-      if (item.smartPrice) {
-        console.log("Smart pricing enabled for item", item._id);
-
-        const customerTransactionsCount = await Transaction.countDocuments({
-          customer: customerId,
-        });
-        const chargedTransactionsCount = await Transaction.countDocuments({
-          customer: customerId,
-          status: "charged",
-        });
-
-        const chargedTransactionChange = Math.round(
-          chargedTransactionsCount / (customerTransactionsCount || 1)
-        );
-
-        price += Math.round(item.price * chargedTransactionChange);
-        item.price = price;
-      }
-    }
-  }
-
+  let items = await Item.find({ business: id, temporary: false });
+  
   const promises = [];
   promises.push(
     Review.find({ business: id })
