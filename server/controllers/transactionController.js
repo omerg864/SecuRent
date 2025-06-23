@@ -12,6 +12,7 @@ import Business from '../models/businessModel.js';
 import Notification from '../models/notificationModel.js';
 import { sendEmail } from '../utils/functions.js';
 import QRCode from 'qrcode';
+import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 
 const getBusinessTransactions = asyncHandler(async (req, res) => {
 	const transactions = await Transaction.find({
@@ -195,7 +196,7 @@ Minimum deposit price: ${item.price}
 Customer's past transactions: ${JSON.stringify(customerTransactions)}`;
 
 		const newPriceResult = await reviewModel.generateContent(reviewPrompt);
-		console.log('Price Result:', reviewResult.response.text());
+		console.log('Price Result:', newPriceResult.response.text());
 		price = parseFloat(newPriceResult.response.text()) || item.price;
 	}
 
