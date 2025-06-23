@@ -101,24 +101,6 @@ const getItemById = asyncHandler(async (req, res) => {
     "business",
     "name image rating"
   );
-  let price = item.price;
-  if (item.smartPrice && customerId) {
-	console.log("Calculating smart price for customer:", customerId);
-    const customerTransactionsCount = await Transaction.countDocuments({
-      customer: customerId,
-    });
-    const chargedTransactionsCount = await Transaction.countDocuments({
-      customer: customerId,
-      status: "charged",
-    });
-
-    const chargedTransactionChange = Math.round(
-      chargedTransactionsCount / (customerTransactionsCount || 1)
-    );
-
-    price += Math.round(item.price * chargedTransactionChange);
-    item.price = price;
-  }
 
   if (!item) {
     res.status(404);
