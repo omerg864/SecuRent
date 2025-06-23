@@ -15,8 +15,18 @@ import {
 	getStripeOnboardingLink,
 	getNearbyBusinesses,
 	getBusinessProfile,
+	getBusinessData,
+	toggleBusinessActivation,
+	updateBusinessAccount,
+	initBusinessAdvisor,
+	chatBusinessAdvisor
 } from '../controllers/businessController.js';
-import { authAny, authBusiness, authCustomer } from '../middleware/authMiddleware.js';
+import {
+	authAny,
+	authBusiness,
+	authCustomer,
+	authSuspendedBusiness,
+} from '../middleware/authMiddleware.js';
 import { upload } from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
@@ -30,16 +40,27 @@ router.put('/', authBusiness, upload.single('image'), updateBusinessDetails);
 router.get('/verify-bank', authBusiness, verifyBank);
 router.post('/verify-email', verifyEmail);
 router.post('/resend-code', resendVerificationCode);
+router.post('/init-advisor', authBusiness, initBusinessAdvisor);
+router.post('/chat-advisor', authBusiness, chatBusinessAdvisor);
 
 // protected routes customer
 router.get('/nearby', authCustomer, getNearbyBusinesses);
 
 // Protected Routes (Requires Authentication)
 router.put('/update', authBusiness, upload.single('image'), updateBusiness);
+router.put(
+	'/update/account',
+	authBusiness,
+	upload.single('image'),
+	updateBusinessAccount
+);
 router.delete('/delete', authBusiness, deleteBusiness);
 router.put('/update-password', authBusiness, updateBusinessPassword);
 router.get('/stripe-onboarding', authBusiness, getStripeOnboardingLink);
-router.get('/:id', authBusiness, getBusinessById);
+router.get('/me', authSuspendedBusiness, getBusinessData);
+router.get('/activation', authSuspendedBusiness, toggleBusinessActivation);
+router.get('/:id', authAny, getBusinessById);
 router.get('/business-profile/:id', authAny, getBusinessProfile);
+
 
 export default router;

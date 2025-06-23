@@ -16,3 +16,22 @@ export const getShortMonthName = (monthNumber) => {
 
 	return shortMonthNames[monthNumber - 1] || 'Invalid month';
 };
+
+export const formatCurrencySymbol = (code) => {
+	switch (code?.toUpperCase()) {
+		case 'ILS':
+			return '₪';
+		case 'USD':
+			return '$';
+		case 'EUR':
+			return '€';
+		default:
+			return code;
+	}
+};
+
+export const formatDate = (dateStr) =>
+	new Date(dateStr).toLocaleString('en-US', {
+		dateStyle: 'medium',
+		timeStyle: 'short',
+	});

@@ -1,14 +1,16 @@
 import { buildFormData } from '@/utils/functions';
 import { checkToken, client } from './httpClient';
 import {
+	ActivationResponse,
 	AuthData,
 	AuthResponse,
-	Business,
 	BusinessDetails,
+	BusinessesResponse,
+	BusinessResponse,
 	StepResponse,
 	ValidResponse,
 } from './interfaceService';
-import { FileObject } from '@/types/business';
+import { FileObject, Business } from '@/types/business';
 
 const registerBusiness = async (
 	businessData: AuthData,
@@ -46,6 +48,32 @@ const updateBusinessDetails = async (businessData: Partial<Business>) => {
 			{
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
+				},
+			}
+		);
+		return response.data;
+	} catch (error) {
+		throw error || 'Business details update failed.';
+	}
+};
+
+const updateBusinessAccount = async (
+	businessData: Partial<Business>,
+	file: FileObject | null
+) => {
+	try {
+		const accessToken = await checkToken();
+		if (!accessToken) {
+			throw new Error('Access token is missing or invalid.');
+		}
+		const formData = buildFormData(businessData, file);
+		const response = await client.put<BusinessResponse>(
+			'business/account',
+			formData,
+			{
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					'Content-Type': 'multipart/form-data',
 				},
 			}
 		);
@@ -136,10 +164,7 @@ const getNearestBusinesses = async (
 ) => {
 	try {
 		const accessToken = await checkToken();
-		const response = await client.get<{
-			success: boolean;
-			businesses: Business[];
-		}>(
+		const response = await client.get<BusinessesResponse>(
 			`business/nearby?lat=${lat}&lng=${lng}&radius=${radius}&rating=${rating}&category=${encodeURIComponent(
 				category
 			)}&search=${encodeURIComponent(search)}`,
@@ -153,12 +178,11 @@ const getNearestBusinesses = async (
 	}
 };
 
-const getBusinessProfile = async (businessId: string) => {
+const getBusinessProfile = async (businessId: string, customerId: string) => {
 	try {
 		const accessToken = await checkToken();
 		const response: any = await client.get<BusinessDetails>(
-			`business/business-profile/${businessId}`,
-
+			`business/business-profile/${businessId}?customerId=${customerId}`,
 			{
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
@@ -168,6 +192,77 @@ const getBusinessProfile = async (businessId: string) => {
 		throw error || 'Failed to get business profile.';
 	}
 };
+
+const getBusinessData = async () => {
+	try {
+		const accessToken = await checkToken();
+		const response = await client.get<BusinessResponse>(`business/me`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
+		return response.data;
+	} catch (error) {
+		throw error || 'Fetching business data failed';
+	}
+};
+
+const toggleActivation = async () => {
+	try {
+		const accessToken = await checkToken();
+		const response = await client.get<ActivationResponse>(
+			`business/activation`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response.data;
+	} catch (error) {
+		throw error || 'Toggle activation failed';
+	}
+};
+
+ const initBusinessAdvisor = async (businessId: string) => {
+  const accessToken = await checkToken();
+  if (!accessToken) {
+    throw new Error('Access token is missing or invalid.');
+  }
+
+  try {
+    const response = await client.post(
+      'business/advisor/init',
+      { businessId },
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    console.log('Business advisor initialized:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Initialize business advisor failed:', error);
+    throw error;
+  }
+};
+
+ const chatBusinessAdvisor = async (
+  sessionId: string,
+  message: string
+) => {
+  const accessToken = await checkToken();
+  if (!accessToken) {
+    throw new Error('Access token is missing or invalid.');
+  }
+
+  try {
+    const response = await client.post(
+      'business/advisor/chat',
+      { sessionId, message },
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    console.log('Business advisor chat response:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Chat with business advisor failed:', error);
+    throw error;
+  }
+};
+
 
 export {
 	registerBusiness,
@@ -179,4 +274,9 @@ export {
 	getStripeOnboardingLink,
 	getNearestBusinesses,
 	getBusinessProfile,
+	getBusinessData,
+	toggleActivation,
+	updateBusinessAccount,
+	initBusinessAdvisor,
+	chatBusinessAdvisor,
 };

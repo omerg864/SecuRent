@@ -232,6 +232,21 @@ const updateCustomer = asyncHandler(async (req, res) => {
 		throw new Error('Customer not found');
 	}
 
+	if(email && email_regex.test(email)) {
+		const customerExists = await Customer.findOne({
+			email: new RegExp(`^${email}$`, 'i'),
+		});
+		const businessExists = await Business.findOne({
+			email: new RegExp(`^${email}$`, 'i'),
+		});
+		if (customerExists || businessExists ) {
+			if (customerExists && customerExists._id.toString() !== customer._id.toString()) {
+			res.status(409);
+			throw new Error('Email already in use');
+			}
+		}
+	}
+
 	if (req.file) {
 		if (customer.image) {
 			await deleteImage(customer.image, true);
@@ -522,6 +537,24 @@ const resendVerificationCode = asyncHandler(async (req, res) => {
 	});
 });
 
+const getCustomerData = asyncHandler(async (req, res) => {
+	const customer = await Customer.findById(req.customer._id).select(
+		'-password -verificationCode -refreshTokens'
+	);
+	
+	if (!customer) {
+		res.status(404);
+		throw new Error('Customer not found');
+	}
+
+	res.status(200).json({
+		success: true,
+		customer,
+	});
+});
+
+
+
 export {
 	registerCustomer,
 	loginCustomer,
@@ -535,4 +568,5 @@ export {
 	verifyEmail,
 	resendVerificationCode,
 	setUpCustomerCard,
+	getCustomerData
 };

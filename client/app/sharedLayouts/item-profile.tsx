@@ -24,6 +24,8 @@ import ParallaxScrollView from '@/components/ui/ParallaxScrollView';
 import { formatCurrencySymbol } from '@/utils/functions';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ShowToast from '@/components/ui/ShowToast';
+import { CURRENT_ACCOUNT_TYPE } from '@/utils/asyncStorageConstants';
+import { USER_ID } from '@/utils/asyncStorageConstants';
 
 const ItemProfileScreen = () => {
 	const { id, from } = useLocalSearchParams<{ id: string; from: string }>();
@@ -38,13 +40,15 @@ const ItemProfileScreen = () => {
 		const fetchItem = async () => {
 			try {
 				setLoading(true);
-				const type = await AsyncStorage.getItem('current_account_type');
+				const type = await AsyncStorage.getItem(CURRENT_ACCOUNT_TYPE);
 				setAccountType(type);
-
+				const storedUserId = await AsyncStorage.getItem(USER_ID) || '';
+				console.log('Stored User ID:', storedUserId);
+				console.log('Type:', type);
 				const data =
 					type === 'business'
 						? await getItemByIdForBusiness(id)
-						: await getItemById(id);
+						: await getItemById(id, storedUserId);
 
 				setItem(data.item);
 			} catch (error) {
@@ -116,9 +120,10 @@ const ItemProfileScreen = () => {
 					<View className="w-full h-full justify-center items-center bg-gray-400">
 						<Ionicons
 							name="image-outline"
-							size={64}
+							size={130}
 							color="white"
 						/>
+						<Text className="text-white text-lg font-bold">No image available</Text>
 					</View>
 				)
 			}

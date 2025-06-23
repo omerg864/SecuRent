@@ -5,11 +5,14 @@ import { ThemedText } from '@/components/ui/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Transaction } from '@/services/interfaceService';
+import { Transaction } from '../../types/transaction';
 import { getBusinessTransactions } from '@/services/transactionService';
 import { useWebSocketContext } from '@/context/WebSocketContext';
 import { currencies } from '@/utils/constants';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { getBusinessData } from '@/services/businessService';
+import ShowToast from '@/components/ui/ShowToast';
+import { useBusiness } from '@/context/BusinessContext';
 
 const PAGE_SIZE = 5;
 
@@ -19,6 +22,7 @@ const BusinessHomePage = () => {
 	const [page, setPage] = useState(1);
 	const [hasMore, setHasMore] = useState(true);
 	const router = useRouter();
+	const { business, setBusiness } = useBusiness();
 
 	const { lastMessage } = useWebSocketContext();
 
@@ -60,10 +64,21 @@ const BusinessHomePage = () => {
 
 			setHasMore(paginated.length === PAGE_SIZE);
 			setPage(pageToLoad + 1);
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Error loading transactions:', error);
+			ShowToast('error', error.response.data.message);
 		} finally {
 			setIsLoading(false);
+		}
+	};
+
+	const getBusiness = async () => {
+		try {
+			const businessData = await getBusinessData();
+			setBusiness(businessData.business);
+		} catch (error: any) {
+			console.error('Error fetching business data:', error);
+			ShowToast('error', error.response.data.message);
 		}
 	};
 
@@ -71,11 +86,13 @@ const BusinessHomePage = () => {
 	useFocusEffect(
 		useCallback(() => {
 			loadTransaction(1, true); // true means reset the list
+			getBusiness(); // Fetch business data on focus
 
 			return () => {
 				setTransactions([]);
 				setPage(1);
 				setHasMore(true);
+				setIsLoading(false);
 			};
 		}, [])
 	);
@@ -133,14 +150,78 @@ const BusinessHomePage = () => {
 				style={{ backgroundColor: '#4338CA' }}
 				onPress={handleNewTransaction}
 			>
-				<ThemedText className="text-white font-semibold text-lg">
+				<ThemedText className="text-white font-semibold text-lg" lightColor='white'>
 					New Transaction
 				</ThemedText>
 			</HapticButton>
+			<HapticButton
+				className="bg-white rounded-full py-4 items-center mb-5 shadow-lg"
+				style={{ backgroundColor: '#FFFFFF' }}
+				onPress={() => router.push('/business/QRScanner')}
+			>
+				<ThemedText className="text-black font-semibold text-lg" darkColor ='black'>
+					Scan QR Code
+				</ThemedText>
+			</HapticButton>
+
+			{business?.suspended && (
+				<View className="flex-row items-center bg-red-100 p-4 rounded-lg mb-4 shadow-sm">
+					<Ionicons
+						name="alert-circle"
+						size={24}
+						color="#DC2626"
+						className="mr-3"
+					/>
+					<View className="flex-1">
+						<ThemedText
+							style={{ color: '#DC2626' }}
+							className="text-base font-semibold mb-1"
+						>
+							Account Suspended
+						</ThemedText>
+						<ThemedText
+							style={{ color: '#991B1B' }}
+							className="text-sm"
+						>
+							Your account is currently suspended. You can only
+							close or charge existing transactions. For more
+							information, please contact{' '}
+							<ThemedText style={{ color: '#4338CA' }}>
+								support@securent.com
+							</ThemedText>
+							.
+						</ThemedText>
+					</View>
+				</View>
+			)}
+			{!business?.activated && (
+				<View className="flex-row items-center bg-red-100 p-4 rounded-lg mb-4 shadow-sm">
+					<Ionicons
+						name="alert-circle"
+						size={24}
+						color="#DC2626"
+						className="mr-3"
+					/>
+					<View className="flex-1">
+						<ThemedText
+							style={{ color: '#DC2626' }}
+							className="text-base font-semibold mb-1"
+						>
+							Account Deactivated
+						</ThemedText>
+						<ThemedText
+							style={{ color: '#991B1B' }}
+							className="text-sm"
+						>
+							Your account is currently deactivated it isn't visible to customers. You can reactivate it by going to the settings page.
+						</ThemedText>
+					</View>
+				</View>
+			)}
 
 			<View
 				className="bg-white rounded-xl shadow-lg p-2"
-				style={{ height: 280 }} // fixed height ensures scrolling within this box
+				style={{ minHeight: 280, maxHeight: '100%' }} // fixed height ensures scrolling within this box
 			>
 				<View className="flex-row justify-between items-center py-4 px-2 border-b border-gray-200">
 					<ThemedText
@@ -149,11 +230,15 @@ const BusinessHomePage = () => {
 					>
 						Active Transactions
 					</ThemedText>
-					<Ionicons name="chevron-forward" size={20} color="#666" />
+					<Ionicons
+						name="chevron-forward"
+						size={20}
+						color="#666"
+						onPress={() => router.push('/business/transactions')}
+					/>
 				</View>
 
 				<FlatList
-					style={{ flex: 1 }}
 					data={transactions}
 					renderItem={renderTransaction}
 					keyExtractor={(item) => item._id}
@@ -168,7 +253,7 @@ const BusinessHomePage = () => {
 					ListEmptyComponent={() =>
 						!isLoading && (
 							<View className="flex-1 justify-center items-center mt-4">
-								<ThemedText className="text-gray-500 text-base text-center">
+								<ThemedText className="text-gray-500 text-black text-center" darkColor='black'>
 									No active transactions
 								</ThemedText>
 							</View>
@@ -176,10 +261,7 @@ const BusinessHomePage = () => {
 					}
 					ListFooterComponent={() =>
 						isLoading && (
-							<View
-								className="py-4 justify-center items-center align-middle"
-								style={{ height: 200 }}
-							>
+							<View className="py-4 justify-center items-center align-middle mt-4">
 								<LoadingSpinner />
 							</View>
 						)

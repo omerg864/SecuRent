@@ -14,12 +14,16 @@ import {
 	getTransactionById,
 	closeTransaction,
 } from '@/services/transactionService';
-import { Transaction } from '@/services/interfaceService';
+import { Transaction } from '@/types/transaction';
 import UserImage from '@/components/UserImage';
 import FloatingBackArrowButton from '@/components/ui/FloatingBackArrowButton';
 import { formatCurrencySymbol } from '@/utils/functions';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ShowToast from '@/components/ui/ShowToast';
+import { CURRENT_ACCOUNT_TYPE } from '@/utils/asyncStorageConstants';
+import ConfirmEmailLink from '@/components/ConfirmEmailLink';
+import LateWarning from '@/components/LateWarning';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function TransactionDetails() {
 	const router = useRouter();
@@ -45,7 +49,7 @@ export default function TransactionDetails() {
 			const fetchData = async () => {
 				try {
 					const type = await AsyncStorage.getItem(
-						'current_account_type'
+						CURRENT_ACCOUNT_TYPE
 					);
 					setAccountType(type);
 
@@ -81,35 +85,6 @@ export default function TransactionDetails() {
 			};
 		}, [id])
 	);
-
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const type = await AsyncStorage.getItem('current_account_type');
-				setAccountType(type);
-
-				if (!id || typeof id !== 'string') {
-					ShowToast('error', 'Missing transaction ID');
-
-					return;
-				}
-
-				const data = await getTransactionById(id);
-				setTransaction(data);
-				setIsOpen(data.status === 'open');
-			} catch (error: any) {
-				ShowToast(
-					'error',
-					'Failed to load transaction',
-					error.message || 'Please try again later'
-				);
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		fetchData();
-	}, [id, from]);
 
 	const handleAddReview = () => {
 		router.push({
@@ -190,7 +165,7 @@ export default function TransactionDetails() {
 	}
 
 	return (
-		<SafeAreaView className="flex-1 bg-white">
+		<SafeAreaView className="flex-1 bg-gray-100">
 			<StatusBar barStyle="dark-content" />
 
 			<FloatingBackArrowButton
@@ -204,6 +179,25 @@ export default function TransactionDetails() {
 						  }/transactions` as RelativePathString)
 				}
 			/>
+			{accountType === 'personal' &&  transaction?.status === 'open' && (
+				<View className="absolute top-20 right-5 z-10">
+					<HapticButton
+						onPress={() =>
+							router.push({
+								pathname: '/customer/QRCodeScreen',
+								params: { id: transaction._id },
+							})
+						}
+						className="bg-white p-2 rounded-full shadow-md"
+					>
+						<Ionicons
+							name="qr-code-outline"
+							size={24}
+							color="black"
+						/>
+					</HapticButton>
+				</View>
+			)}
 			<View className="mt-20 mb-6 items-center">
 				<Text className="text-2xl font-semibold text-gray-900">
 					Transaction Details
@@ -212,7 +206,7 @@ export default function TransactionDetails() {
 
 			<ScrollView
 				className="flex-1 px-6"
-				contentContainerStyle={{ paddingBottom: 100 }}
+				contentContainerStyle={{ paddingBottom: 130 }}
 			>
 				<View className="items-center mb-8 mt-2">
 					<UserImage
@@ -224,6 +218,16 @@ export default function TransactionDetails() {
 					<Text className="text-lg font-medium text-black mb-2">
 						{userName}
 					</Text>
+
+					{accountType === 'business' &&
+						transaction.customer?.email && (
+							<ConfirmEmailLink
+								email={transaction.customer.email}
+								recipientName={transaction.customer.name}
+								businessName={transaction.business?.name}
+							/>
+						)}
+
 					{accountType === 'personal' && (
 						<HapticButton
 							onPress={handleGoToBusinessProfile}
@@ -234,6 +238,24 @@ export default function TransactionDetails() {
 							</Text>
 						</HapticButton>
 					)}
+
+					<LateWarning
+						returnDate={transaction.return_date}
+						status={transaction.status}
+					/>
+				</View>
+
+				<View className="mb-6 bg-gray-50 rounded-lg py-4">
+					<Row
+						label="Description"
+						value={transaction.description || '-'}
+					/>
+					<Row
+						label="Deposit Amount"
+						value={`${transaction.amount} ${formatCurrencySymbol(
+							transaction.currency
+						)}`}
+					/>
 				</View>
 
 				<View className="mb-6 bg-gray-50 rounded-lg py-4">
@@ -241,7 +263,7 @@ export default function TransactionDetails() {
 						label="Start Date"
 						value={new Date(
 							transaction.createdAt
-						).toLocaleDateString()}
+						).toLocaleDateString('en-GB')}
 					/>
 					<Row
 						label="Start Time"
@@ -254,25 +276,51 @@ export default function TransactionDetails() {
 					/>
 				</View>
 
+				<View className="mb-6 bg-gray-50 rounded-lg py-4">
+					<Row
+						label="Planned End Date"
+						value={
+							transaction.return_date
+								? new Date(
+										transaction.return_date
+								  ).toLocaleDateString()
+								: '-'
+						}
+					/>
+					<Row
+						label="Planned End Time"
+						value={
+							transaction.return_date
+								? new Date(
+										transaction.return_date
+								  ).toLocaleTimeString([], {
+										hour: '2-digit',
+										minute: '2-digit',
+								  })
+								: '-'
+						}
+					/>
+				</View>
+
 				{!isOpen && (
 					<View className="mb-6 bg-gray-50 rounded-lg py-4">
 						<Row
-							label="End Date"
+							label="Actual End Date"
 							value={
-								transaction.return_date
+								transaction.closed_at
 									? new Date(
-											transaction.return_date
-									  ).toLocaleDateString()
+											transaction.closed_at
+									  ).toLocaleDateString('en-GB')
 									: '-'
 							}
 						/>
 						<Row
-							label="End Time"
+							label="Actual End Time"
 							value={
-								transaction.return_date
+								transaction.closed_at
 									? new Date(
-											transaction.return_date
-									  ).toLocaleTimeString([], {
+											transaction.closed_at
+									  ).toLocaleTimeString('en-GB', {
 											hour: '2-digit',
 											minute: '2-digit',
 									  })
@@ -281,19 +329,6 @@ export default function TransactionDetails() {
 						/>
 					</View>
 				)}
-
-				<View className="mb-6 bg-gray-50 rounded-lg py-4">
-					<Row
-						label="Description"
-						value={transaction.description || '-'}
-					/>
-					<Row
-						label="Amount"
-						value={`${transaction.amount} ${formatCurrencySymbol(
-							transaction.currency
-						)}`}
-					/>
-				</View>
 
 				<View className="mb-4 bg-gray-50 rounded-lg py-4">
 					<Row
@@ -333,7 +368,7 @@ export default function TransactionDetails() {
 					</View>
 				)}
 
-				{accountType === 'customer' && (
+				{accountType === 'personal' && (
 					<Text className="text-xs text-center text-gray-400 mt-6">
 						* This transaction is read-only for customers
 					</Text>
@@ -341,7 +376,7 @@ export default function TransactionDetails() {
 			</ScrollView>
 
 			{!isOpen && accountType === 'personal' && (
-				<View className="absolute bottom-4 left-0 right-0 px-6 pb-6 bg-white">
+				<View className="absolute bottom-4 left-0 right-0 px-6 pb-6 bg-gray-100">
 					<HapticButton
 						className={`rounded-full py-4 items-center mb-3 ${
 							hasReviewed ? 'bg-yellow-500' : 'bg-green-500'
@@ -358,7 +393,7 @@ export default function TransactionDetails() {
 			)}
 
 			{isOpen && accountType === 'business' && (
-				<View className="absolute bottom-4 left-0 right-0 px-6 pb-6 bg-white">
+				<View className="absolute bottom-4 left-0 right-0 px-6 pb-6 bg-gray-100 pt-2">
 					<HapticButton
 						className="bg-red-500 rounded-full py-4 items-center mb-3"
 						onPress={handleChargeDeposit}
@@ -393,7 +428,7 @@ const Row = ({
 }) => (
 	<View className="flex-row">
 		<View className="flex-1 p-4">
-			<Text className="text-sm text-gray-600">{label}</Text>
+			<Text className="text-sm text-gray-800">{label}</Text>
 		</View>
 		<View className="flex-1 p-4 items-end">
 			<Text className={`text-sm font-medium text-black ${valueClass}`}>

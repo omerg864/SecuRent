@@ -1,69 +1,155 @@
-import { BusinessInfoCard } from "../components/business-info-card";
-import { TransactionsTable } from "../components/transactions-table";
-import { useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { getBusinessTransactions } from "../services/adminServices";
-import Loader from "../components/Loader";
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { UserInfoCard } from '../components/UserInfoCard';
+import { TransactionsTable } from '../components/TransactionsTable';
+import Loader from '../components/Loader';
+import {
+	getBusinessTransactions,
+	getBusinessReviews,
+	getBusinessReports,
+} from '../services/adminServices';
+import { getBusinessById } from '../services/businessService';
+import SuspensionButton from '../components/SuspensionButton';
+import { ReviewsTable } from '../components/ReviewsTable';
+import ReportsTable from '../components/ReportsTable';
 
 export default function SingleBusiness() {
-  const location = useLocation();
-  const business = location.state;
-  const [loading, setLoading] = useState(true);
-  const [transactions, setTransactions] = useState([]);
+	const { id } = useParams();
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      setLoading(true);
-      try {
-        const data = await getBusinessTransactions(business._id);
-        setTransactions(data.transactions);
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+	const [business, setBusiness] = useState(null);
+	const [loading, setLoading] = useState(true);
+	const [transactions, setTransactions] = useState([]);
+	const [reviews, setReviews] = useState([]);
+	const [reports, setReports] = useState([]);
 
-    if (business?._id) {
-      fetchTransactions();
-    }
-  }, [business]);
+	// Fetch business if not in location state
+	useEffect(() => {
+		const fetchBusiness = async () => {
+			if (id) {
+				try {
+					const fetchedBusiness = await getBusinessById(id);
+					setBusiness(fetchedBusiness);
+				} catch (error) {
+					console.error('Error fetching business:', error);
+				}
+			}
+		};
+		fetchBusiness();
+	}, [id]);
 
-  return (
-    <main className="container mx-auto px-4">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Business Details:
-        </h1>
-          <button
-            className="min-w-[100px] text-center px-4 py-1.5 rounded-md text-sm font-medium transition
-                 border border-yellow-600 text-yellow-600 hover:bg-yellow-50
-                 dark:border-yellow-400 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
-          >
-            Suspend
-          </button>
-      </div>
+	// Fetch all business data once business is loaded
+	useEffect(() => {
+		const fetchAllData = async () => {
+			if (business?._id) {
+				setLoading(true);
+				try {
+					const [txRes, revRes, repRes] = await Promise.all([
+						getBusinessTransactions(business._id),
+						getBusinessReviews(business._id),
+						getBusinessReports(business._id),
+					]);
+					console.log('Transactions:', txRes);
+					setTransactions(txRes.transactions);
+					setReviews(revRes.reviews);
+					setReports(repRes.reports);
+				} catch (error) {
+					console.error('Error fetching business data:', error);
+				} finally {
+					setLoading(false);
+				}
+			}
+		};
+		fetchAllData();
+	}, [business]);
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
-          <BusinessInfoCard business={business} />
-        </div>
+	return (
+		<main className="container mx-auto px-4">
+			<div className="mb-6">
+				<div className="flex justify-between items-center">
+					<h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+						Business Details:
+					</h1>
+					<div className="flex items-center gap-4">
+						{business?.suspended && (
+							<div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+								<div className="text-4xl leading-none">⚠️</div>
+								<p className="text-sm font-bold leading-tight">
+									This business is currently suspended.
+									<br />
+									New transactions are blocked.
+								</p>
+							</div>
+						)}
+						<SuspensionButton
+							accountType="Business"
+							account={business}
+							onStatusChange={setBusiness}
+						/>
+					</div>
+				</div>
+			</div>
 
-        <div className="lg:col-span-2">
-          <h2 className="text-2xl font-semibold mb-4">Transactions</h2>
+			{loading ? (
+				<div className="flex justify-center items-center h-64">
+					<Loader />
+				</div>
+			) : business ? (
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+					{/* Left */}
+					<div className="lg:col-span-1">
+						<div className="h-full">
+							<UserInfoCard
+								accountType="Business"
+								account={business}
+							/>
+						</div>
+					</div>
 
-          {loading ? (
-            <Loader />
-          ) : transactions.length > 0 ? (
-            <TransactionsTable
-              transactions={transactions}
-              currency={business.currency}
-            />
-          ) : (
-            <p className="text-muted-foreground">No transactions yet.</p>
-          )}
-        </div>
-      </div>
-    </main>
-  );
+					{/* Right */}
+					<div className="lg:col-span-2 space-y-8">
+						<section>
+							<h2 className="text-2xl font-semibold mb-4">
+								Transactions
+							</h2>
+							{transactions.length > 0 ? (
+								<TransactionsTable
+									accountType="Business"
+									transactions={transactions}
+									currency={business.currency}
+								/>
+							) : (
+								<p className="text-muted-foreground">
+									No transactions yet.
+								</p>
+							)}
+						</section>
+
+						{
+							<section>
+								<h2 className="text-2xl font-semibold mb-4">
+									Reviews
+								</h2>
+								<ReviewsTable
+									accountType="Business"
+									reviews={reviews}
+								/>
+							</section>
+						}
+
+						<section>
+							<h2 className="text-2xl font-semibold mb-4">
+								Reports
+							</h2>
+							<ReportsTable
+								accountType="Business"
+								reports={reports}
+							/>
+						</section>
+					</div>
+				</div>
+			) : (
+				<Loader />
+			)}
+		</main>
+	);
 }

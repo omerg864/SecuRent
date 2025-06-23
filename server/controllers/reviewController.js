@@ -292,7 +292,7 @@ const getReviews = asyncHandler(async (req, res) => {
 
 const getReviewById = asyncHandler(async (req, res) => {
 	const { id } = req.params;
-	const review = await Review.findById(id).populate('customer', 'name image');
+	const review = await Review.findById(id).populate('customer', 'name image').populate('business', 'name image');
 
 	if (!review) {
 		res.status(404);
@@ -567,4 +567,45 @@ const deleteReview = asyncHandler(async (req, res) => {
 		message: 'Review deleted successfully',
 	});
 });
-export { createReview, getReviews, getReviewById, updateReview, deleteReview };
+
+
+const getAllReviewsByCustomerId = asyncHandler(async (req, res) => {
+	const { id } = req.params;
+	const reviews = await Review.find({
+		customer: id,
+	})
+	.sort({ createdAt: -1 })
+	.populate('customer', 'name image email ').populate('business', 'name image');
+
+	if (!reviews) {
+		res.status(404);
+		throw new Error('Reviews not found');
+	}
+
+	res.status(200).json({
+		success: true,
+		reviews,
+	});
+});
+
+const getAllReviewsByBusinessId = asyncHandler(async (req, res) => {
+	const { id } = req.params;
+
+	const reviews = await Review.find({ business: id })
+		.sort({ createdAt: -1 })
+		.populate('customer', 'name image email')
+		.populate('business', 'name image');
+
+	if (!reviews || reviews.length === 0) {
+		res.status(404);
+		throw new Error('Reviews not found for this business');
+	}
+
+	res.status(200).json({
+		success: true,
+		reviews,
+	});
+});
+
+
+export { createReview, getReviews, getReviewById, updateReview, deleteReview, getAllReviewsByCustomerId, getAllReviewsByBusinessId };

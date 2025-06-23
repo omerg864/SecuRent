@@ -3,12 +3,13 @@ import {
 	AuthData,
 	AuthResponse,
 	ClientStripeParamsResponse,
-	CreditCardData,
+	CustomerResponse
 } from './interfaceService';
 import { checkToken } from './httpClient';
 import { buildFormData } from '@/utils/functions';
 import { FileObject } from '@/types/business';
 import { AxiosResponse } from 'axios';
+import { Customer } from '@/types/customer';
 
 const registerCustomer = async (
 	customerData: AuthData,
@@ -106,6 +107,42 @@ const resendCustomerVerificationCode = async (userId: string) => {
 	}
 };
 
+const getCustomerData = async () => {
+	try {
+		const accessToken = await checkToken();
+		const response = await client.get<CustomerResponse>('customer/me', {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
+		return response.data;
+	} catch (error) {
+		throw error || 'Fetching customer data failed.';
+	}
+};
+
+const updateCustomerDetails = async (
+	customerData: Partial<Customer>,
+	file: FileObject | null
+): Promise<CustomerResponse> => {
+	try {
+		const formData = buildFormData(customerData, file);
+		const accessToken = await checkToken();
+		const response = await client.put<CustomerResponse>(
+			'customer/update',
+			formData,
+			{
+				headers: {
+					'Content-Type': 'multipart/form-data',
+					Authorization: `Bearer ${accessToken}`,
+				},
+			}
+		);
+		console.log('Update response:', response.data);
+		return response.data;
+	} catch (error) {
+		throw error || 'Updating customer details failed.';
+	}
+}
+
 export {
 	registerCustomer,
 	updateCreditCard,
@@ -113,4 +150,6 @@ export {
 	updateCustomerPassword,
 	resendCustomerVerificationCode,
 	customerCardIntent,
+	getCustomerData,
+	updateCustomerDetails
 };

@@ -47,7 +47,7 @@ const GraphChart = ({ analyticsData }) => {
 		],
 		stroke: {
 			width: [2, 2],
-			curve: 'straight',
+			curve: 'smooth',
 		},
 		// labels: {
 		//   show: false,

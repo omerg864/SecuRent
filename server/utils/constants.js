@@ -9,3 +9,14 @@ export const REPORT_STATUS = {
 };
 
 export const REPORT_RESOLUTION = { ...REPORT_STATUS, OPEN: undefined };
+
+export const REPORT_LIMIT_PER_PAGE = 15; // Default limit for report pagination
+
+export const NOTIFICATION_LIMIT_PER_PAGE = 8; // Default limit for admin notification pagination
+
+export const CHARGED_PERCENT_NOTIFICATION = 66;
+
+export const APP_NAME = 'secuRent';
+export const APP_URL = `secuRent://`;
+export const ITEM_NAME = 'item';
+export const TRANSACTION_NAME = 'transaction';

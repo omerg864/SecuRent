@@ -20,9 +20,11 @@ import * as Location from 'expo-location';
 import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
 import { getNearestBusinesses } from '@/services/businessService';
-import { Business } from '@/services/interfaceService';
 import debounce from 'lodash/debounce';
 import ShowToast from '@/components/ui/ShowToast';
+import { getCustomerData } from '@/services/customerService';
+import { logout } from '@/utils/functions';
+import { Business } from '@/types/business';
 
 const CustomerHome: React.FC = () => {
 	const [searchText, setSearchText] = useState<string>('');
@@ -131,9 +133,30 @@ const CustomerHome: React.FC = () => {
 		}
 	};
 
+	const getCustomer = async () => {
+		try {
+			const customerData = await getCustomerData();
+			if (customerData.customer.suspended) {
+				ShowToast(
+					'error',
+					'Account Suspended',
+					'Your account has been suspended. Please contact support.'
+				);
+				await logout(() => router.replace('/login'));
+			}
+		} catch (error: any) {
+			console.error('Error fetching customer data:', error);
+			ShowToast(
+				'error',
+				error.response?.data?.message || 'Error fetching data'
+			);
+		}
+	};
+
 	useFocusEffect(
 		useCallback(() => {
 			refetchBusinesses();
+			getCustomer();
 
 			// Optional cleanup if you want to reset state
 			return () => {
@@ -284,7 +307,7 @@ const CustomerHome: React.FC = () => {
 						</Text>
 						<Slider
 							minimumValue={10}
-							maximumValue={500}
+							maximumValue={30000}
 							step={1}
 							value={maxDistance}
 							onValueChange={setMaxDistance}

@@ -1,5 +1,12 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 import colors from 'colors';
 import connectDB from './config/db.js';
 import mongoSanitize from 'express-mongo-sanitize';
@@ -14,11 +21,11 @@ import itemRoutes from './routes/itemRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import locationRoutes from './routes/locationRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
+import notificationsRoutes from './routes/notificationsRoutes.js';
 import cors from 'cors';
 import http from 'http';
 import { setUpWebSocket } from './config/websocket.js';
 
-dotenv.config();
 const PORT = process.env.PORT || 3000;
 
 const app = express();
@@ -60,6 +67,7 @@ app.use('/api/item', itemRoutes);
 app.use('/api/review', reviewRoutes);
 app.use('/api/location', locationRoutes);
 app.use('/api/report', reportRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 // Error handler middleware should be last
 app.use(errorHandler);

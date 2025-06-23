@@ -1,4 +1,5 @@
 import { checkToken, client } from './httpClient';
+import { ReviewResponse } from './interfaceService';
 
 // In ReviewService.ts
 const createReview = async (
@@ -15,14 +16,13 @@ const createReview = async (
 		console.log('Creating review with transaction:', transactionId);
 		if (images && images.length > 0) {
 			const formData = new FormData();
-			formData.append('transaction', transactionId); // Make sure this matches the server expectation
+			formData.append('transaction', transactionId);
 			formData.append('content', content);
-
 			images.forEach((image) => {
 				formData.append('images', image);
 			});
 
-			const response = await client.post('/review', formData, {
+			const response = await client.post<ReviewResponse>('/review', formData, {
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
 					'Content-Type': 'multipart/form-data',
@@ -33,7 +33,7 @@ const createReview = async (
 			const response = await client.post(
 				'/review',
 				{
-					transaction: transactionId, // Make sure this matches the server expectation
+					transaction: transactionId,
 					content,
 				},
 				{

@@ -79,3 +79,9 @@ export const businessTypes = [
 	'Boat Rental',
 	'Costume Rental',
 ];
+
+
+export const APP_NAME = 'secuRent';
+export const APP_URL = `secuRent://`;
+export const ITEM_NAME = 'item';
+export const TRANSACTION_NAME = 'transaction';

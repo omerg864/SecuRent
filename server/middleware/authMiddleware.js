@@ -74,6 +74,34 @@ const authSuspendedBusiness = asyncHandler(async (req, res, next) => {
 	next();
 });
 
+const authSuspendedCustomer = asyncHandler(async (req, res, next) => {
+	const authHeader = req.headers['authorization'];
+	const token = authHeader && authHeader.split(' ')[1];
+
+	if (!token) {
+		res.status(401);
+		throw new Error('Not authorized, no token');
+	}
+	let decoded;
+	try {
+		decoded = jwt.verify(token, process.env.JWT_SECRET_ACCESS_COSTUMER);
+	} catch (error) {
+		res.status(401);
+		throw new Error('Not authorized, token failed');
+	}
+
+	const customer = await Customer.findById(decoded.id);
+
+	if (!customer) {
+		res.status(404);
+		throw new Error('Customer not found');
+	}
+
+	req.customer = customer;
+
+	next();
+});
+
 const authCustomer = asyncHandler(async (req, res, next) => {
 	const authHeader = req.headers['authorization'];
 	const token = authHeader && authHeader.split(' ')[1];
@@ -174,4 +202,5 @@ export {
 	authAdmin,
 	authAny,
 	authSuspendedBusiness,
+	authSuspendedCustomer
 };

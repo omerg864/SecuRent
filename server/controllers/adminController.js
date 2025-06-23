@@ -19,6 +19,8 @@ import { uploadToCloudinary, deleteImage } from '../utils/cloudinary.js';
 import { v4 as uuidv4 } from 'uuid';
 import { admins } from '../config/websocket.js';
 import jwt from 'jsonwebtoken';
+import Notification from '../models/notificationModel.js';
+import { businesses, customers } from '../config/websocket.js';
 
 const successFullLogin = async (res, admin) => {
 	const accessToken = generateAdminAccessToken(admin._id);
@@ -255,6 +257,7 @@ const updateAdmin = asyncHandler(async (req, res) => {
 			`${process.env.CLOUDINARY_BASE_FOLDER}/admins`,
 			imageID
 		);
+		admin.image = imageUrl;
 	} else if (imageDeleteFlag) {
 		if (admin.image) {
 			await deleteImage(admin.image, true);
@@ -468,7 +471,9 @@ const identifyUser = asyncHandler(async (req, res) => {
 const adminAnalytics = asyncHandler(async (req, res) => {
 	const numCustomers = await Customer.countDocuments();
 	const numBusinesses = await Business.countDocuments();
-	const numTransactions = await Transaction.countDocuments();
+	const numTransactions = await Transaction.countDocuments({
+		status: { $ne: 'intent' },
+	});
 	const numActiveTransactions = await Transaction.countDocuments({
 		status: 'open',
 	});
@@ -628,6 +633,33 @@ const adminAnalytics = asyncHandler(async (req, res) => {
 	});
 });
 
+const getAllCustomers = asyncHandler(async (req, res) => {
+	const page = parseInt(req.query.page) || 1;
+	const name = req.query.name || '';
+	const limit = 10;
+	const skip = (page - 1) * limit;
+
+	const totalCustomers = await Customer.countDocuments();
+	const totalPages = Math.ceil(totalCustomers / limit);
+
+	// search by name or partial name
+	const customers = await Customer.find({
+		name: { $regex: new RegExp(name, 'i') }, // match anywhere, case-insensitive
+	})
+		.sort({ createdAt: -1 })
+		.skip(skip)
+		.limit(limit)
+		.select('-password -refreshTokens -verificationCode');
+
+	res.status(200).json({
+		success: true,
+		page,
+		totalPages,
+		totalCustomers,
+		customers,
+	});
+});
+
 const getAllBusinesses = asyncHandler(async (req, res) => {
 	const page = parseInt(req.query.page) || 1;
 	const name = req.query.name || '';
@@ -654,6 +686,7 @@ const getAllBusinesses = asyncHandler(async (req, res) => {
 		// Total transactions
 		const transactionCount = await Transaction.countDocuments({
 			business: business._id,
+			status: { $in: ['open', 'closed', 'charged'] },
 		});
 
 		// Only "charged" transactions
@@ -677,6 +710,111 @@ const getAllBusinesses = asyncHandler(async (req, res) => {
 	});
 });
 
+const toggleBusinessSuspension = asyncHandler(async (req, res) => {
+	const { id } = req.params;
+	const business = await Business.findById(id);
+	if (!business) {
+		res.status(404);
+		throw new Error('Business not found');
+	}
+
+	business.suspended = !business.suspended;
+	await business.save();
+
+	const notification = await Notification.create({
+		type: 'business',
+		title: 'Business Account Suspension',
+		content: `Your account has been ${
+			business.suspended ? 'suspended' : 'released from suspension'
+		}`,
+		business: business._id,
+	});
+
+	const associatedBusinesses = businesses.filter(
+		(ws) => ws.id === business._id.toString()
+	);
+
+	if (associatedBusinesses.length > 0) {
+		associatedBusinesses.forEach((ws) => {
+			ws.send(
+				JSON.stringify({
+					type: 'notification',
+					data: {
+						notification: notification,
+					},
+				})
+			);
+		});
+	}
+
+	res.status(200).json({
+		success: true,
+		suspended: business.suspended,
+	});
+});
+
+const toggleCustomerSuspension = asyncHandler(async (req, res) => {
+	const { id } = req.params;
+	const customer = await Customer.findById(id);
+	if (!customer) {
+		res.status(404);
+		throw new Error('Customer not found');
+	}
+
+	customer.suspended = !customer.suspended;
+	await customer.save();
+
+	const notification = await Notification.create({
+		type: 'customer',
+		title: 'Customer Account Suspension',
+		content: `Your account has been ${
+			customer.suspended ? 'suspended' : 'released from suspension'
+		}`,
+		customer: customer._id,
+	});
+
+	const associatedCustomers = customers.filter(
+		(ws) => ws.id === customer._id.toString()
+	);
+
+	if (associatedCustomers.length > 0) {
+		associatedCustomers.forEach((ws) => {
+			ws.send(
+				JSON.stringify({
+					type: 'notification',
+					data: {
+						notification: notification,
+					},
+				})
+			);
+		});
+	}
+
+	res.status(200).json({
+		success: true,
+		suspended: customer.suspended,
+	});
+});
+
+const getAdminByEmail = asyncHandler(async (req, res) => {
+	const { email } = req.params;
+	if (!email) {
+		res.status(400);
+		throw new Error('Email was not provided');
+	}
+
+	const admin = await Admin.findOne({
+		email: email,
+	});
+
+	if (!admin) {
+		res.status(404);
+		throw new Error('Admin was not found');
+	}
+
+	res.status(200).json({ success: true, admin });
+});
+
 export {
 	login,
 	register,
@@ -689,4 +827,8 @@ export {
 	adminAnalytics,
 	refreshTokens,
 	getAllBusinesses,
+	getAllCustomers,
+	toggleBusinessSuspension,
+	toggleCustomerSuspension,
+	getAdminByEmail,
 };

@@ -16,6 +16,7 @@ import { createTemporaryItem } from '@/services/itemService';
 import ShowToast from '@/components/ui/ShowToast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { currencies } from '@/utils/constants';
+import { useBusiness } from '@/context/BusinessContext';
 
 const format = {
 	date: (d: Date) => d.toLocaleDateString('en-GB'),
@@ -31,6 +32,7 @@ const CreateTransactionScreen = () => {
 	const [date, setDate] = useState(new Date());
 	const [show, setShow] = useState({ date: false, time: false });
 	const [isLoading, setIsLoading] = useState(false);
+	const { business } = useBusiness();
 
 	const handleDateChange = (d?: Date) => d && setDate(d);
 	const handleTimeChange = (h: number, m: number) =>
@@ -96,24 +98,13 @@ const CreateTransactionScreen = () => {
 	);
 
 	useEffect(() => {
-		const fetchBusinessData = async () => {
-			try {
-				const data = await AsyncStorage.getItem('Business_Data');
-				if (data) {
-					const parsedData = JSON.parse(data);
-					const currency = parsedData?.currency || 'ILS';
-					setCurrencySymbol(
-						currencies.find((c) => c.code === currency)?.symbol ||
-							'₪'
-					);
-				}
-			} catch (error) {
-				console.error('Error fetching business data:', error);
-			}
-		};
-
-		fetchBusinessData();
-	}, []);
+		if (business) {
+			setCurrencySymbol(
+				currencies.find((c) => c.code === business.currency)?.symbol ||
+					'₪'
+			);
+		}
+	}, [business]);
 
 	return (
 		<View className="flex-1 p-6 bg-white">

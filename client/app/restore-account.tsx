@@ -12,6 +12,7 @@ import { ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { emailRegex } from '@/utils/regex';
 import ShowToast from '@/components/ui/ShowToast';
+import { USER_ID } from '@/utils/asyncStorageConstants';
 
 const RestoreAccountScreen = () => {
 	const [email, setEmail] = useState('');
@@ -34,7 +35,7 @@ const RestoreAccountScreen = () => {
 				setLoading(false);
 				return;
 			}
-			await AsyncStorage.setItem('UserID', response.userId);
+			await AsyncStorage.setItem(USER_ID, response.userId);
 			router.push({
 				pathname: './verify-email',
 				params: {

@@ -6,9 +6,8 @@ import { ThemedText } from '@/components/ui/ThemedText';
 import HapticButton from '@/components/ui/HapticButton';
 import { createBusinessItem } from '@/services/itemService';
 import { useRouter } from 'expo-router';
-import { getBusinessCurrencySymbol } from '@/utils/functions';
 import ItemForm from '@/components/forms/ItemForm';
-import FloatingBackArrowButton from '@/components/ui/FloatingBackArrowButton';
+import { useBusiness } from '@/context/BusinessContext';
 
 export default function newItem() {
 	const [desc, setDesc] = useState('');
@@ -16,9 +15,11 @@ export default function newItem() {
 	const [file, setFile] = useState<FileObject | null>(null);
 	const [duration, setDuration] = useState('');
 	const [timeUnit, setTimeUnit] = useState('days');
+	const [smartPrice, setSmartPrice] = useState<boolean>(false);
 	const [durationError, setDurationError] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [currency, setCurrency] = useState('ILS');
+	const { business } = useBusiness();
 
 	const timeUnits = ['minutes', 'hours', 'days'];
 
@@ -57,6 +58,7 @@ export default function newItem() {
 				price,
 				parseInt(duration),
 				timeUnit,
+				smartPrice,
 				file
 			);
 			if (!response) {
@@ -142,13 +144,8 @@ export default function newItem() {
 	};
 
 	useEffect(() => {
-		const getSymbol = async () => {
-			const symbol = await getBusinessCurrencySymbol();
-			setCurrency(symbol);
-		};
-
-		getSymbol();
-	}, []);
+		setCurrency(business?.currency || 'ILS');
+	}, [business]);
 
 	return (
 		<ScrollView className="flex-1 p-4 bg-white">
@@ -162,8 +159,9 @@ export default function newItem() {
 				setPrice={setPrice}
 				file={file}
 				setFile={setFile}
+				smartPrice={smartPrice}
+				setSmartPrice={setSmartPrice}
 				duration={duration}
-				setDuration={setDuration}
 				timeUnit={timeUnit}
 				setTimeUnit={setTimeUnit}
 				durationError={durationError}

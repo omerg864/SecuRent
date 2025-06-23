@@ -9,8 +9,6 @@ import {
 	Text,
 	TextInput,
 	FlatList,
-	Image,
-	ActivityIndicator,
 	TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,9 +16,9 @@ import { Transaction } from '@/services/interfaceService';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect, usePathname, useRouter } from 'expo-router';
 import UserImage from '@/components/UserImage';
-import { currencies } from '@/utils/constants';
 import { formatCurrencySymbol } from '@/utils/functions';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { CURRENT_ACCOUNT_TYPE } from '@/utils/asyncStorageConstants';
 
 const PAGE_SIZE = 8;
 
@@ -49,7 +47,7 @@ const TransactionsPage = () => {
 				try {
 					setIsLoading(true);
 					const accountType = await AsyncStorage.getItem(
-						'current_account_type'
+						CURRENT_ACCOUNT_TYPE
 					);
 					setAccountType(accountType);
 					const fetchedTransactions =
@@ -161,12 +159,7 @@ const TransactionsPage = () => {
 				}}
 				className="flex-row justify-between items-center bg-white rounded-xl mb-4 px-4 py-3 shadow-sm border border-gray-200"
 			>
-				<UserImage
-					image={userImage}
-					name={userName}
-					size={12}
-					className="ml-4"
-				/>
+				<UserImage image={userImage} name={userName} size={12} />
 				<View className="flex-1 ml-2">
 					<Text className="text-sm font-medium text-gray-900">
 						{accountType === 'business'

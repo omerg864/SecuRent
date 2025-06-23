@@ -14,12 +14,13 @@ import {
 	CustomerSheetResult,
 } from '@stripe/stripe-react-native';
 import ShowToast from '@/components/ui/ShowToast';
+import { COMPLETED_STEPS, CURRENT_ACCOUNT_TYPE } from '@/utils/asyncStorageConstants';
 
 const AddPaymentScreen = () => {
 	const router = useRouter();
 	const [loading, setLoading] = useState(false);
-	const params = useLocalSearchParams();
-	const accountType = (params.accountType as string) || 'personal';
+	const params = useLocalSearchParams<{ accountType: string}>();
+	const accountType = params.accountType || 'personal';
 	const [customerSheetVisible, setCustomerSheetVisible] = useState(false);
 	const [clientSecret, setClientSecret] = useState('');
 	const [customerId, setCustomerId] = useState('');
@@ -54,7 +55,7 @@ const AddPaymentScreen = () => {
 					return;
 				}
 
-				const storageKey = `completedSteps_${accountType}`;
+				const storageKey = `${COMPLETED_STEPS}_${accountType}`;
 				const savedSteps = await AsyncStorage.getItem(storageKey);
 				const completedSteps = savedSteps ? JSON.parse(savedSteps) : [];
 
@@ -65,7 +66,7 @@ const AddPaymentScreen = () => {
 						JSON.stringify(completedSteps)
 					);
 				}
-				await AsyncStorage.setItem('current_account_type', accountType);
+				await AsyncStorage.setItem(CURRENT_ACCOUNT_TYPE, accountType);
 				ShowToast('success', 'Payment method added successfully');
 
 				router.replace({

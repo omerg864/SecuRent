@@ -3,13 +3,14 @@ import {
 	View,
 	Text,
 	Pressable,
-	Keyboard,
 	Animated,
 	LayoutAnimation,
 	UIManager,
 	Platform,
 	NativeSyntheticEvent,
 	TextInputKeyPressEventData,
+	TextStyle,
+	StyleProp,
 } from 'react-native';
 import { ThemedTextInput } from './ThemedTextInput';
 import { ThemedText } from './ThemedText';
@@ -31,6 +32,7 @@ interface MultiSelectInputProps {
 	setSelected: (selected: string[]) => void;
 	max_selection?: number;
 	max_selection_length?: number;
+	labelColor?: string;
 }
 
 export default function MultiSelectInput({
@@ -42,7 +44,12 @@ export default function MultiSelectInput({
 	setSelected,
 	max_selection,
 	max_selection_length,
+	labelColor = '',
 }: MultiSelectInputProps) {
+	const labelStyle: StyleProp<TextStyle> = {};
+	if (labelColor) {
+		labelStyle.color = labelColor;
+	}
 	const [input, setInput] = useState('');
 	const [filtered, setFiltered] = useState<string[]>(options);
 	const [error, setError] = useState('');
@@ -136,7 +143,9 @@ export default function MultiSelectInput({
 
 	return (
 		<View className="">
-			<ThemedText className="text-lg font-bold mb-2">{label}</ThemedText>
+			<ThemedText style={labelStyle} className={`text-lg font-bold mb-2`}>
+				{label}
+			</ThemedText>
 			<Animated.View style={{ minHeight: 48, height: animatedHeight }}>
 				<View
 					className="w-full border border-gray-300 rounded-md px-2 py-2"

@@ -1,9 +1,10 @@
+import { Transaction } from '@/types/transaction';
 import { checkToken, client } from './httpClient';
 import {
 	ChargeDepositPayload,
 	TransactionResponse,
-	Transaction,
 	TransactionIntentResponse,
+	TransactionsResponse
 } from './interfaceService';
 const chargeDeposit = async (
 	transactionId: string,
@@ -52,10 +53,7 @@ const createTransactionFromItem = async (itemId: string) => {
 const getBusinessTransactions = async () => {
 	try {
 		const accessToken = await checkToken();
-		const response = await client.get<{
-			success: boolean;
-			transactions: Transaction[];
-		}>(`transaction/business`, {
+		const response = await client.get<TransactionsResponse>(`transaction/business`, {
 			headers: { Authorization: `Bearer ${accessToken}` },
 		});
 		return response.data;
@@ -67,10 +65,7 @@ const getBusinessTransactions = async () => {
 const getCustomerTransactions = async () => {
 	try {
 		const accessToken = await checkToken();
-		const response = await client.get<{
-			success: boolean;
-			transactions: Transaction[];
-		}>(`transaction/customer`, {
+		const response = await client.get<TransactionsResponse>(`transaction/customer`, {
 			headers: { Authorization: `Bearer ${accessToken}` },
 		});
 		return response.data;
@@ -84,10 +79,7 @@ const getTransactionById = async (id: string): Promise<Transaction> => {
 	const accessToken = await checkToken();
 	if (!accessToken) throw new Error('No access token available');
 
-	const response = await client.get<{
-		success: boolean;
-		transaction: Transaction;
-	}>(`transaction/transaction/${id}`, {
+	const response = await client.get<TransactionResponse>(`transaction/transaction/${id}`, {
 		headers: { Authorization: `Bearer ${accessToken}` },
 	});
 	// console.log("📦 Transaction response:", response.data);
@@ -98,10 +90,7 @@ const closeTransaction = async (id: string): Promise<Transaction> => {
 	const accessToken = await checkToken();
 	if (!accessToken) throw new Error('No access token available');
 
-	const response = await client.put<{
-		success: boolean;
-		transaction: Transaction;
-	}>(
+	const response = await client.put<TransactionResponse>(
 		`transaction/close/${id}`,
 		{},
 		{
@@ -112,16 +101,11 @@ const closeTransaction = async (id: string): Promise<Transaction> => {
 	return response.data.transaction;
 };
 
-const confirmTransactionPayment = async (id: string) => {
+const confirmTransactionPayment = async (id: string): Promise<TransactionResponse> => {
 	try {
 		const accessToken = await checkToken();
 
-		console.log('Access Token:', accessToken);
-
-		const response = await client.post<{
-			success: boolean;
-			transactions: Transaction[];
-		}>(
+		const response = await client.post<TransactionResponse>(
 			`transaction/confirm/${id}`,
 			{},
 			{

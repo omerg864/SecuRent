@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { View, Text, Image, TouchableOpacity, Modal } from "react-native";
+import { View, Text, Image, TouchableOpacity, Modal, StyleProp, TextStyle } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import HapticButton from "@/components/ui/HapticButton";
 import { ThemedText } from "./ui/ThemedText";
@@ -14,6 +14,8 @@ interface ProfileImageInputProps {
   containerClassName?: string;
   themeText?: boolean;
   file: FileObject | null;
+  initialUrl?: string; // <- added support for existing profile image
+  labelColor?: string;
 }
 
 export default function ProfileImageInput({
@@ -22,12 +24,19 @@ export default function ProfileImageInput({
   labelClassName,
   containerClassName,
   themeText = true,
-  file
+  file,
+  initialUrl,
+  labelColor = "",
 }: ProfileImageInputProps) {
   const [uri, setUri] = useState<string | null>(null);
   const [wasManuallyEdited, setWasManuallyEdited] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const actionSheetRef = useRef<ActionSheetRef>(null);
+
+  const labelStyle: StyleProp<TextStyle> = {};
+	if (labelColor) {
+		labelStyle.color = labelColor;
+	}
 
   const ensureValidFile = (
     uri: string,
@@ -35,7 +44,7 @@ export default function ProfileImageInput({
   ): FileObject => ({
     uri,
     name: fileName,
-    type: "image/jpeg"
+    type: "image/jpeg",
   });
 
   const pickFromLibrary = async () => {
@@ -45,15 +54,12 @@ export default function ProfileImageInput({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 1
+        quality: 1,
       });
 
       if (!result.canceled) {
         const asset = result.assets[0];
-        const file = ensureValidFile(
-          asset.uri,
-          asset.fileName ?? "image.jpg"
-        );
+        const file = ensureValidFile(asset.uri, asset.fileName ?? "image.jpg");
         setWasManuallyEdited(true);
         setUri(asset.uri);
         setFile(file);
@@ -70,7 +76,7 @@ export default function ProfileImageInput({
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 1
+        quality: 1,
       });
 
       if (!result.canceled) {
@@ -95,10 +101,12 @@ export default function ProfileImageInput({
   useEffect(() => {
     if (file?.uri) {
       setUri(file.uri);
+    } else if (initialUrl && !wasManuallyEdited) {
+      setUri(initialUrl);
     } else {
       setUri(null);
     }
-  }, [file]);
+  }, [file, initialUrl, wasManuallyEdited]);
 
   const handleEditPress = () => {
     actionSheetRef.current?.show();
@@ -108,7 +116,7 @@ export default function ProfileImageInput({
     <View className={`${containerClassName} flex-col gap-4`}>
       <View className="items-center">
         {themeText ? (
-          <ThemedText className={`text-sm font-medium ${labelClassName}`}>
+          <ThemedText style={labelStyle} className={`text-sm font-medium ${labelClassName}`}>
             {label}
           </ThemedText>
         ) : (
@@ -134,10 +142,7 @@ export default function ProfileImageInput({
 
         {uri && (
           <View className="mt-2 flex-col gap-2">
-            <Text
-              onPress={handleEditPress}
-              className="text-blue-500 underline"
-            >
+            <Text onPress={handleEditPress} className="text-blue-500 underline">
               Edit Image
             </Text>
           </View>
@@ -160,7 +165,6 @@ export default function ProfileImageInput({
           <Text className="text-lg text-center">Choose from Library</Text>
         </TouchableOpacity>
 
-        {/* Remove Image */}
         {uri && (
           <TouchableOpacity
             onPress={handleRemove}
@@ -194,7 +198,7 @@ export default function ProfileImageInput({
                 position: "absolute",
                 top: 50,
                 left: 20,
-                zIndex: 10
+                zIndex: 10,
               }}
             >
               <Text style={{ color: "white", fontSize: 30 }}>✕</Text>

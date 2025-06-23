@@ -7,15 +7,16 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import HapticButton from '@/components/ui/HapticButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useWebSocketContext } from '@/context/WebSocketContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import ShowToast from '@/components/ui/ShowToast';
+import { useBusiness } from '@/context/BusinessContext';
+import { APP_URL, ITEM_NAME } from '@/utils/constants';
 
 const QRCodeScreen = () => {
 	const router = useRouter();
 	// parameter to be passed in the QR code
 	const { id, from } = useLocalSearchParams();
-	const transactionUrl = `secuRent://${id}`;
-
+	const transactionUrl = `${APP_URL}${ITEM_NAME}-${id}`;
+	const { business } = useBusiness();
 	const { lastMessage } = useWebSocketContext();
 
 	useEffect(() => {
@@ -42,10 +43,13 @@ const QRCodeScreen = () => {
 		try {
 			if (from === 'ProfilePage') {
 				console.log('from ProfilePage');
-				const storedUserId = await AsyncStorage.getItem('UserID');
+				if (!business) {
+					ShowToast('error', 'Error', 'Business data not found.');
+					return;
+				}
 				router.replace({
 					pathname: '/business/BusinessProfileScreen',
-					params: { id: storedUserId },
+					params: { id: business._id },
 				});
 				return;
 			}
