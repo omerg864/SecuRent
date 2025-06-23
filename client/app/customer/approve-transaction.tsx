@@ -30,7 +30,7 @@ export default function ApproveTransaction() {
 	const [hasReadTerms, setHasReadTerms] = useState(false);
 	const [transaction, setTransaction] = useState<any>(null);
 	const termsRef = useRef<TermsAgreementSectionRef>(null);
-    const { customer } = useCustomer();
+	const { customer } = useCustomer();
 
 	useFocusEffect(
 		useCallback(() => {
@@ -125,15 +125,15 @@ export default function ApproveTransaction() {
 		<SafeAreaView className="flex-1 bg-indigo-900">
 			<StatusBar barStyle="light-content" />
 			{/* Header */}
-			<View className="px-4 pt-4 flex-row items-center">
+			<View className="flex-row items-center px-4 pt-4">
 				<HapticButton
 					onPress={() => router.back()}
-					className="p-2 rounded-full bg-indigo-700"
+					className="p-2 bg-indigo-700 rounded-full"
 				>
 					<Ionicons name="chevron-back" size={24} color="white" />
 				</HapticButton>
 				<View className="px-6 pt-2">
-					<Text className="text-white text-2xl font-semibold">
+					<Text className="text-2xl font-semibold text-white">
 						Hello {customerName}
 					</Text>
 					<Text className="text-white/70 text-md">New deposit</Text>
@@ -155,7 +155,7 @@ export default function ApproveTransaction() {
 			/>
 
 			{/* Approve Button */}
-			<View className="absolute bottom-10 left-0 right-0 px-6">
+			<View className="bottom-10 absolute left-0 right-0 px-6">
 				<HapticButton
 					onPress={() => {
 						if (!hasReadTerms) {
@@ -172,7 +172,7 @@ export default function ApproveTransaction() {
 					{loadingApprove ? (
 						<ActivityIndicator size="small" color="black" />
 					) : (
-						<Text className="text-indigo-900 font-semibold text-lg">
+						<Text className="text-lg font-semibold text-indigo-900">
 							Approve deposit
 						</Text>
 					)}

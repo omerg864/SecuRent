@@ -6,6 +6,7 @@ import {
 	TextInput,
 	StyleSheet,
 	ActivityIndicator,
+	Switch,
 } from 'react-native';
 import { DatePickerModal, TimePickerModal } from 'react-native-paper-dates';
 import HapticButton from '@/components/ui/HapticButton';
@@ -31,6 +32,7 @@ const CreateTransactionScreen = () => {
 	const [currencySymbol, setCurrencySymbol] = useState('₪');
 	const [date, setDate] = useState(new Date());
 	const [show, setShow] = useState({ date: false, time: false });
+	const [smartPrice, setSmartPrice] = useState<boolean>(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const { business } = useBusiness();
 
@@ -58,7 +60,12 @@ const CreateTransactionScreen = () => {
 			// create temporary item
 			setIsLoading(true);
 			try {
-				const response = await createTemporaryItem(desc, date, price);
+				const response = await createTemporaryItem(
+					desc,
+					date,
+					price,
+					smartPrice
+				);
 				if (!response) {
 					setIsLoading(false);
 					ShowToast('error', 'Internal Server Error');
@@ -67,6 +74,7 @@ const CreateTransactionScreen = () => {
 				setDesc('');
 				setPrice(0);
 				setDate(new Date());
+				setSmartPrice(false);
 				setShow({ date: false, time: false });
 				router.push({
 					pathname: '/business/QRCodeScreen',
@@ -89,6 +97,7 @@ const CreateTransactionScreen = () => {
 				setPrice(0);
 				setDate(new Date());
 				setShow({ date: false, time: false });
+				setSmartPrice(false);
 			};
 
 			return () => {
@@ -108,20 +117,20 @@ const CreateTransactionScreen = () => {
 
 	return (
 		<View className="flex-1 p-6 bg-white">
-			<Text className="text-xl font-bold mb-2">New Transaction</Text>
-			<Text className="text-xl mb-8">
+			<Text className="mb-2 text-xl font-bold">New Transaction</Text>
+			<Text className="mb-8 text-xl">
 				Create new transaction for a customer
 			</Text>
 
-			<Text className="text-lg font-semibold mb-2">Description</Text>
+			<Text className="mb-2 text-lg font-semibold">Description</Text>
 			<TextInput
-				className="border border-gray-300 rounded-lg p-3 text-lg bg-gray-100 mb-6"
+				className="p-3 mb-6 text-lg bg-gray-100 border border-gray-300 rounded-lg"
 				value={desc}
 				onChangeText={setDesc}
 			/>
 
 			<View className="mb-6">
-				<Text className="text-lg font-semibold mb-2">
+				<Text className="mb-2 text-lg font-semibold">
 					Return time and date
 				</Text>
 				<View style={styles.row}>
@@ -166,8 +175,24 @@ const CreateTransactionScreen = () => {
 				/>
 			</View>
 
+			<View className="flex-row items-center justify-between w-full">
+				<View className="flex-1">
+					<Text className="text-lg font-semibold">Smart Price</Text>
+					<Text className="mb-4 text-gray-500">
+						*The price will be calculated based on the customer
+						profile at transaction time.
+					</Text>
+				</View>
+				<Switch
+					value={smartPrice}
+					onValueChange={setSmartPrice}
+					trackColor={{ false: '#D1D5DB', true: '#4F46E5' }}
+					thumbColor={smartPrice ? '#ffffff' : '#f4f3f4'}
+				/>
+			</View>
+
 			<PriceSelector
-				title="Set Price"
+				title={smartPrice ? 'Minimum Price' : 'Price'}
 				price={price}
 				setPrice={setPrice}
 				steps={50}
@@ -175,7 +200,7 @@ const CreateTransactionScreen = () => {
 			/>
 
 			<HapticButton
-				className="rounded-full py-4 items-center mb-5 shadow-lg mt-5"
+				className="items-center py-4 mt-5 mb-5 rounded-full shadow-lg"
 				style={{ backgroundColor: '#4338CA' }}
 				onPress={handleContinue}
 				disabled={isLoading}
@@ -184,7 +209,7 @@ const CreateTransactionScreen = () => {
 					<ActivityIndicator size="small" color="#FFFFFF" />
 				) : (
 					<ThemedText
-						className="text-white font-semibold text-lg"
+						className="text-lg font-semibold text-white"
 						lightColor="#fff"
 					>
 						Continue
