@@ -28,6 +28,7 @@ import { CURRENT_ACCOUNT_TYPE, USER_ID } from '@/utils/asyncStorageConstants';
 import { useBusiness } from '@/context/BusinessContext';
 import { useCustomer } from '@/context/CustomerContext';
 import { Item } from '@/types/item';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 const BusinessProfileScreen = () => {
 	const [activeTab, setActiveTab] = useState('items');
@@ -402,13 +403,17 @@ const BusinessProfileScreen = () => {
 													<ThemedText
 														type="defaultSemiBold"
 														className="text-green-600"
-														darkColor={
-															isBusiness &&
-															item.smartPrice
-																? 'green'
-																: 'black'
-														}
+														darkColor={'black'}
 													>
+														{item.smartPrice && (
+															<>
+																<MaterialCommunityIcons
+																	name="robot"
+																	size={24}
+																	color="black"
+																/>{' '}
+															</>
+														)}
 														{item.price}{' '}
 														{currencies.find(
 															(currency) =>

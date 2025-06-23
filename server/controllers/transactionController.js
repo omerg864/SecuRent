@@ -173,6 +173,7 @@ const createTransactionFromItem = asyncHandler(async (req, res) => {
 
 		const customerTransactions = await Transaction.find({
 			customer: req.customer._id,
+			status: { $ne: 'intent' },
 		});
 
 		const reviewPrompt = `You are a smart assistant for a digital deposit system. In this system, users (customers) make deposits when transacting with businesses. If something goes wrong—such as property damage, late return, or other issues—the business can charge all or part of the deposit.

@@ -11,7 +11,8 @@ import {
 const createTemporaryItem = async (
 	description: string,
 	date: Date,
-	price: number
+	price: number,
+	smartPrice: boolean = false
 ) => {
 	try {
 		const accessToken = await checkToken();
@@ -22,6 +23,7 @@ const createTemporaryItem = async (
 				description,
 				date,
 				price,
+				smartPrice,
 			},
 			{
 				headers: { Authorization: `Bearer ${accessToken}` },
@@ -68,9 +70,12 @@ const createBusinessItem = async (
 const getItemById = async (itemId: string, storedId: string) => {
 	try {
 		const accessToken = await checkToken();
-		const response = await client.get<ItemResponse>(`item/${itemId}?customerId=${storedId}`, {
-			headers: { Authorization: `Bearer ${accessToken}` },
-		});
+		const response = await client.get<ItemResponse>(
+			`item/${itemId}?customerId=${storedId}`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
 		return response.data;
 	} catch (error) {
 		throw error || 'Item retrieval failed.';
@@ -136,10 +141,7 @@ const getItemByIdForBusiness = async (itemId: string) => {
 	return response.data;
 };
 
-const updateItemById = async (
-	id: string,
-	formData: FormData
-) => {
+const updateItemById = async (id: string, formData: FormData) => {
 	try {
 		const accessToken = await checkToken();
 		const response = await client.put<ItemResponse>(
