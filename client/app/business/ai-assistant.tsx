@@ -28,6 +28,7 @@ const AIAssistant: React.FC = () => {
     const [input, setInput] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
     const [loadingReply, setLoadingReply] = useState(false);
+    const [businessName, setBusinessName] = useState<string>("");
     const scrollRef = useRef<ScrollView>(null);
 
     useEffect(() => {
@@ -42,10 +43,14 @@ const AIAssistant: React.FC = () => {
             try {
                 const raw = await AsyncStorage.getItem(BUSINESS_DATA);
                 if (!raw) throw new Error("No business data found");
-                const { _id } = JSON.parse(raw);
-                if (!_id) throw new Error("Business ID missing");
+
+                const { _id, name } = JSON.parse(raw);
+                if (!_id || !name)
+                    throw new Error("Business ID or name missing");
 
                 console.log("🔑 Business ID:", _id);
+
+                setBusinessName(name || "");
 
                 const { sessionId, firstMessage } = await initBusinessAdvisor(
                     _id
@@ -53,10 +58,6 @@ const AIAssistant: React.FC = () => {
                 console.log("🎯 Session ID received:", sessionId);
 
                 setSessionId(sessionId);
-
-                if (firstMessage) {
-                    setMessages([{ role: "bot", text: firstMessage }]);
-                }
             } catch (err: any) {
                 console.error("❌ Init error:", err);
                 setError(err.message || "Unknown error");
@@ -106,18 +107,20 @@ const AIAssistant: React.FC = () => {
         return (
             <View className='p-4'>
                 <Text className='text-red-600'>
-                    {error || "לא הצלחנו להתחבר לעוזר העסקי."}
+                    {error || "Failed to start session. Please try again."}
                 </Text>
             </View>
         );
     }
+
+    const welcomeMessage = `👋 Hello, ${businessName}! Just say "Hi" or "היי" or even a simple emoji 😊, and I'll instantly show you the key insights about your business 📊`;
 
     return (
         <SafeAreaView className='flex-1 bg-white'>
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
-                keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0} 
+                keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
             >
                 <View className='flex-1'>
                     <ScrollView
@@ -125,9 +128,16 @@ const AIAssistant: React.FC = () => {
                         contentContainerStyle={{
                             padding: 16,
                             paddingBottom: 80
-                        }} // extra bottom padding
+                        }}
                         keyboardShouldPersistTaps='handled'
                     >
+                        <View className='px-4 pt-4 pb-2'>
+                            <MessageBubble
+                                text={welcomeMessage}
+                                isUser={false}
+                            />
+                        </View>
+
                         {messages.map((msg, i) => (
                             <MessageBubble
                                 key={i}
