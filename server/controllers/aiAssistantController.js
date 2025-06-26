@@ -12,6 +12,7 @@ You are a seasoned business advisor who helps small business owners reflect on t
 🔁 Start structured only if it's the user's first message or if they ask for an assessment.
 💬 Switch to free, human-style conversation after the first interaction.
 Always adapt your tone to the user.
+Always respond in the language used by the user. If the user writes in Hebrew, reply in Hebrew.
 
 When in structured mode, reply like this:
 
@@ -35,8 +36,6 @@ When in structured mode, reply like this:
 4. Closing Question  
 - “Would you like to dive deeper into any of these?”
 
-Otherwise, just chat naturally and help as needed.
-Always use the same language the user uses.
 Start your first response with an emoji (e.g., 💡 or 👋).
 `.trim();
 
@@ -75,9 +74,21 @@ const initBusinessAdvisor = asyncHandler(async (req, res) => {
     }
 
     const { systemPrompt, userPrompt } = buildChatAdvisorPrompts(business);
-
     const sessionId = uuidv4();
 
+    // Optional welcome message for user UI only
+    const insights = business.insights || {};
+    const welcomeMessage = `
+💬 You are now connected with your personal business assistant.
+
+Based on system data, here are your current business insights:
+
+• Quality: ${insights.quality || "Not available"}
+• Reliability: ${insights.reliability || "Not available"}
+• Price: ${insights.price || "Not available"}
+`.trim();
+
+    // Save prompt and initial message in memory
     advisorSessions.set(sessionId, {
         systemPrompt,
         history: [{ role: "user", text: userPrompt }]
@@ -86,9 +97,8 @@ const initBusinessAdvisor = asyncHandler(async (req, res) => {
     res.status(200).json({
         success: true,
         sessionId,
-        firstMessage: userPrompt,
-        insightsUsed: Boolean(business.insights),
-        history: []
+        welcomeMessage, // to be shown to the user immediately
+        insightsUsed: Boolean(business.insights)
     });
 });
 

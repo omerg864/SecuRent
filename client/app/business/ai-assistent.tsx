@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
     ActivityIndicator,
-    KeyboardAvoidingView,
     Platform,
     ScrollView,
     TextInput,
     TouchableOpacity,
     View,
     Text,
-    SafeAreaView
+    SafeAreaView,
+    KeyboardAvoidingView
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -17,6 +17,7 @@ import {
 } from "@/services/businessService";
 import { BUSINESS_DATA } from "@/utils/asyncStorageConstants";
 import MessageBubble from "@/components/ui/MessageBubble";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 type Message = { role: "user" | "bot"; text: string };
 
@@ -29,7 +30,6 @@ const AIAssistant: React.FC = () => {
     const [loadingReply, setLoadingReply] = useState(false);
     const scrollRef = useRef<ScrollView>(null);
 
-    // גלילה אוטומטית בסיום כל הודעה
     useEffect(() => {
         const timeout = setTimeout(() => {
             scrollRef.current?.scrollToEnd({ animated: true });
@@ -37,7 +37,6 @@ const AIAssistant: React.FC = () => {
         return () => clearTimeout(timeout);
     }, [messages]);
 
-    // אתחול השיחה
     useEffect(() => {
         const startSession = async () => {
             try {
@@ -69,7 +68,6 @@ const AIAssistant: React.FC = () => {
         startSession();
     }, []);
 
-    // שליחת הודעה
     const sendMessage = async () => {
         if (!input.trim() || !sessionId) return;
 
@@ -90,10 +88,7 @@ const AIAssistant: React.FC = () => {
             ]);
         } catch (err) {
             console.error("❌ Chat error:", err);
-            setMessages((prev) => [
-                ...prev,
-                { role: "bot", text: "משהו השתבש. נסה שוב מאוחר יותר." }
-            ]);
+            setMessages((prev) => [...prev, { role: "bot", text: "Som" }]);
         } finally {
             setLoadingReply(false);
         }
@@ -120,50 +115,57 @@ const AIAssistant: React.FC = () => {
     return (
         <SafeAreaView className='flex-1 bg-white'>
             <KeyboardAvoidingView
-                className='flex-1 p-4'
-                behavior={Platform.OS === "ios" ? "padding" : undefined}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={{ flex: 1 }}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0} 
             >
-                <ScrollView
-                    ref={scrollRef}
-                    className='flex-1'
-                    contentContainerStyle={{
-                        paddingTop: 12,
-                        paddingBottom: 80
-                    }}
-                >
-                    {messages.map((msg, i) => (
-                        <MessageBubble
-                            key={i}
-                            text={msg.text}
-                            isUser={msg.role === "user"}
-                        />
-                    ))}
-                    {loadingReply && (
-                        <MessageBubble
-                            text='כותב...'
-                            isUser={false}
-                        />
-                    )}
-                </ScrollView>
-
-                <View className='flex-row items-center mt-2'>
-                    <TextInput
-                        value={input}
-                        onChangeText={setInput}
-                        placeholder='שאל משהו...'
-                        className='flex-1 border border-gray-300 rounded-lg px-3 py-2 mr-2'
-                        onSubmitEditing={sendMessage}
-                        returnKeyType='send'
-                    />
-                    <TouchableOpacity
-                        onPress={sendMessage}
-                        disabled={loadingReply}
-                        className='bg-blue-500 px-4 py-2 rounded-lg'
+                <View className='flex-1'>
+                    <ScrollView
+                        ref={scrollRef}
+                        contentContainerStyle={{
+                            padding: 16,
+                            paddingBottom: 80
+                        }} // extra bottom padding
+                        keyboardShouldPersistTaps='handled'
                     >
-                        <Text className='text-white'>
-                            {loadingReply ? "..." : "שלח"}
-                        </Text>
-                    </TouchableOpacity>
+                        {messages.map((msg, i) => (
+                            <MessageBubble
+                                key={i}
+                                text={msg.text}
+                                isUser={msg.role === "user"}
+                            />
+                        ))}
+                        {loadingReply && (
+                            <MessageBubble
+                                text='Typing...'
+                                isUser={false}
+                            />
+                        )}
+                    </ScrollView>
+
+                    {/* Input bar (outside of ScrollView) */}
+                    <View className='flex-row items-center p-4 border-t border-gray-200 bg-white'>
+                        <TextInput
+                            value={input}
+                            onChangeText={setInput}
+                            placeholder='Type your message...'
+                            placeholderTextColor='#888'
+                            className='flex-1 border border-gray-300 rounded-lg px-3 py-2 mr-2'
+                            onSubmitEditing={sendMessage}
+                            returnKeyType='send'
+                            textAlign='left'
+                            style={{ writingDirection: "ltr" }}
+                        />
+                        <TouchableOpacity
+                            onPress={sendMessage}
+                            disabled={loadingReply}
+                            className='bg-blue-500 px-4 py-2 rounded-lg'
+                        >
+                            <Text className='text-white'>
+                                {loadingReply ? "..." : "Send"}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </KeyboardAvoidingView>
         </SafeAreaView>
