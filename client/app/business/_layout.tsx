@@ -172,7 +172,7 @@ export default function Layout() {
             }}
           />
             <Drawer.Screen
-                name='ai-assistent'
+                name='ai-assistant'
                 options={{
                     drawerLabel: "AI Assistaet Bot",
                     title: "AI Assistant Bot"
