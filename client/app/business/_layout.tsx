@@ -171,7 +171,14 @@ export default function Layout() {
               drawerItemStyle: { display: "none" },
             }}
           />
-        </Drawer>
+            <Drawer.Screen
+                name='ai-assistent'
+                options={{
+                    drawerLabel: "AI Assistaet Bot",
+                    title: "AI Assistant Bot"
+                }}
+              />
+        </Drawer>  
       </GestureHandlerRootView>
     </WebSocketProvider>
   );
