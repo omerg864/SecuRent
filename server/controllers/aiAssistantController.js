@@ -1,4 +1,4 @@
- import asyncHandler from "express-async-handler";
+import asyncHandler from "express-async-handler";
 import Business from "../models/businessModel.js";
 import { v4 as uuidv4 } from "uuid";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
@@ -72,14 +72,13 @@ const initBusinessAdvisor = asyncHandler(async (req, res) => {
 
     const { systemPrompt, userPrompt } = buildChatAdvisorPrompts(business); // returns an object with systemPrompt and userPrompt
 
-    const messages = [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-    ];
-
     const sessionId = uuidv4();
 
-    advisorSessions.set(sessionId, { messages, history: [] });
+    advisorSessions.set(sessionId, {
+        systemPrompt,
+        userPrompt,
+        history: []
+    });
 
     res.status(200).json({ success: true, sessionId });
 });
