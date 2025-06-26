@@ -88,10 +88,7 @@ const AIAssistant: React.FC = () => {
             ]);
         } catch (err) {
             console.error("❌ Chat error:", err);
-            setMessages((prev) => [
-                ...prev,
-                { role: "bot", text: "משהו השתבש. נסה שוב מאוחר יותר." }
-            ]);
+            setMessages((prev) => [...prev, { role: "bot", text: "Som" }]);
         } finally {
             setLoadingReply(false);
         }
@@ -120,7 +117,7 @@ const AIAssistant: React.FC = () => {
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
-                keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0} // כוון לפי הצורך
+                keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0} 
             >
                 <View className='flex-1'>
                     <ScrollView
@@ -128,7 +125,7 @@ const AIAssistant: React.FC = () => {
                         contentContainerStyle={{
                             padding: 16,
                             paddingBottom: 80
-                        }} // מרווח תחתון גדול
+                        }} // extra bottom padding
                         keyboardShouldPersistTaps='handled'
                     >
                         {messages.map((msg, i) => (
@@ -140,13 +137,13 @@ const AIAssistant: React.FC = () => {
                         ))}
                         {loadingReply && (
                             <MessageBubble
-                                text='כותב...'
+                                text='Typing...'
                                 isUser={false}
                             />
                         )}
                     </ScrollView>
 
-                    {/* שורת ההקלדה - מחוץ ל־ScrollView */}
+                    {/* Input bar (outside of ScrollView) */}
                     <View className='flex-row items-center p-4 border-t border-gray-200 bg-white'>
                         <TextInput
                             value={input}
