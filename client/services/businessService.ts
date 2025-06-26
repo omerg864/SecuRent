@@ -233,15 +233,22 @@ const initBusinessAdvisor = async (businessId: string) => {
             { businessId },
             { headers: { Authorization: `Bearer ${accessToken}` } }
         );
-        console.log("Business advisor initialized:", response.data);
-        return response.data;
+
+        return {
+            sessionId: response.data.sessionId,
+            firstMessage: response.data.firstMessage || null,
+            insightsUsed: response.data.insightsUsed || false
+        };
     } catch (error: any) {
-        console.error("Initialize business advisor failed:", error);
+        console.error("Failed to initialize advisor session:", error);
         throw error;
     }
 };
 
-const chatBusinessAdvisor = async (sessionId: string, message: string) => {
+const chatBusinessAdvisor = async (
+    sessionId: string,
+    message: string
+) => {
     const accessToken = await checkToken();
     if (!accessToken) {
         throw new Error("Access token is missing or invalid.");
@@ -253,8 +260,11 @@ const chatBusinessAdvisor = async (sessionId: string, message: string) => {
             { sessionId, message },
             { headers: { Authorization: `Bearer ${accessToken}` } }
         );
-        console.log("Business advisor chat response:", response.data);
-        return response.data;
+
+        return {
+            advisorReply: response.data.advisorReply,
+            isStructuredStart: response.data.isStructuredStart || false
+        };
     } catch (error: any) {
         if (axios.isAxiosError(error)) {
             console.error("Axios error:", {

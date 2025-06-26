@@ -8,7 +8,7 @@ import {
     TouchableOpacity,
     View,
     Text,
-	SafeAreaView
+    SafeAreaView
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -22,40 +22,54 @@ type Message = { role: "user" | "bot"; text: string };
 
 const AIAssistant: React.FC = () => {
     const [sessionId, setSessionId] = useState<string | null>(null);
-    const [loadingInit, setLoadingInit] = useState(true);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [input, setInput] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
     const [loadingReply, setLoadingReply] = useState(false);
     const scrollRef = useRef<ScrollView>(null);
 
+    // גלילה אוטומטית בסיום כל הודעה
     useEffect(() => {
-        scrollRef.current?.scrollToEnd({ animated: true });
+        const timeout = setTimeout(() => {
+            scrollRef.current?.scrollToEnd({ animated: true });
+        }, 50);
+        return () => clearTimeout(timeout);
     }, [messages]);
 
+    // אתחול השיחה
     useEffect(() => {
-        const init = async () => {
+        const startSession = async () => {
             try {
-                const businessDataString = await AsyncStorage.getItem(
-                    BUSINESS_DATA
+                const raw = await AsyncStorage.getItem(BUSINESS_DATA);
+                if (!raw) throw new Error("No business data found");
+                const { _id } = JSON.parse(raw);
+                if (!_id) throw new Error("Business ID missing");
+
+                console.log("🔑 Business ID:", _id);
+
+                const { sessionId, firstMessage } = await initBusinessAdvisor(
+                    _id
                 );
-                if (!businessDataString)
-                    throw new Error("Business data not found");
-                const businessData = JSON.parse(businessDataString);
-                const businessId = businessData?._id;
-                if (!businessId) throw new Error("Business ID missing");
-                const { sessionId } = await initBusinessAdvisor(businessId);
+                console.log("🎯 Session ID received:", sessionId);
+
                 setSessionId(sessionId);
+
+                if (firstMessage) {
+                    setMessages([{ role: "bot", text: firstMessage }]);
+                }
             } catch (err: any) {
-                console.error("Init error:", err);
+                console.error("❌ Init error:", err);
                 setError(err.message || "Unknown error");
             } finally {
-                setLoadingInit(false);
+                setLoading(false);
             }
         };
-        init();
+
+        startSession();
     }, []);
 
+    // שליחת הודעה
     const sendMessage = async () => {
         if (!input.trim() || !sessionId) return;
 
@@ -69,23 +83,23 @@ const AIAssistant: React.FC = () => {
                 sessionId,
                 userMessage
             );
-			console.log("Advisor reply:", advisorReply);
+
             setMessages((prev) => [
                 ...prev,
                 { role: "bot", text: advisorReply }
             ]);
         } catch (err) {
-            console.error("Send error:", err);
+            console.error("❌ Chat error:", err);
             setMessages((prev) => [
                 ...prev,
-                { role: "bot", text: "Something went wrong. Please try again." }
+                { role: "bot", text: "משהו השתבש. נסה שוב מאוחר יותר." }
             ]);
         } finally {
             setLoadingReply(false);
         }
     };
 
-    if (loadingInit) {
+    if (loading) {
         return (
             <View className='flex-1 justify-center items-center'>
                 <ActivityIndicator size='large' />
@@ -97,7 +111,7 @@ const AIAssistant: React.FC = () => {
         return (
             <View className='p-4'>
                 <Text className='text-red-600'>
-                    {error || "Unable to start session."}
+                    {error || "לא הצלחנו להתחבר לעוזר העסקי."}
                 </Text>
             </View>
         );
@@ -126,7 +140,7 @@ const AIAssistant: React.FC = () => {
                     ))}
                     {loadingReply && (
                         <MessageBubble
-                            text='Typing...'
+                            text='כותב...'
                             isUser={false}
                         />
                     )}
@@ -136,7 +150,7 @@ const AIAssistant: React.FC = () => {
                     <TextInput
                         value={input}
                         onChangeText={setInput}
-                        placeholder='Ask something...'
+                        placeholder='שאל משהו...'
                         className='flex-1 border border-gray-300 rounded-lg px-3 py-2 mr-2'
                         onSubmitEditing={sendMessage}
                         returnKeyType='send'
@@ -147,7 +161,7 @@ const AIAssistant: React.FC = () => {
                         className='bg-blue-500 px-4 py-2 rounded-lg'
                     >
                         <Text className='text-white'>
-                            {loadingReply ? "..." : "Send"}
+                            {loadingReply ? "..." : "שלח"}
                         </Text>
                     </TouchableOpacity>
                 </View>
