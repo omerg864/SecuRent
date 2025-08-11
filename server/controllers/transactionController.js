@@ -453,7 +453,7 @@ const captureDeposit = asyncHandler(async (req, res) => {
 	const { id } = req.params;
 	const { charged_description, amount } = req.body;
 
-	const transaction = await Transaction.findById(id);
+	const transaction = await Transaction.findById(id).populate('customer');
 	if (!transaction) {
 		res.status(404);
 		throw new Error('Transaction not found');
@@ -500,12 +500,12 @@ const captureDeposit = asyncHandler(async (req, res) => {
 	const notification = await Notification.create({
 		title: 'Deposit Charged',
 		content: `Deposit of ${chargedAmount} ${transaction.currency.toUpperCase()} charged successfully.`,
-		customer: transaction.customer,
+		customer: transaction.customer.id,
 		type: 'customer',
 	});
 
 	const customerAssociated = customers.filter(
-		(ws) => ws.id === transaction.customer.toString()
+		(ws) => ws.id === transaction.customer._id.toString()
 	);
 
 	if (customerAssociated.length > 0) {
@@ -528,6 +528,63 @@ const captureDeposit = asyncHandler(async (req, res) => {
 			);
 		}
 	}
+
+	const plainText = `
+💳 Charge Confirmation
+
+Hello ${transaction.customer.name},
+
+We have processed a charge to your payment method for the transaction with ${
+		business.name
+	}.
+
+Transaction Details:
+- Description: ${transaction.description}
+- Amount Charged: ${transaction.charged} ${transaction.currency.toUpperCase()}
+- Reason for Charge: ${transaction.charged_description}
+- Charged At: ${new Date(transaction.closed_at).toLocaleString()}
+- Business: ${business.name}
+
+If you have any questions about this charge, please contact our support team.
+
+Thank you,
+BlueApp Team
+`;
+
+	const html = `
+  <div style="font-family: Arial, sans-serif; color: #1e3a8a; line-height: 1.5;">
+    <h2 style="color: #1e3a8a;">💳 Charge Confirmation</h2>
+    <p>Hello <strong>${transaction.customer.name}</strong>,</p>
+
+    <p>We have processed a charge to your payment method for the transaction with <strong>${
+		business.name
+	}</strong>.</p>
+
+    <h3 style="color: #1e3a8a;">Transaction Details</h3>
+    <ul style="padding-left: 16px;">
+      <li><strong>Description:</strong> ${transaction.description}</li>
+      <li><strong>Amount Charged:</strong> ${
+			transaction.amount
+		} ${transaction.currency.toUpperCase()}</li>
+      <li><strong>Reason for Charge:</strong> ${transaction.charge_reason}</li>
+      <li><strong>Charged At:</strong> ${new Date(
+			transaction.charged_at
+		).toLocaleString()}</li>
+      <li><strong>Business:</strong> ${business.name}</li>
+    </ul>
+
+    <p>If you have any questions about this charge, please reply to this email or contact our support team.</p>
+
+    <p>Thank you,<br/>The <strong>BlueApp</strong> Team</p>
+  </div>
+`;
+
+	await sendEmail(
+		transaction.customer.email,
+		'Charge Confirmation',
+		plainText,
+		html
+	);
 
 	if (!business.rating) {
 		business.rating = {
