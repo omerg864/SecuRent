@@ -495,9 +495,6 @@ const captureDeposit = asyncHandler(async (req, res) => {
 	transaction.charged_description =
 		charged_description || 'Charged full deposit';
 
-	console.log('charge', chargedAmount, charged_description);
-	console.log(transaction);
-
 	await transaction.save();
 
 	const notification = await Notification.create({
@@ -567,11 +564,13 @@ SecuRent Team
     <ul style="padding-left: 16px;">
       <li><strong>Description:</strong> ${transaction.description}</li>
       <li><strong>Amount Charged:</strong> ${
-			transaction.amount
+			transaction.charged
 		} ${transaction.currency.toUpperCase()}</li>
-      <li><strong>Reason for Charge:</strong> ${transaction.charge_reason}</li>
+      <li><strong>Reason for Charge:</strong> ${
+			transaction.charged_description
+		}</li>
       <li><strong>Charged At:</strong> ${new Date(
-			transaction.charged_at
+			transaction.closed_at
 		).toLocaleString()}</li>
       <li><strong>Business:</strong> ${business.name}</li>
     </ul>
