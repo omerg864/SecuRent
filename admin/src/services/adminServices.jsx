@@ -119,10 +119,6 @@ const getBusinessTransactions = async (businessId) => {
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
 		);
-		console.log(
-			'Get business transactions response: ',
-			response.data.transactions
-		);
 		return response.data;
 	} catch (error) {
 		console.log('Get business transactions error: ', error);
@@ -144,7 +140,6 @@ const getCustomerTransactions = async (customerId) => {
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
 		);
-		console.log('Get customer transactions response: ', response.data);
 		return response.data;
 	} catch (error) {
 		console.log('Get customer transactions error: ', error);
@@ -175,7 +170,6 @@ const getAllCustomers = async (page, name = '') => {
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
 		);
-		console.log('Get all customers response: ', response.data);
 		return response.data;
 	} catch (error) {
 		console.log('Get all customers error: ', error);
@@ -194,7 +188,6 @@ const getCustomerReviews = async (customerId) => {
 		const response = await client.get(`review/customer/${customerId}`, {
 			headers: { Authorization: `Bearer ${accessToken}` },
 		});
-		console.log('Get customer reviews response: ', response.data);
 		return response.data;
 	} catch (error) {
 		console.log('Get customer reviews error: ', error);
@@ -212,7 +205,6 @@ const getCustomerReports = async (customerId) => {
 		const response = await client.get(`report/customer/${customerId}`, {
 			headers: { Authorization: `Bearer ${accessToken}` },
 		});
-		console.log('Get customer reports response: ', response.data);
 		return response.data;
 	} catch (error) {
 		console.log('Get customer reports error: ', error);
@@ -231,7 +223,6 @@ const getBusinessReports = async (businessId) => {
 		const response = await client.get(`report/business/${businessId}`, {
 			headers: { Authorization: `Bearer ${accessToken}` },
 		});
-		console.log('Get business reports response: ', response.data);
 		return response.data;
 	} catch (error) {
 		console.log('Get business reports error: ', error);
@@ -250,7 +241,6 @@ const getBusinessReviews = async (businessId) => {
 		const response = await client.get(`review/business/${businessId}`, {
 			headers: { Authorization: `Bearer ${accessToken}` },
 		});
-		console.log('Get business reviews response: ', response.data);
 		return response.data;
 	} catch (error) {
 		console.log('Get business reviews error: ', error);

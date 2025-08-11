@@ -43,15 +43,22 @@ export default function SingleBusiness() {
 			if (business?._id) {
 				setLoading(true);
 				try {
-					const [txRes, revRes, repRes] = await Promise.all([
+					const [txRes, revRes, repRes] = await Promise.allSettled([
 						getBusinessTransactions(business._id),
 						getBusinessReviews(business._id),
 						getBusinessReports(business._id),
 					]);
-					console.log('Transactions:', txRes);
-					setTransactions(txRes.transactions);
-					setReviews(revRes.reviews);
-					setReports(repRes.reports);
+					setTransactions(
+						txRes.status === 'rejected'
+							? []
+							: txRes.value.transactions
+					);
+					setReviews(
+						revRes.status === 'rejected' ? [] : revRes.value.reviews
+					);
+					setReports(
+						repRes.status === 'rejected' ? [] : repRes.value.reports
+					);
 				} catch (error) {
 					console.error('Error fetching business data:', error);
 				} finally {
