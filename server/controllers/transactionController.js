@@ -278,7 +278,7 @@ const closeTransactionById = asyncHandler(async (req, res) => {
 	const { id } = req.params;
 
 	const transaction = await Transaction.findById(id)
-		.populate('customer', 'name image phone')
+		.populate('customer', 'name image phone email')
 		.populate('business', 'name image rating category');
 	if (!transaction) {
 		res.status(404);
@@ -402,7 +402,7 @@ SecuRent Team
 
     <p>If you have any questions, feel free to reply to this email or contact our support team.</p>
 
-    <p>Thank you,<br/>The <strong>BlueApp</strong> Team</p>
+    <p>Thank you,<br/>The <strong>SecuRent</strong> Team</p>
   </div>
 `;
 	await sendEmail(
@@ -548,7 +548,7 @@ Transaction Details:
 If you have any questions about this charge, please contact our support team.
 
 Thank you,
-BlueApp Team
+SecuRent Team
 `;
 
 	const html = `
@@ -575,7 +575,7 @@ BlueApp Team
 
     <p>If you have any questions about this charge, please reply to this email or contact our support team.</p>
 
-    <p>Thank you,<br/>The <strong>BlueApp</strong> Team</p>
+    <p>Thank you,<br/>The <strong>SecuRent</strong> Team</p>
   </div>
 `;
 
@@ -828,7 +828,7 @@ SecuRent Team
 	const html = `
   <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1e3a8a;">
     <h2 style="color: #1e3a8a;">🔔 New Transaction Opened</h2>
-    <p>Hello,</p>
+    <p>Hello, ${req.customer.name}</p>
     <p>Your transaction has been successfully opened. When you return the item the business can scan the QR code to view the transaction details:</p>
 
     <div style="text-align: center; margin: 20px 0;">
