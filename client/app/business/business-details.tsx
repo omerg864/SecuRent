@@ -112,6 +112,8 @@ export default function UpdateBusinessDetails() {
 				},
 				file
 			);
+
+			console.log('Business account updated response:', response);
 			updateBusiness({
 				companyNumber: businessNumber.trim(),
 				phone: phoneNumber.trim(),
@@ -141,6 +143,7 @@ export default function UpdateBusinessDetails() {
 				pathname: '/business/settings',
 			});
 		} catch (error: any) {
+			console.log('Error updating business account:', error);
 			ShowToast('error', error.response.data.message);
 		} finally {
 			setLoading(false);

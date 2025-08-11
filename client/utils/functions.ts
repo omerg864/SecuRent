@@ -37,7 +37,7 @@ export const buildFormData = (data: any, file: FileObject | null): FormData => {
 	const formData = new FormData();
 	for (const key in data) {
 		if (data[key] !== undefined && data[key] !== null) {
-			formData.append(key, data[key] as string | Blob);
+			formData.append(key, JSON.stringify(data[key]) as string | Blob);
 		}
 	}
 	if (file) {
