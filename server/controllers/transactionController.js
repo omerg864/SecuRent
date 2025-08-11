@@ -495,6 +495,9 @@ const captureDeposit = asyncHandler(async (req, res) => {
 	transaction.charged_description =
 		charged_description || 'Charged full deposit';
 
+	console.log('charge', chargedAmount, charged_description);
+	console.log(transaction);
+
 	await transaction.save();
 
 	const notification = await Notification.create({
