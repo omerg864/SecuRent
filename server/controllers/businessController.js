@@ -490,6 +490,11 @@ const updateBusinessAccount = asyncHandler(async (req, res) => {
 		throw new Error('All fields are required');
 	}
 
+	if (!phone_regex.test(phone)) {
+		res.status(401);
+		throw new Error('Invalid phone number format');
+	}
+
 	if (!email_regex.test(email)) {
 		res.status(401);
 		throw new Error('Invalid email format');

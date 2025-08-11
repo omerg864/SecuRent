@@ -33,17 +33,44 @@ export const getDistance = (
 	return R * c; // Distance in Km
 };
 
-export const buildFormData = (data: any, file: FileObject | null): FormData => {
-	const formData = new FormData();
-	for (const key in data) {
-		if (data[key] !== undefined && data[key] !== null) {
-			formData.append(key, JSON.stringify(data[key]) as string | Blob);
+type FileLike = File | Blob | FileObject;
+
+export const buildFormData = (
+	data: Record<string, any>,
+	file?: FileLike | null,
+	fileFieldName = 'image',
+	fileName?: string
+): FormData => {
+	const fd = new FormData();
+
+	const append = (key: string, value: any) => {
+		if (value === undefined || value === null) return;
+
+		// File/Blob
+		if (value instanceof Blob || value instanceof File) {
+			const name = (value as File).name ?? fileName ?? 'upload.bin';
+			fd.append(key, value, name);
+			return;
 		}
+
+		// Primitive -> string
+		if (typeof value !== 'object') {
+			fd.append(key, String(value));
+			return;
+		}
+
+		// Arrays/objects -> JSON (or flatten if your backend expects bracketed keys)
+		fd.append(key, JSON.stringify(value));
+	};
+
+	// Properly iterate real keys
+	for (const [key, value] of Object.entries(data ?? {})) {
+		append(key, value);
 	}
-	if (file) {
-		formData.append('image', file as any);
-	}
-	return formData;
+
+	if (file) append(fileFieldName, file);
+
+	return fd;
 };
 
 export const NormalizedImage = (
