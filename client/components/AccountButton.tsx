@@ -18,8 +18,8 @@ const AccountButton = ({
 	title,
 	subTitle,
 	Icon,
-	buttonBackground = 'bg-indigo-600/30',
-	descriptionColor = Colors.light.icon,
+	buttonBackground = 'bg-indigo-600',
+	descriptionColor = Colors.dark.text,
 	isSettings = false,
 }: AccountProps) => {
 	return (
@@ -29,8 +29,10 @@ const AccountButton = ({
 		>
 			<View className="flex-row justify-between items-center">
 				<View className="flex-1">
-					<ThemedText className="text-xl font-semibold text-white"
-						style={{ color: isSettings ? 'white' : Colors.light.text }}
+					<ThemedText
+						className="text-xl font-semibold"
+						darkColor={isSettings ? 'white' : Colors.dark.text}
+						lightColor={isSettings ? 'white' : Colors.dark.text}
 					>
 						{title}
 					</ThemedText>
