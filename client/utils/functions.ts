@@ -68,8 +68,7 @@ export const buildFormData = (
 		append(key, value);
 	}
 
-	if (file) append(fileFieldName, file);
-
+	if (file) fd.append(fileFieldName, file as any);
 	return fd;
 };
 
