@@ -24,11 +24,26 @@ import {
 import { CustomerProvider } from '@/context/CustomerContext';
 import { BusinessProvider } from '@/context/BusinessContext';
 import { I18nManager } from 'react-native';
+import * as Localization from 'expo-localization';
+import * as Updates from 'expo-updates';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
-I18nManager.forceRTL(false);
-I18nManager.allowRTL(false);
+
+const deviceLocale = Localization.getLocales()[0]?.languageCode; // e.g. 'he', 'en'
+if (deviceLocale === 'he') {
+	if (!I18nManager.isRTL) {
+		I18nManager.allowRTL(true);
+		I18nManager.forceRTL(true);
+		Updates.reloadAsync();
+	}
+} else {
+	if (I18nManager.isRTL) {
+		I18nManager.allowRTL(false);
+		I18nManager.forceRTL(false);
+		Updates.reloadAsync();
+	}
+}
 
 export default function RootLayout() {
 	const colorScheme = useColorScheme();
