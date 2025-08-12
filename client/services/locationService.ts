@@ -5,7 +5,10 @@ export const getLocationPredictions = async (
 	query: string
 ): Promise<LocationPrediction[]> => {
 	try {
-		const response = await client.get<{ success: boolean, predictions: LocationPrediction[]}>('/location', {
+		const response = await client.get<{
+			success: boolean;
+			predictions: LocationPrediction[];
+		}>('/location', {
 			params: { query },
 		});
 		return response.data.predictions;
@@ -19,9 +22,12 @@ export const getLocationDetails = async (
 	placeId: string
 ): Promise<LocationDetails> => {
 	try {
-		const response = await client.get<{ success: boolean } & LocationDetails>('/location/details', {
+		const response = await client.get<
+			{ success: boolean } & LocationDetails
+		>('/location/details', {
 			params: { id: placeId },
 		});
+		console.log('Location details response:', response.data);
 		return response.data;
 	} catch (error) {
 		console.error('Error fetching location details:', error);

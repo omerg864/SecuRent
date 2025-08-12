@@ -101,8 +101,8 @@ export default function UpdateBusinessDetails() {
 					location: {
 						type: 'Point',
 						coordinates: [
-							selectedLocation?.lat || 0,
 							selectedLocation?.lng || 0,
+							selectedLocation?.lat || 0,
 						],
 					},
 					currency: currency,
@@ -121,8 +121,8 @@ export default function UpdateBusinessDetails() {
 				location: {
 					type: 'Point',
 					coordinates: [
-						selectedLocation?.lat || 0,
 						selectedLocation?.lng || 0,
+						selectedLocation?.lat || 0,
 					],
 				},
 				currency: currency,

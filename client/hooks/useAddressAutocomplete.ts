@@ -62,6 +62,7 @@ export const useAddressAutocomplete = (defaultQuery: string = '') => {
 		setSuggestions([]);
 
 		const details = await fetchPlaceDetails(item.id);
+		console.log('Fetched details:', details);
 		if (details) {
 			const selectedData = {
 				address: details.address,
