@@ -69,7 +69,7 @@ const DisplayReview = () => {
 							className="mb-2"
 						/>
 						<Text className="text-2xl font-bold text-gray-800 text-center mt-8">
-							Your review for {businessName}
+							Review for {businessName}
 						</Text>
 					</View>
 					<View className="flex-row items-center mb-8 space-x-4">
