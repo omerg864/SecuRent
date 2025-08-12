@@ -23,9 +23,12 @@ import {
 } from '@/utils/asyncStorageConstants';
 import { CustomerProvider } from '@/context/CustomerContext';
 import { BusinessProvider } from '@/context/BusinessContext';
+import { I18nManager } from 'react-native';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+I18nManager.forceRTL(false);
+I18nManager.allowRTL(false);
 
 export default function RootLayout() {
 	const colorScheme = useColorScheme();
