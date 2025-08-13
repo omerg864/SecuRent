@@ -101,7 +101,7 @@ export default function Layout() {
 							drawerLabel: 'Approve Transaction',
 							title: 'Approve Transaction',
 							drawerItemStyle: { display: 'none' },
-							headerShown: false,
+							headerShown: true,
 						}}
 					/>
 					<Drawer.Screen
