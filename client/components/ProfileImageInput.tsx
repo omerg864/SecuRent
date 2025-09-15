@@ -109,6 +109,7 @@ export default function ProfileImageInput({
   }, [file, initialUrl, wasManuallyEdited]);
 
   const handleEditPress = () => {
+    console.log("👉 handleEditPress called");
     actionSheetRef.current?.show();
   };
 
@@ -124,13 +125,15 @@ export default function ProfileImageInput({
         )}
 
         <HapticButton
-          onPress={() => {
-            if (uri) {
-              setShowPreview(true);
-            } else {
-              handleEditPress();
-            }
-          }}
+     onPress={() => {
+      console.log("👉 HapticButton pressed, uri:", uri);
+      if (uri) {
+        console.log("👉 Opening preview modal");
+        setShowPreview(true);
+      } else {
+        handleEditPress();
+      }
+    }}
           className="w-24 h-24 rounded-full bg-gray-300 justify-center items-center mt-2 overflow-hidden"
         >
           {uri ? (
